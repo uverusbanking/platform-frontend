@@ -1,0 +1,312 @@
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+@theme {
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-light: hsl(var(--primary-light));
+  --color-primary-dark: hsl(var(--primary-dark));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-success-light: hsl(var(--success-light));
+
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-warning-light: hsl(var(--warning-light));
+
+  --color-error: hsl(var(--error));
+  --color-error-foreground: hsl(var(--error-foreground));
+  --color-error-light: hsl(var(--error-light));
+
+  --color-destructive: hsl(var(--error));
+  --color-destructive-foreground: hsl(var(--error-foreground));
+
+  --color-info: hsl(var(--info));
+  --color-info-foreground: hsl(var(--info-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--card));
+  --color-popover-foreground: hsl(var(--card-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-surface-elevated: hsl(var(--surface-elevated));
+  --color-surface-overlay: hsl(var(--surface-overlay));
+
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --background-image-gradient-primary: var(--gradient-primary);
+  --background-image-gradient-surface: var(--gradient-surface);
+  --background-image-gradient-success: var(--gradient-success);
+  --background-image-gradient-card: var(--gradient-card);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-fintech: var(--shadow-fintech);
+
+  --radius-lg: var(--radius-lg);
+  --radius: var(--radius);
+  --radius-md: var(--radius);
+  --radius-sm: var(--radius-sm);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-fade-in: fade-in 0.5s ease-out;
+  --animate-slide-up: slide-up 0.3s ease-out;
+  --animate-scale-in: scale-in 0.2s ease-out;
+  --animate-pulse-fintech: pulse-fintech 2s ease-in-out infinite;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+
+    to {
+      height: 0;
+    }
+  }
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-up {
+    0% {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes scale-in {
+    0% {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes pulse-fintech {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 hsl(var(--primary) / 0.7);
+    }
+
+    70% {
+      box-shadow: 0 0 0 10px hsl(var(--primary) / 0);
+    }
+  }
+}
+
+:root {
+  /* Dynamic Primary Color System */
+  --primary-hue: 213;
+  --primary-saturation: 89%;
+  --primary-lightness: 42%;
+
+  /* Core Fintech Color Palette */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+
+  /* Surface Colors */
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --surface-elevated: 0 0% 98%;
+  --surface-overlay: 0 0% 96%;
+
+  /* Dynamic Primary Colors */
+  --primary: var(--primary-hue) var(--primary-saturation)
+    var(--primary-lightness);
+  --primary-foreground: 0 0% 100%;
+  --primary-light: var(--primary-hue) var(--primary-saturation)
+    calc(var(--primary-lightness) + 15%);
+  --primary-dark: var(--primary-hue) var(--primary-saturation)
+    calc(var(--primary-lightness) - 10%);
+
+  /* Fintech-specific colors */
+  --success: 145 63% 49%;
+  --success-foreground: 0 0% 100%;
+  --success-light: 145 63% 95%;
+
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 100%;
+  --warning-light: 38 92% 95%;
+
+  --error: 0 84% 60%;
+  --error-foreground: 0 0% 100%;
+  --error-light: 0 84% 95%;
+
+  --info: 207 89% 86%;
+  --info-foreground: 222.2 84% 4.9%;
+
+  /* Secondary Colors */
+  --secondary: 220 13% 91%;
+  --secondary-foreground: 222.2 84% 4.9%;
+
+  /* Muted Colors */
+  --muted: 220 13% 95%;
+  --muted-foreground: 220 9% 46%;
+
+  /* Accent Colors */
+  --accent: 220 13% 95%;
+  --accent-foreground: 222.2 84% 4.9%;
+
+  /* Border & Input */
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: var(--primary);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(
+    135deg,
+    hsl(var(--primary)) 0%,
+    hsl(var(--primary-light)) 100%
+  );
+  --gradient-surface: linear-gradient(
+    135deg,
+    hsl(var(--background)) 0%,
+    hsl(var(--surface-elevated)) 100%
+  );
+  --gradient-success: linear-gradient(
+    135deg,
+    hsl(var(--success)) 0%,
+    hsl(145 63% 59%) 100%
+  );
+  --gradient-card: linear-gradient(
+    135deg,
+    hsl(0 0% 100%) 0%,
+    hsl(220 13% 98%) 100%
+  );
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 hsl(220 43% 11% / 0.05);
+  --shadow-md:
+    0 4px 6px -1px hsl(220 43% 11% / 0.1),
+    0 2px 4px -1px hsl(220 43% 11% / 0.06);
+  --shadow-lg:
+    0 10px 15px -3px hsl(220 43% 11% / 0.1),
+    0 4px 6px -2px hsl(220 43% 11% / 0.05);
+  --shadow-fintech: 0 8px 30px hsl(var(--primary) / 0.12);
+
+  /* Layout */
+  --radius: 0.75rem;
+  --radius-sm: 0.5rem;
+  --radius-lg: 1rem;
+
+  /* Sidebar */
+  --sidebar-background: 255 255% 100%;
+  --sidebar-foreground: 222.2 84% 4.9%;
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 220 13% 95%;
+  --sidebar-accent-foreground: 222.2 84% 4.9%;
+  --sidebar-border: 220 13% 91%;
+  --sidebar-ring: var(--primary);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --surface-elevated: 217.2 32.6% 17.5%;
+  --surface-overlay: 217.2 32.6% 20%;
+
+  --primary-light: var(--primary-hue) var(--primary-saturation)
+    calc(var(--primary-lightness) + 20%);
+  --primary-dark: var(--primary-hue) var(--primary-saturation)
+    calc(var(--primary-lightness) - 5%);
+
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+
+  --gradient-surface: linear-gradient(
+    135deg,
+    hsl(var(--background)) 0%,
+    hsl(var(--surface-elevated)) 100%
+  );
+  --gradient-card: linear-gradient(
+    135deg,
+    hsl(217.2 32.6% 17.5%) 0%,
+    hsl(217.2 32.6% 20%) 100%
+  );
+
+  --sidebar-background: 222.2 84% 4.9%;
+  --sidebar-foreground: 210 40% 98%;
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 217.2 32.6% 17.5%;
+  --sidebar-accent-foreground: 210 40% 98%;
+  --sidebar-border: 217.2 32.6% 17.5%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

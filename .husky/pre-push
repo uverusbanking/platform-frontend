@@ -1,0 +1,20 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "========================================="
+echo "🛫 Running Pre-Push Hooks..."
+echo "========================================="
+
+# Step 1: Run complete Test Suites
+# We want to catch any failing business logic before it ever hits GitHub or CI/CD pipelines.
+echo "🧪 Step 1: Running unit tests..."
+pnpm run test
+
+# Step 2: Validate TypeScript Compilation & Builds
+# Ensures that both your Control and Dashboard applications can structurally build without errors.
+# Since we are using Next.js and pnpm, we run the parallel build command.
+echo "🏗️  Step 2: Checking Builds and Types..."
+pnpm run build
+
+echo "✅ Pre-Push passed securely! Code is safe to push!"
+echo "========================================="
