@@ -25,6 +25,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { APP_ROUTES } from "@/lib/routes";
 import { useGetCustomerById } from "@/hooks/endpoints/useCustomerHook";
+import { ICustomer } from "@/types/customer.types";
 import { useGetWallets, IWallet } from "@/hooks/endpoints/useWalletHook";
 import { useUserStore } from "@/state/userStore";
 import { Button } from "@/components/ui/button";
@@ -77,10 +78,7 @@ export default function CustomerDetailPage({
   const [showFreezeDialog, setShowFreezeDialog] = useState(false);
   const [showUnfreezeDialog, setShowUnfreezeDialog] = useState(false);
   const { data: customerResponse, isLoading } = useGetCustomerById(id);
-  const customer =
-    customerResponse && "data" in customerResponse
-      ? customerResponse.data
-      : customerResponse;
+  const customer: ICustomer | undefined = customerResponse?.data;
   const userData = useUserStore((state) => state.userData);
   const view_mode = userData?.view_mode;
   const [showBalance, setShowBalance] = useState(false);
