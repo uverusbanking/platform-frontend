@@ -1,42 +1,71 @@
-# Define the base image as node:20 and name it as base.
-FROM node:20 AS base
-
-# Set the working directory inside the container to /app.
-# We need to set the working directory so Docker knows where to run the commands.
+# ─── Stage 1: Base (dependency installation) ────────────────────────────
+FROM node:20-alpine AS base
+RUN apk add --no-cache libc6-compat
+RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files to the working directory in the container.
-# This command is necessary for Docker to install project dependencies.
-COPY package.json package-lock.json ./
+# Copy dependency manifests first for cached installs
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
-# Install project dependencies using npm.
-RUN npm install
-
-# Copy all files from the context directory (where the Dockerfile is located) to the working directory in the container.
+# Copy all source code (apps + shared)
 COPY . .
 
-ARG NEXT_PUBLIC_API_URL
+# ─── Stage 2: Builder (build all apps) ──────────────────────────────────
+FROM base AS builder
 
+ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
-# Run the project build command using npm.
-RUN npm run build
+RUN pnpm run build:control
+RUN pnpm run build:dashboard
+RUN pnpm run build:personal-web
+RUN pnpm run build:corporate-web
 
-# Define a second stage of the image based on node:20-alpine3.19 and name it as release.
-# Alpine image is a lighter version of node, which helps reduce the final image size.
-FROM node:20-alpine3.19 AS release
-
-# Set the working directory inside the container to /app.
+# ─── Stage 3: Runner (slim shared runtime base) ─────────────────────────
+FROM node:20-alpine AS runner
 WORKDIR /app
+RUN apk add --no-cache libc6-compat
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+ENV NODE_ENV=production
 
-# Copy the node_modules folder from the base stage to the node_modules directory in the release stage.
-COPY --from=base /app/node_modules ./node_modules
+# ─── Runtime: platform-control ──────────────────────────────────────────
+FROM runner AS platform-control
+COPY --from=builder /app/control/public ./control/public
+COPY --from=builder --chown=nextjs:nodejs /app/control/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/control/.next/static ./control/.next/static
+USER nextjs
+EXPOSE 3000
+ENV PORT=3000 HOSTNAME="0.0.0.0"
+CMD ["node", "control/server.js"]
 
-# Copy the package.json file from the base stage to the current directory in the release stage.
-COPY --from=base /app/package.json ./package.json
+# ─── Runtime: platform-dashboard ────────────────────────────────────────
+FROM runner AS platform-dashboard
+COPY --from=builder /app/dashboard/public ./dashboard/public
+COPY --from=builder --chown=nextjs:nodejs /app/dashboard/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/dashboard/.next/static ./dashboard/.next/static
+USER nextjs
+EXPOSE 3000
+ENV PORT=3000 HOSTNAME="0.0.0.0"
+CMD ["node", "dashboard/server.js"]
 
-# Copy the .next folder from the base stage to the .next directory in the release stage.
-COPY --from=base /app/.next ./.next
+# ─── Runtime: platform-personal-web ─────────────────────────────────────
+FROM runner AS platform-personal-web
+COPY --from=builder /app/personal-web/public ./personal-web/public
+COPY --from=builder --chown=nextjs:nodejs /app/personal-web/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/personal-web/.next/static ./personal-web/.next/static
+USER nextjs
+EXPOSE 3000
+ENV PORT=3000 HOSTNAME="0.0.0.0"
+CMD ["node", "personal-web/server.js"]
 
-# Define the default command to be executed when the container is started with npm start.
-CMD ["npm", "run", "start"]
+# ─── Runtime: platform-corporate-web ────────────────────────────────────
+FROM runner AS platform-corporate-web
+COPY --from=builder /app/corporate-web/public ./corporate-web/public
+COPY --from=builder --chown=nextjs:nodejs /app/corporate-web/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/corporate-web/.next/static ./corporate-web/.next/static
+USER nextjs
+EXPOSE 3000
+ENV PORT=3000 HOSTNAME="0.0.0.0"
+CMD ["node", "corporate-web/server.js"]

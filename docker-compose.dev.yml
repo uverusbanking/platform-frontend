@@ -1,0 +1,85 @@
+# Docker Compose for HOT RELOAD (Development)
+services:
+  platform-control:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/control/.next
+    env_file:
+      - .env
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+    command: pnpm run dev:control
+    networks:
+      - uverus-network
+
+  platform-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    ports:
+      - "3001:3001"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/dashboard/.next
+    env_file:
+      - .env
+    environment:
+      - PORT=3001
+      - NODE_ENV=development
+    command: pnpm run dev:dashboard
+    networks:
+      - uverus-network
+
+  platform-personal-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    ports:
+      - "3002:3002"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/personal-web/.next
+    env_file:
+      - .env
+    environment:
+      - PORT=3002
+      - NODE_ENV=development
+    command: pnpm run dev:personal-web
+    networks:
+      - uverus-network
+
+  platform-corporate-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    ports:
+      - "3003:3003"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/corporate-web/.next
+    env_file:
+      - .env
+    environment:
+      - PORT=3003
+      - NODE_ENV=development
+    command: pnpm run dev:corporate-web
+    networks:
+      - uverus-network
+
+networks:
+  uverus-network:
+    driver: bridge

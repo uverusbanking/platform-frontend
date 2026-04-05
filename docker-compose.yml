@@ -1,0 +1,78 @@
+services:
+  platform-control:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: platform-control
+    env_file:
+      - .env
+    environment:
+      - PORT=3000
+    networks:
+      - uverus-network
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.platform-control.rule=Host(`control.uverusbanking.com`)"
+      - "traefik.http.routers.platform-control.entrypoints=websecure"
+      - "traefik.http.routers.platform-control.tls.certresolver=letsencrypt"
+      - "traefik.http.services.platform-control.loadbalancer.server.port=3000"
+
+  platform-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: platform-dashboard
+    env_file:
+      - .env
+    environment:
+      - PORT=3000
+    networks:
+      - uverus-network
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.platform-dashboard.rule=Host(`dashboard.uverusbanking.com`)"
+      - "traefik.http.routers.platform-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.platform-dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.services.platform-dashboard.loadbalancer.server.port=3000"
+
+  platform-personal-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: platform-personal-web
+    env_file:
+      - .env
+    environment:
+      - PORT=3000
+    networks:
+      - uverus-network
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      # Tenant domains are added via Dokploy UI per customer
+      - "traefik.http.services.platform-personal-web.loadbalancer.server.port=3000"
+
+  platform-corporate-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: platform-corporate-web
+    env_file:
+      - .env
+    environment:
+      - PORT=3000
+    networks:
+      - uverus-network
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      # Tenant domains are added via Dokploy UI per customer
+      - "traefik.http.services.platform-corporate-web.loadbalancer.server.port=3000"
+
+networks:
+  uverus-network:
+    driver: bridge
+  dokploy-network:
+    external: true

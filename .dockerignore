@@ -1,4 +1,6 @@
 node_modules
+.next
+*/.next
 npm-debug.log
 dist
 .DS_Store
@@ -8,4 +10,6 @@ dist
 .env.*
 !/.env.example
 README.md
-
+docker-compose*.yml
+backup.Dockerfile
+Dockerfile.dev
