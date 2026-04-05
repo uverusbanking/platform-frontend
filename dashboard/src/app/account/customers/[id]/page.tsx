@@ -92,9 +92,9 @@ export default function CustomerDetailPage({
 
   if (isLoading) return <CustomerDetailSkeleton />;
 
-  const wallet: WalletMetadata | undefined =
-    walletsResponse?.data || walletsResponse?.data.metadata;
-  const totalBalance = Number(walletsResponse?.data.balance ?? 0);
+  const wallet: IWallet | undefined = walletsResponse?.data;
+  const walletMetadata: WalletMetadata | undefined = wallet?.metadata;
+  const totalBalance = Number(wallet?.balance ?? 0);
 
   if (!customer) {
     return (
