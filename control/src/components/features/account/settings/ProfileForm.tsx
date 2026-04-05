@@ -52,7 +52,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
         last_name: userData.last_name,
         middle_name: userData.middle_name || "",
         phone_number: userData.phone_number,
-        gender: userData.gender || "MALE",
+        gender: userData.gender || Gender.MALE,
       });
     }
   }, [userData, reset]);

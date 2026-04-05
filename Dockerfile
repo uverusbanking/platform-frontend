@@ -26,6 +26,11 @@ RUN pnpm run build:corporate-web
 FROM node:20-alpine AS runner
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
+# Install Doppler CLI via Alpine package repository
+RUN wget -q -t3 'https://packages.doppler.com/public/cli/rsa.8004D9FF50437357.key' -O /etc/apk/keys/cli@doppler-8004D9FF50437357.rsa.pub && \
+    echo 'https://packages.doppler.com/public/cli/alpine/any-version/main' | tee -a /etc/apk/repositories && \
+    apk update && \
+    apk add doppler
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 ENV NODE_ENV=production
@@ -38,7 +43,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/control/.next/static ./control/.n
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000 HOSTNAME="0.0.0.0"
-CMD ["node", "control/server.js"]
+CMD ["doppler", "run", "--", "node", "control/server.js"]
 
 # ─── Runtime: platform-dashboard ────────────────────────────────────────
 FROM runner AS platform-dashboard
@@ -48,7 +53,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/dashboard/.next/static ./dashboar
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000 HOSTNAME="0.0.0.0"
-CMD ["node", "dashboard/server.js"]
+CMD ["doppler", "run", "--", "node", "dashboard/server.js"]
 
 # ─── Runtime: platform-personal-web ─────────────────────────────────────
 FROM runner AS platform-personal-web
@@ -58,7 +63,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/personal-web/.next/static ./perso
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000 HOSTNAME="0.0.0.0"
-CMD ["node", "personal-web/server.js"]
+CMD ["doppler", "run", "--", "node", "personal-web/server.js"]
 
 # ─── Runtime: platform-corporate-web ────────────────────────────────────
 FROM runner AS platform-corporate-web
@@ -68,4 +73,4 @@ COPY --from=builder --chown=nextjs:nodejs /app/corporate-web/.next/static ./corp
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000 HOSTNAME="0.0.0.0"
-CMD ["node", "corporate-web/server.js"]
+CMD ["doppler", "run", "--", "node", "corporate-web/server.js"]
