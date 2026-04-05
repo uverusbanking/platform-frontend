@@ -8,7 +8,7 @@ echo "========================================="
 # We use lint-staged to run Prettier and ESLint only on the files you actually changed.
 # This makes committing incredibly fast while still keeping the codebase clean.
 echo "✨ Step 1: Linting and Formatting staged files..."
-pnpm exec lint-staged
+npx lint-staged
 
 # Note: We run full test suites and builds in the 'pre-push' hook instead of here.
 # This ensures that developers can commit locally quickly without waiting for slow tests,
