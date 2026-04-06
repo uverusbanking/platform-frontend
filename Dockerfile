@@ -7,6 +7,7 @@ WORKDIR /app
 # Copy dependency manifests first for cached installs
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY personal-web/package.json ./personal-web/
+COPY corporate-web/package.json ./corporate-web/
 
 RUN pnpm install --frozen-lockfile
 
@@ -75,12 +76,17 @@ RUN printf 'server {\n  listen 3000;\n  root /usr/share/nginx/html;\n  index ind
 EXPOSE 3000
 CMD ["nginx", "-g", "daemon off;"]
 
-# ─── Runtime: platform-corporate-web ────────────────────────────────────
-FROM runner AS platform-corporate-web
-COPY --from=builder /app/corporate-web/public ./corporate-web/public
-COPY --from=builder --chown=nextjs:nodejs /app/corporate-web/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/corporate-web/.next/static ./corporate-web/.next/static
-USER nextjs
+# ─── Runtime: platform-corporate-web (Vite SPA via nginx) ───────────────
+FROM nginx:alpine AS platform-corporate-web
+# Install Doppler CLI
+RUN apk add --no-cache wget && \
+    wget -q -t3 'https://packages.doppler.com/public/cli/rsa.8004D9FF50437357.key' -O /etc/apk/keys/cli@doppler-8004D9FF50437357.rsa.pub && \
+    echo 'https://packages.doppler.com/public/cli/alpine/any-version/main' | tee -a /etc/apk/repositories && \
+    apk update && \
+    apk add doppler
+# Copy built static assets from builder
+COPY --from=builder /app/corporate-web/dist /usr/share/nginx/html
+# SPA fallback: serve index.html for all routes
+RUN printf 'server {\n  listen 3000;\n  root /usr/share/nginx/html;\n  index index.html;\n  location / {\n    try_files $uri $uri/ /index.html;\n  }\n}\n' > /etc/nginx/conf.d/default.conf
 EXPOSE 3000
-ENV PORT=3000 HOSTNAME="0.0.0.0"
-CMD ["doppler", "run", "--", "node", "corporate-web/server.js"]
+CMD ["doppler", "run", "--", "nginx", "-g", "daemon off;"]

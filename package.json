@@ -7,17 +7,17 @@
     "dev:control": "next dev control -p 3000",
     "dev:dashboard": "next dev dashboard -p 3001",
     "dev:personal-web": "pnpm --filter personal-web dev",
-    "dev:corporate-web": "next dev corporate-web -p 3003",
+    "dev:corporate-web": "pnpm --filter corporate-web dev",
     "build": "pnpm run build:control && pnpm run build:dashboard && pnpm run build:personal-web && pnpm run build:corporate-web",
     "build:control": "next build control",
     "build:dashboard": "next build dashboard",
     "build:personal-web": "pnpm --filter personal-web build",
-    "build:corporate-web": "next build corporate-web",
+    "build:corporate-web": "pnpm --filter corporate-web build",
     "start": "pnpm run start:control & pnpm run start:dashboard & pnpm run start:personal-web & pnpm run start:corporate-web",
     "start:control": "next start control -p 3000",
     "start:dashboard": "next start dashboard -p 3001",
     "start:personal-web": "pnpm --filter personal-web preview",
-    "start:corporate-web": "next start corporate-web -p 3003",
+    "start:corporate-web": "pnpm --filter corporate-web preview",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "test": "jest",
@@ -121,6 +121,7 @@
     "typescript": "^5"
   },
   "workspaces": [
-    "personal-web"
+    "personal-web",
+    "corporate-web"
   ]
 }
