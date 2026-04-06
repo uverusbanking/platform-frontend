@@ -255,7 +255,7 @@ const Index = () => {
                 variants={fadeInUp}
                 className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto lg:mx-0 mb-10 leading-relaxed"
               >
-                Tenant-branded personal banking portal with bank-level security. 
+                Tenant-branded personal banking portal with bank-level security.
                 Experience banking without borders across Africa.
               </motion.p>
 
@@ -493,9 +493,9 @@ const Index = () => {
                 <span className="text-primary">more.</span>
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                We're rethinking banking from the ground up to give you the
-                tools you need to succeed in today's fast-paced digital economy.
-                No hidden fees, no unnecessary paperwork.
+                We&apos;re rethinking banking from the ground up to give you the
+                tools you need to succeed in today&apos;s fast-paced digital
+                economy. No hidden fees, no unnecessary paperwork.
               </p>
 
               <div className="space-y-4 pt-4">
