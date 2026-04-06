@@ -5,7 +5,9 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
 # Copy dependency manifests first for cached installs
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY personal-web/package.json ./personal-web/
+
 RUN pnpm install --frozen-lockfile
 
 # Copy all source code (apps + shared)
