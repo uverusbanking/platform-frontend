@@ -54,26 +54,29 @@ export async function submitPayment(input: {
   submittedBy: { id: string; name: string; role: string };
 }): Promise<{ success: boolean; error?: string }> {
   try {
-    const res = await fetch('/api/payments', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(input)
+    const res = await fetch("/api/payments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
     });
-    
+
     const data = await res.json();
     if (!data.success) {
       return { success: false, error: data.error };
     }
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "An unknown error occurred",
+    };
   }
 }
 
 /** Fetch all payments with their approval request + actions */
 export async function getPaymentsWithApprovals(): Promise<SubmittedPayment[]> {
   try {
-    const res = await fetch('/api/payments');
+    const res = await fetch("/api/payments");
     const { data } = await res.json();
     return data;
   } catch (err) {
@@ -84,7 +87,7 @@ export async function getPaymentsWithApprovals(): Promise<SubmittedPayment[]> {
 
 export async function getPaymentBatches(): Promise<PaymentBatch[]> {
   try {
-    const res = await fetch('/api/batches');
+    const res = await fetch("/api/batches");
     const { data } = await res.json();
     return data;
   } catch (err) {
@@ -95,7 +98,7 @@ export async function getPaymentBatches(): Promise<PaymentBatch[]> {
 
 export async function getPaymentMandates(): Promise<PaymentMandate[]> {
   try {
-    const res = await fetch('/api/mandates');
+    const res = await fetch("/api/mandates");
     const { data } = await res.json();
     return data;
   } catch (err) {
@@ -105,9 +108,11 @@ export async function getPaymentMandates(): Promise<PaymentMandate[]> {
 }
 
 /** Convert DB payments to ApprovalRequest format for the approval queue */
-export async function getSubmittedAsApprovalRequests(): Promise<ApprovalRequest[]> {
+export async function getSubmittedAsApprovalRequests(): Promise<
+  ApprovalRequest[]
+> {
   try {
-    const res = await fetch('/api/approval-requests');
+    const res = await fetch("/api/approval-requests");
     const { data } = await res.json();
     return data;
   } catch (err) {
@@ -126,25 +131,27 @@ export async function updatePaymentApproval(
   comment: string,
 ) {
   try {
-    const res = await fetch('/api/approval-actions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch("/api/approval-actions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         approvalRequestId,
         action,
         actorId,
         actorName,
         actorRole,
-        comment
-      })
+        comment,
+      }),
     });
     const data = await res.json();
     if (!data.success) {
       return { success: false, error: data.error };
     }
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "An unknown error occurred",
+    };
   }
 }
-
