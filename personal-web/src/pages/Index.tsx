@@ -245,9 +245,9 @@ const Index = () => {
                 variants={fadeInUp}
                 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight mb-8"
               >
-                Move Money With <br />
+                Personal <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-success">
-                  Zero Friction
+                  Banking
                 </span>
               </motion.h1>
 
@@ -255,9 +255,8 @@ const Index = () => {
                 variants={fadeInUp}
                 className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto lg:mx-0 mb-10 leading-relaxed"
               >
-                Send, receive, and manage your business finances instantly with
-                bank-level security. Experience banking without borders across
-                Africa.
+                Tenant-branded personal banking portal with bank-level security. 
+                Experience banking without borders across Africa.
               </motion.p>
 
               <motion.div
