@@ -17,6 +17,9 @@ FROM base AS builder
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
 RUN pnpm run build:control
 RUN pnpm run build:dashboard
 RUN pnpm run build:personal-web
@@ -55,15 +58,20 @@ EXPOSE 3000
 ENV PORT=3000 HOSTNAME="0.0.0.0"
 CMD ["doppler", "run", "--", "node", "dashboard/server.js"]
 
-# ─── Runtime: platform-personal-web ─────────────────────────────────────
-FROM runner AS platform-personal-web
-COPY --from=builder /app/personal-web/public ./personal-web/public
-COPY --from=builder --chown=nextjs:nodejs /app/personal-web/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/personal-web/.next/static ./personal-web/.next/static
-USER nextjs
+# ─── Runtime: platform-personal-web (Vite SPA via nginx) ────────────────
+FROM nginx:alpine AS platform-personal-web
+# Install Doppler CLI
+RUN apk add --no-cache wget && \
+    wget -q -t3 'https://packages.doppler.com/public/cli/rsa.8004D9FF50437357.key' -O /etc/apk/keys/cli@doppler-8004D9FF50437357.rsa.pub && \
+    echo 'https://packages.doppler.com/public/cli/alpine/any-version/main' | tee -a /etc/apk/repositories && \
+    apk update && \
+    apk add doppler
+# Copy built static assets from builder
+COPY --from=builder /app/personal-web/dist /usr/share/nginx/html
+# SPA fallback: serve index.html for all routes
+RUN printf 'server {\n  listen 3000;\n  root /usr/share/nginx/html;\n  index index.html;\n  location / {\n    try_files $uri $uri/ /index.html;\n  }\n}\n' > /etc/nginx/conf.d/default.conf
 EXPOSE 3000
-ENV PORT=3000 HOSTNAME="0.0.0.0"
-CMD ["doppler", "run", "--", "node", "personal-web/server.js"]
+CMD ["nginx", "-g", "daemon off;"]
 
 # ─── Runtime: platform-corporate-web ────────────────────────────────────
 FROM runner AS platform-corporate-web
