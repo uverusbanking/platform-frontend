@@ -9,19 +9,19 @@ import LoadingDataComponent from "@/components/LoadingData2";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { queryClient } from "@/utils/queryClient";
+import localFont from "next/font/local";
 import { Toaster } from "@/components/ui/sonner";
-import { Inter, JetBrains_Mono } from "next/font/google";
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
+const inter = localFont({
+  src: "../../../shared/fonts/inter.woff2",
   variable: "--font-sans",
+  display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  display: "swap",
+const jetbrainsMono = localFont({
+  src: "../../../shared/fonts/jetbrains-mono.woff2",
   variable: "--font-mono",
+  display: "swap",
 });
 
 export default function RootLayout({
