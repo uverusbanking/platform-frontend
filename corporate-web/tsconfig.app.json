@@ -14,6 +14,7 @@
     "noUnusedParameters": false,
     "paths": {
       "@/*": ["./src/*"],
+      "@shared/core": ["../shared/src/index.ts"],
       "react": ["./node_modules/@types/react"],
       "react-dom": ["./node_modules/@types/react-dom"]
     },
