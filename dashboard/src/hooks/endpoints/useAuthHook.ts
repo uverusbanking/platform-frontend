@@ -1,16 +1,16 @@
 import { IApiResponse, TError } from "@/types/apiResponseType";
+import { IVerifyLoginResponse } from "@/types/auth.types";
 import {
-  ILoginPayload,
   IPublicKey,
+  ILoginPayload,
+  ILoginResponse,
   IVerifyLoginPayload,
-  IVerifyLoginResponse,
-  IForgotPasswordPayload,
   IVerifyForgotOTPPayload,
+  IForgotPasswordPayload,
   IVerifyForgotOTPResponse,
   IResetPasswordPayload,
   IResendForgotOTPPayload,
-  ILoginSuccessResponse,
-} from "@/types/auth.types";
+} from "@shared/types/auth.types";
 import {
   getEncryptionPublicKey,
   login,
@@ -30,11 +30,7 @@ export { useGetEncryptionPublicKey };
 export const useLogin = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    IApiResponse<ILoginSuccessResponse>,
-    TError,
-    ILoginPayload
-  >({
+  return useMutation<IApiResponse<ILoginResponse>, TError, ILoginPayload>({
     mutationFn: login,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["company-login"] });

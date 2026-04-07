@@ -2,12 +2,17 @@ import { IApiResponse, TError } from "@/types/apiResponse.type";
 import {
   ILoginPayload,
   ILoginResponse,
-  IPublicKey,
   IVerifyLoginPayload,
-  IVerifyLoginResponse,
-} from "@/types/auth.types";
+  IPublicKey,
+  IForgotPasswordPayload,
+  IVerifyForgotOTPPayload,
+  IVerifyForgotOTPResponse,
+  IResetPasswordPayload,
+  IResendForgotOTPPayload,
+} from "@shared/types/auth.types";
+import { IVerifyLoginResponse } from "@/types/auth.types";
 import apiClient from "@/lib/axios";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 
 const getEncryptionPublicKey = async (): Promise<IPublicKey> => {
@@ -26,73 +31,69 @@ export const useGetEncryptionPublicKey = () => {
 export const login = async (
   payload: ILoginPayload,
 ): Promise<IApiResponse<ILoginResponse>> => {
-  const response = await apiClient.post("/auth/login", payload);
+  const response = await apiClient.post("/platform/auth/login", payload);
   return response.data;
 };
 
-const verifyLogin = async (
+export const verifyLogin = async (
   payload: IVerifyLoginPayload,
-): Promise<IVerifyLoginResponse> => {
-  const response = await apiClient.post("/auth/verify-code", payload);
-  return response.data.data;
+): Promise<IApiResponse<IVerifyLoginResponse>> => {
+  const response = await apiClient.post("/platform/auth/verify-code", payload);
+  return response.data;
 };
 
-export const useVerifyLogin = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation<IVerifyLoginResponse, TError, IVerifyLoginPayload>({
-    mutationFn: verifyLogin,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.AUTH.COMPANY_LOGIN],
-      });
-      // You might want to show a success toast message here
-      // toast.success(data.message || "Profile updated successfully", {description: ""});
-    },
-  });
-};
-
-const forgotPassword = async (payload: {
-  email: string;
-  type: "PLATFORM";
-}): Promise<IApiResponse<unknown>> => {
-  const response = await apiClient.post("/auth/forgot-password", payload);
+const forgotPassword = async (
+  payload: IForgotPasswordPayload,
+): Promise<IApiResponse<unknown>> => {
+  const response = await apiClient.post(
+    "/platform/auth/forgot-password",
+    payload,
+  );
   return response.data;
 };
 
 export const useForgotPassword = () => {
-  return useMutation<
-    IApiResponse<unknown>,
-    TError,
-    { email: string; type: "PLATFORM" }
-  >({
+  return useMutation<IApiResponse<unknown>, TError, IForgotPasswordPayload>({
     mutationFn: forgotPassword,
   });
 };
 
-const verifyForgotOtp = async (payload: {
-  email: string;
-  type: "PLATFORM";
-  otp: string;
-}): Promise<{ session_id: string }> => {
-  const response = await apiClient.post("/auth/verify-forgot-otp", payload);
+const verifyForgotOtp = async (
+  payload: IVerifyForgotOTPPayload,
+): Promise<IApiResponse<IVerifyForgotOTPResponse>> => {
+  const response = await apiClient.post(
+    "/platform/auth/verify-forgot-otp",
+    payload,
+  );
   return response.data;
 };
 
 export const useVerifyForgotOtp = () => {
   return useMutation<
-    { session_id: string },
+    IApiResponse<IVerifyForgotOTPResponse>,
     TError,
-    { email: string; type: "PLATFORM"; otp: string }
+    IVerifyForgotOTPPayload
   >({
     mutationFn: verifyForgotOtp,
   });
 };
 
-export const resetPassword = async (payload: {
-  session_id: string;
-  new_password: string;
-}): Promise<IApiResponse<unknown>> => {
-  const response = await apiClient.post("/auth/reset-password", payload);
+export const resetPassword = async (
+  payload: IResetPasswordPayload,
+): Promise<IApiResponse<unknown>> => {
+  const response = await apiClient.post(
+    "/platform/auth/reset-password",
+    payload,
+  );
+  return response.data;
+};
+
+export const resendForgotOtp = async (
+  payload: IResendForgotOTPPayload,
+): Promise<IApiResponse<unknown>> => {
+  const response = await apiClient.post(
+    "/platform/auth/resend-forgot-otp",
+    payload,
+  );
   return response.data;
 };

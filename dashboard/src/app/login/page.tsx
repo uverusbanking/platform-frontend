@@ -20,7 +20,7 @@ import {
   useGetEncryptionPublicKey,
   useLogin,
 } from "@/hooks/endpoints/useAuthHook";
-import { ILoginPayload } from "@/types/auth.types";
+import { ILoginPayload } from "@shared/types/auth.types";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -89,7 +89,6 @@ export default function Login() {
       );
       const payload: ILoginPayload = {
         email: formData.email,
-        type: "ORGANISATION",
         encrypted_password: encryptedPassword,
       };
 
@@ -99,7 +98,7 @@ export default function Login() {
           _setTempLoginData(payload);
 
           reset();
-          router.replace(APP_ROUTES.AUTH.VERIFY(response.data.sessionId));
+          router.replace(APP_ROUTES.AUTH.VERIFY(response.data.session_id));
         },
         onError: (error) => {
           const message = getApiErrorMessage(

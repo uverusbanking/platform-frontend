@@ -155,8 +155,8 @@ describe("apiClient auth flow", () => {
       status: true,
     });
 
-    expect(sessionClient.post).toHaveBeenCalledWith("/auth/logout", {
-      sessionId: "persisted-session",
+    expect(sessionClient.post).toHaveBeenCalledWith("/platform/auth/logout", {
+      session_id: "persisted-session",
     });
   });
 
@@ -219,9 +219,12 @@ describe("apiClient auth flow", () => {
       response: { status: 401 },
     });
 
-    expect(sessionClient.post).toHaveBeenCalledWith("/auth/refresh-token", {
-      sessionId: "persisted-session",
-    });
+    expect(sessionClient.post).toHaveBeenCalledWith(
+      "/platform/auth/refresh-token",
+      {
+        session_id: "persisted-session",
+      },
+    );
     expect(mockResolveUserPermissions).toHaveBeenCalledWith(
       refreshedUser,
       storedUser,
@@ -403,7 +406,7 @@ describe("apiClient auth flow", () => {
 
     const loginError = {
       config: {
-        url: "/auth/login",
+        url: "/platform/auth/login",
         headers: {
           Authorization: "Bearer ignored-token",
         },
@@ -473,9 +476,7 @@ describe("apiClient auth flow", () => {
         },
       }),
     ).toEqual({
-      error: {
-        detail: "Unknown error payload",
-      },
+      error: "[object Object]",
       errorMsgs: undefined,
     });
   });

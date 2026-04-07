@@ -19,7 +19,7 @@ import {
   directorInterface,
   documentInterface,
 } from "@/types/organisationRegistration";
-import apiClient, { apiErrorResponse } from "@/lib/axios";
+import apiClient from "@/lib/axios";
 import { defaultApiResponse } from "@/lib/resources";
 
 const steps = [
@@ -118,9 +118,11 @@ export default function OrganisationRegistration() {
       setIsSubmitted(true);
       setOrganisationData(defaultOrganisationData);
       setCurrentStep(1);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log(error);
-      const message = error.response?.data?.message || "An error occurred";
+      const message =
+        (error as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message || "An error occurred";
       setApiResponse({
         display: true,
         status: false,

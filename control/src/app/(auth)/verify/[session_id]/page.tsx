@@ -20,30 +20,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { defaultApiResponse } from "@/lib/resources";
 import DisplayRespondsMessage from "@/components/DisplayResponse";
 import { useUserStore } from "@/state/userStore";
-import { useVerifyLogin } from "@/hooks/endpoints/useAuth";
+import { useVerifyLogin } from "@/hooks/mutations/useAuthMutations";
 import { useLogin } from "@/hooks/mutations/useAuthMutations";
 import { codeSchema } from "@/lib/schemas/fields/code.schema";
 import { resolveUserPermissions } from "@/auth/resolveUserPermissions";
 import { IVerifyLoginResponse } from "@/types/auth.types";
+import { ResendLoginResponse } from "@shared/types/auth.types";
 import { BrandIcon } from "@/components/layouts/layout/BrandIcon";
-
-type ApiError = {
-  response?: {
-    data?: {
-      message?: string;
-    };
-  };
-};
-
-type ResendLoginResponse = {
-  data?: {
-    sessionId?: string;
-  };
-};
+import { IApiResponse, TErrorResponse } from "@/types/apiResponse.type";
 
 const getErrorMessage = (error: unknown, fallback: string) => {
-  const apiError = error as ApiError | undefined;
-  return apiError?.response?.data?.message || fallback;
+  const apiError = error as TErrorResponse | undefined;
+  return apiError?.data?.message || fallback;
 };
 
 const FormSchema = z.object({
@@ -90,17 +78,17 @@ export default function Verify({
     try {
       const payload = {
         code: formData.code,
-        sessionId: session_id,
+        session_id: session_id,
       };
 
       await verifyLoginMutation(payload, {
-        onSuccess: (data: IVerifyLoginResponse) => {
+        onSuccess: (data: IApiResponse<IVerifyLoginResponse>) => {
           toast.success("Logged in successfully");
-          const userWithPermissions = resolveUserPermissions(data.user);
+          const userWithPermissions = resolveUserPermissions(data.data.user);
           _loginUser(
             userWithPermissions,
-            data.access_token,
-            data.session_id || session_id,
+            data.data.access_token,
+            data.data.session_id || session_id,
           );
 
           reset(); // after submit
@@ -138,11 +126,11 @@ export default function Verify({
 
     setCountdown(30);
     loginMutation(tempLoginData, {
-      onSuccess: (data: ResendLoginResponse) => {
+      onSuccess: (data: IApiResponse<ResendLoginResponse>) => {
         toast.success("A new verification code has been sent.");
         // Update URL if session ID changed (though typically it stays same)
-        if (data?.data?.sessionId && data.data.sessionId !== session_id) {
-          router.replace(`/verify/${data.data.sessionId}`);
+        if (data?.data?.session_id && data.data.session_id !== session_id) {
+          router.replace(`/verify/${data.data.session_id}`);
         }
       },
       onError: (error: unknown) => {

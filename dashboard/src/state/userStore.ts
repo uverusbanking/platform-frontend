@@ -80,7 +80,6 @@ type _typeInterface_ = {
   tempLoginData: {
     email: string;
     encrypted_password: string;
-    type: string;
   } | null;
   userData: IUser;
   isLoggedIn: boolean;
@@ -90,7 +89,7 @@ type _typeInterface_ = {
   _clearUserSessionLocally: () => void;
   _logOutUser: () => void;
   _setTempLoginData: (
-    data: { email: string; encrypted_password: string; type: string } | null,
+    data: { email: string; encrypted_password: string } | null,
   ) => void;
   _handleRestoreUser: () => void;
   _updateUser: (user: IUser) => void;

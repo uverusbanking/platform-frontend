@@ -100,7 +100,6 @@ export default function ForgotPassword() {
     forgotPasswordMutation(
       {
         email: data.email,
-        type: "ORGANISATION",
       },
       {
         onSuccess: () => {
@@ -122,7 +121,6 @@ export default function ForgotPassword() {
       {
         email,
         otp: data.otp,
-        type: "ORGANISATION",
       },
       {
         onSuccess: (response) => {
@@ -183,7 +181,6 @@ export default function ForgotPassword() {
     resendOTPMutation(
       {
         email,
-        type: "ORGANISATION",
       },
       {
         onSuccess: () => {

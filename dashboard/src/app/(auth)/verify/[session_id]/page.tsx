@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Building2, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -73,7 +73,7 @@ export default function Verify({
 
     const payload = {
       code: formData.code,
-      sessionId: session_id,
+      session_id: session_id,
     };
 
     verifyLoginMutation(payload, {
