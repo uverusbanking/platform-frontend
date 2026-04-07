@@ -4,12 +4,45 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Search, Plus, MoreVertical, Mail, Pencil, Trash2, Shield } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  Search,
+  Plus,
+  MoreVertical,
+  Mail,
+  Pencil,
+  Trash2,
+  Shield,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ROLE_DEFINITIONS, type CorporateRole } from "@/types/roles";
 import { toast } from "sonner";
 
@@ -26,16 +59,80 @@ interface CorporateUser {
 }
 
 const mockUsers: CorporateUser[] = [
-  { id: "u1", name: "Adewale Johnson", email: "adewale@uverus.com", role: "owner", status: "active", dailyLimit: 50_000_000, perTxLimit: 10_000_000, lastLogin: "Apr 02, 2026 09:15", createdAt: "Jan 10, 2026" },
-  { id: "u2", name: "Ngozi Okafor", email: "ngozi@uverus.com", role: "initiator", status: "active", dailyLimit: 20_000_000, perTxLimit: 5_000_000, lastLogin: "Apr 01, 2026 14:30", createdAt: "Jan 15, 2026" },
-  { id: "u3", name: "Emeka Nwosu", email: "emeka@uverus.com", role: "authorizer", status: "active", dailyLimit: 100_000_000, perTxLimit: 50_000_000, lastLogin: "Mar 31, 2026 11:00", createdAt: "Feb 01, 2026" },
-  { id: "u4", name: "Fatima Bello", email: "fatima@uverus.com", role: "authorizer", status: "active", dailyLimit: 100_000_000, perTxLimit: 50_000_000, lastLogin: "Apr 02, 2026 08:45", createdAt: "Feb 01, 2026" },
-  { id: "u5", name: "Chidi Eze", email: "chidi@uverus.com", role: "viewer", status: "invited", dailyLimit: 0, perTxLimit: 0, lastLogin: null, createdAt: "Mar 20, 2026" },
-  { id: "u6", name: "Kemi Adeyemi", email: "kemi@uverus.com", role: "initiator", status: "suspended", dailyLimit: 10_000_000, perTxLimit: 2_000_000, lastLogin: "Feb 15, 2026 16:20", createdAt: "Jan 20, 2026" },
+  {
+    id: "u1",
+    name: "Adewale Johnson",
+    email: "adewale@company.com",
+    role: "owner",
+    status: "active",
+    dailyLimit: 50_000_000,
+    perTxLimit: 10_000_000,
+    lastLogin: "Apr 02, 2026 09:15",
+    createdAt: "Jan 10, 2026",
+  },
+  {
+    id: "u2",
+    name: "Ngozi Okafor",
+    email: "ngozi@company.com",
+    role: "initiator",
+    status: "active",
+    dailyLimit: 20_000_000,
+    perTxLimit: 5_000_000,
+    lastLogin: "Apr 01, 2026 14:30",
+    createdAt: "Jan 15, 2026",
+  },
+  {
+    id: "u3",
+    name: "Emeka Nwosu",
+    email: "emeka@company.com",
+    role: "authorizer",
+    status: "active",
+    dailyLimit: 100_000_000,
+    perTxLimit: 50_000_000,
+    lastLogin: "Mar 31, 2026 11:00",
+    createdAt: "Feb 01, 2026",
+  },
+  {
+    id: "u4",
+    name: "Fatima Bello",
+    email: "fatima@company.com",
+    role: "authorizer",
+    status: "active",
+    dailyLimit: 100_000_000,
+    perTxLimit: 50_000_000,
+    lastLogin: "Apr 02, 2026 08:45",
+    createdAt: "Feb 01, 2026",
+  },
+  {
+    id: "u5",
+    name: "Chidi Eze",
+    email: "chidi@company.com",
+    role: "viewer",
+    status: "invited",
+    dailyLimit: 0,
+    perTxLimit: 0,
+    lastLogin: null,
+    createdAt: "Mar 20, 2026",
+  },
+  {
+    id: "u6",
+    name: "Kemi Adeyemi",
+    email: "kemi@company.com",
+    role: "initiator",
+    status: "suspended",
+    dailyLimit: 10_000_000,
+    perTxLimit: 2_000_000,
+    lastLogin: "Feb 15, 2026 16:20",
+    createdAt: "Jan 20, 2026",
+  },
 ];
 
 const fmt = (n: number) =>
-  "₦ " + n.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  "₦ " +
+  n.toLocaleString("en-NG", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
 
 const statusStyles: Record<string, string> = {
   active: "bg-success/10 text-success border-success/20",
@@ -66,7 +163,12 @@ export default function UserManagement() {
   const [editStatus, setEditStatus] = useState(true);
 
   const filtered = users.filter((u) => {
-    if (search && !u.name.toLowerCase().includes(search.toLowerCase()) && !u.email.toLowerCase().includes(search.toLowerCase())) return false;
+    if (
+      search &&
+      !u.name.toLowerCase().includes(search.toLowerCase()) &&
+      !u.email.toLowerCase().includes(search.toLowerCase())
+    )
+      return false;
     if (roleFilter !== "all" && u.role !== roleFilter) return false;
     if (statusFilter !== "all" && u.status !== statusFilter) return false;
     return true;
@@ -101,11 +203,17 @@ export default function UserManagement() {
 
   const handleEditSave = () => {
     if (!editUser) return;
-    setUsers(users.map((u) =>
-      u.id === editUser.id
-        ? { ...u, role: editRole, status: editStatus ? "active" : "suspended" }
-        : u
-    ));
+    setUsers(
+      users.map((u) =>
+        u.id === editUser.id
+          ? {
+              ...u,
+              role: editRole,
+              status: editStatus ? "active" : "suspended",
+            }
+          : u,
+      ),
+    );
     setEditUser(null);
     toast.success("User updated successfully");
   };
@@ -118,11 +226,17 @@ export default function UserManagement() {
 
   const handleLimitsSave = () => {
     if (!limitsUser) return;
-    setUsers(users.map((u) =>
-      u.id === limitsUser.id
-        ? { ...u, dailyLimit: Number(editDailyLimit) || 0, perTxLimit: Number(editPerTxLimit) || 0 }
-        : u
-    ));
+    setUsers(
+      users.map((u) =>
+        u.id === limitsUser.id
+          ? {
+              ...u,
+              dailyLimit: Number(editDailyLimit) || 0,
+              perTxLimit: Number(editPerTxLimit) || 0,
+            }
+          : u,
+      ),
+    );
     setLimitsUser(null);
     toast.success("Transaction limits updated");
   };
@@ -141,12 +255,21 @@ export default function UserManagement() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold" style={{ fontFamily: "Manrope, sans-serif" }}>
+          <h1
+            className="text-xl sm:text-2xl font-bold"
+            style={{ fontFamily: "Manrope, sans-serif" }}
+          >
             User Management
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">{users.length} corporate users</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {users.length} corporate users
+          </p>
         </div>
-        <Button size="sm" onClick={() => setInviteOpen(true)} className="gap-1.5 w-full sm:w-auto">
+        <Button
+          size="sm"
+          onClick={() => setInviteOpen(true)}
+          className="gap-1.5 w-full sm:w-auto"
+        >
           <Plus className="h-4 w-4" />
           Invite User
         </Button>
@@ -156,7 +279,12 @@ export default function UserManagement() {
       <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
         <div className="relative w-full sm:w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search users..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-9 text-sm" />
+          <Input
+            placeholder="Search users..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 h-9 text-sm"
+          />
         </div>
         <Select value={roleFilter} onValueChange={setRoleFilter}>
           <SelectTrigger className="w-full sm:w-[140px] h-9 text-sm">
@@ -165,7 +293,9 @@ export default function UserManagement() {
           <SelectContent>
             <SelectItem value="all">All roles</SelectItem>
             {ROLE_DEFINITIONS.map((r) => (
-              <SelectItem key={r.id} value={r.id}>{r.label}</SelectItem>
+              <SelectItem key={r.id} value={r.id}>
+                {r.label}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -180,52 +310,119 @@ export default function UserManagement() {
             <SelectItem value="suspended">Suspended</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="ghost" size="sm" className="text-xs sm:ml-auto" onClick={() => { setSearch(""); setRoleFilter("all"); setStatusFilter("all"); }}>Clear</Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-xs sm:ml-auto"
+          onClick={() => {
+            setSearch("");
+            setRoleFilter("all");
+            setStatusFilter("all");
+          }}
+        >
+          Clear
+        </Button>
       </div>
 
       {/* Mobile cards */}
       <div className="block sm:hidden space-y-3">
         {filtered.length === 0 ? (
-          <p className="text-center py-8 text-muted-foreground">No users found</p>
-        ) : filtered.map((user) => {
-          const roleDef = ROLE_DEFINITIONS.find((r) => r.id === user.role)!;
-          return (
-            <Card key={user.id} className="p-4 space-y-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center shrink-0">
-                    <span className="text-xs font-bold text-primary">
-                      {user.name.split(" ").map((w) => w[0]).join("").toUpperCase()}
+          <p className="text-center py-8 text-muted-foreground">
+            No users found
+          </p>
+        ) : (
+          filtered.map((user) => {
+            const roleDef = ROLE_DEFINITIONS.find((r) => r.id === user.role)!;
+            return (
+              <Card key={user.id} className="p-4 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-primary">
+                        {user.name
+                          .split(" ")
+                          .map((w) => w[0])
+                          .join("")
+                          .toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold truncate">
+                        {user.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 shrink-0"
+                      >
+                        <MoreVertical className="h-3.5 w-3.5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEditOpen(user)}>
+                        <Pencil className="h-3.5 w-3.5 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleLimitsOpen(user)}>
+                        <Shield className="h-3.5 w-3.5 mr-2" />
+                        Limits
+                      </DropdownMenuItem>
+                      {user.status === "invited" && (
+                        <DropdownMenuItem
+                          onClick={() => handleResendInvite(user)}
+                        >
+                          <Mail className="h-3.5 w-3.5 mr-2" />
+                          Resend invite
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onClick={() => handleRemove(user)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-2" />
+                        Remove
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge
+                    className={`${roleDef.color} border-0 text-[10px] font-semibold uppercase`}
+                  >
+                    {roleDef.label}
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className={`text-[10px] uppercase ${statusStyles[user.status]}`}
+                  >
+                    {user.status}
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                  <div>
+                    Daily:{" "}
+                    <span className="font-medium text-foreground">
+                      {fmt(user.dailyLimit)}
                     </span>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold truncate">{user.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  <div>
+                    Per tx:{" "}
+                    <span className="font-medium text-foreground">
+                      {fmt(user.perTxLimit)}
+                    </span>
                   </div>
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0"><MoreVertical className="h-3.5 w-3.5" /></Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleEditOpen(user)}><Pencil className="h-3.5 w-3.5 mr-2" />Edit</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleLimitsOpen(user)}><Shield className="h-3.5 w-3.5 mr-2" />Limits</DropdownMenuItem>
-                    {user.status === "invited" && <DropdownMenuItem onClick={() => handleResendInvite(user)}><Mail className="h-3.5 w-3.5 mr-2" />Resend invite</DropdownMenuItem>}
-                    <DropdownMenuItem className="text-destructive" onClick={() => handleRemove(user)}><Trash2 className="h-3.5 w-3.5 mr-2" />Remove</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <Badge className={`${roleDef.color} border-0 text-[10px] font-semibold uppercase`}>{roleDef.label}</Badge>
-                <Badge variant="outline" className={`text-[10px] uppercase ${statusStyles[user.status]}`}>{user.status}</Badge>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                <div>Daily: <span className="font-medium text-foreground">{fmt(user.dailyLimit)}</span></div>
-                <div>Per tx: <span className="font-medium text-foreground">{fmt(user.perTxLimit)}</span></div>
-              </div>
-            </Card>
-          );
-        })}
+              </Card>
+            );
+          })
+        )}
       </div>
 
       {/* Desktop table */}
@@ -237,57 +434,122 @@ export default function UserManagement() {
                 <TableHead className="text-xs">User</TableHead>
                 <TableHead className="text-xs">Role</TableHead>
                 <TableHead className="text-xs">Status</TableHead>
-                <TableHead className="text-xs text-right">Daily Limit</TableHead>
-                <TableHead className="text-xs text-right">Per Tx Limit</TableHead>
+                <TableHead className="text-xs text-right">
+                  Daily Limit
+                </TableHead>
+                <TableHead className="text-xs text-right">
+                  Per Tx Limit
+                </TableHead>
                 <TableHead className="text-xs">Last Login</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No users found</TableCell></TableRow>
-              ) : filtered.map((user) => {
-                const roleDef = ROLE_DEFINITIONS.find((r) => r.id === user.role)!;
-                return (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                          <span className="text-[10px] font-bold text-primary">
-                            {user.name.split(" ").map((w) => w[0]).join("").toUpperCase()}
-                          </span>
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    No users found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filtered.map((user) => {
+                  const roleDef = ROLE_DEFINITIONS.find(
+                    (r) => r.id === user.role,
+                  )!;
+                  return (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                            <span className="text-[10px] font-bold text-primary">
+                              {user.name
+                                .split(" ")
+                                .map((w) => w[0])
+                                .join("")
+                                .toUpperCase()}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">{user.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {user.email}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium">{user.name}</p>
-                          <p className="text-xs text-muted-foreground">{user.email}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={`${roleDef.color} border-0 text-[10px] font-semibold uppercase`}>{roleDef.label}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={`text-[10px] uppercase ${statusStyles[user.status]}`}>{user.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-right font-medium">{fmt(user.dailyLimit)}</TableCell>
-                    <TableCell className="text-sm text-right font-medium">{fmt(user.perTxLimit)}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{user.lastLogin ?? "—"}</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-7 w-7"><MoreVertical className="h-3.5 w-3.5" /></Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditOpen(user)}><Pencil className="h-3.5 w-3.5 mr-2" />Edit user</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleLimitsOpen(user)}><Shield className="h-3.5 w-3.5 mr-2" />Set limits</DropdownMenuItem>
-                          {user.status === "invited" && <DropdownMenuItem onClick={() => handleResendInvite(user)}><Mail className="h-3.5 w-3.5 mr-2" />Resend invite</DropdownMenuItem>}
-                          <DropdownMenuItem className="text-destructive" onClick={() => handleRemove(user)}><Trash2 className="h-3.5 w-3.5 mr-2" />Remove user</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={`${roleDef.color} border-0 text-[10px] font-semibold uppercase`}
+                        >
+                          {roleDef.label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={`text-[10px] uppercase ${statusStyles[user.status]}`}
+                        >
+                          {user.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-right font-medium">
+                        {fmt(user.dailyLimit)}
+                      </TableCell>
+                      <TableCell className="text-sm text-right font-medium">
+                        {fmt(user.perTxLimit)}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                        {user.lastLogin ?? "—"}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                            >
+                              <MoreVertical className="h-3.5 w-3.5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => handleEditOpen(user)}
+                            >
+                              <Pencil className="h-3.5 w-3.5 mr-2" />
+                              Edit user
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleLimitsOpen(user)}
+                            >
+                              <Shield className="h-3.5 w-3.5 mr-2" />
+                              Set limits
+                            </DropdownMenuItem>
+                            {user.status === "invited" && (
+                              <DropdownMenuItem
+                                onClick={() => handleResendInvite(user)}
+                              >
+                                <Mail className="h-3.5 w-3.5 mr-2" />
+                                Resend invite
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => handleRemove(user)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5 mr-2" />
+                              Remove user
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </div>
@@ -298,33 +560,58 @@ export default function UserManagement() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Invite User</DialogTitle>
-            <DialogDescription>Send an invitation to join your corporate account.</DialogDescription>
+            <DialogDescription>
+              Send an invitation to join your corporate account.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
-              <Label className="text-sm font-medium mb-1.5 block">Full name</Label>
-              <Input placeholder="Enter full name" value={invName} onChange={(e) => setInvName(e.target.value)} />
+              <Label className="text-sm font-medium mb-1.5 block">
+                Full name
+              </Label>
+              <Input
+                placeholder="Enter full name"
+                value={invName}
+                onChange={(e) => setInvName(e.target.value)}
+              />
             </div>
             <div>
-              <Label className="text-sm font-medium mb-1.5 block">Email address</Label>
-              <Input type="email" placeholder="user@company.com" value={invEmail} onChange={(e) => setInvEmail(e.target.value)} />
+              <Label className="text-sm font-medium mb-1.5 block">
+                Email address
+              </Label>
+              <Input
+                type="email"
+                placeholder="user@company.com"
+                value={invEmail}
+                onChange={(e) => setInvEmail(e.target.value)}
+              />
             </div>
             <div>
               <Label className="text-sm font-medium mb-1.5 block">Role</Label>
-              <Select value={invRole} onValueChange={(v) => setInvRole(v as CorporateRole)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={invRole}
+                onValueChange={(v) => setInvRole(v as CorporateRole)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {ROLE_DEFINITIONS.map((r) => (
-                    <SelectItem key={r.id} value={r.id}>{r.label}</SelectItem>
+                    <SelectItem key={r.id} value={r.id}>
+                      {r.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setInviteOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setInviteOpen(false)}>
+              Cancel
+            </Button>
             <Button onClick={handleInvite} disabled={!invName || !invEmail}>
-              <Mail className="h-4 w-4 mr-1.5" />Send Invitation
+              <Mail className="h-4 w-4 mr-1.5" />
+              Send Invitation
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -335,16 +622,25 @@ export default function UserManagement() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Edit User</DialogTitle>
-            <DialogDescription>Update role and status for {editUser?.name}.</DialogDescription>
+            <DialogDescription>
+              Update role and status for {editUser?.name}.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
               <Label className="text-sm font-medium mb-1.5 block">Role</Label>
-              <Select value={editRole} onValueChange={(v) => setEditRole(v as CorporateRole)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={editRole}
+                onValueChange={(v) => setEditRole(v as CorporateRole)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {ROLE_DEFINITIONS.map((r) => (
-                    <SelectItem key={r.id} value={r.id}>{r.label}</SelectItem>
+                    <SelectItem key={r.id} value={r.id}>
+                      {r.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -355,7 +651,9 @@ export default function UserManagement() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditUser(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setEditUser(null)}>
+              Cancel
+            </Button>
             <Button onClick={handleEditSave}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
@@ -366,26 +664,52 @@ export default function UserManagement() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Transaction Limits</DialogTitle>
-            <DialogDescription>Set individual limits for {limitsUser?.name}.</DialogDescription>
+            <DialogDescription>
+              Set individual limits for {limitsUser?.name}.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
-              <Label className="text-sm font-medium mb-1.5 block">Daily transaction limit</Label>
+              <Label className="text-sm font-medium mb-1.5 block">
+                Daily transaction limit
+              </Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">₦</span>
-                <Input className="pl-7" placeholder="0" value={editDailyLimit} onChange={(e) => setEditDailyLimit(e.target.value.replace(/[^0-9]/g, ""))} />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                  ₦
+                </span>
+                <Input
+                  className="pl-7"
+                  placeholder="0"
+                  value={editDailyLimit}
+                  onChange={(e) =>
+                    setEditDailyLimit(e.target.value.replace(/[^0-9]/g, ""))
+                  }
+                />
               </div>
             </div>
             <div>
-              <Label className="text-sm font-medium mb-1.5 block">Per-transaction limit</Label>
+              <Label className="text-sm font-medium mb-1.5 block">
+                Per-transaction limit
+              </Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">₦</span>
-                <Input className="pl-7" placeholder="0" value={editPerTxLimit} onChange={(e) => setEditPerTxLimit(e.target.value.replace(/[^0-9]/g, ""))} />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                  ₦
+                </span>
+                <Input
+                  className="pl-7"
+                  placeholder="0"
+                  value={editPerTxLimit}
+                  onChange={(e) =>
+                    setEditPerTxLimit(e.target.value.replace(/[^0-9]/g, ""))
+                  }
+                />
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setLimitsUser(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setLimitsUser(null)}>
+              Cancel
+            </Button>
             <Button onClick={handleLimitsSave}>Save Limits</Button>
           </DialogFooter>
         </DialogContent>

@@ -15,7 +15,9 @@ export class BrandConfigService {
   private static readonly CACHE_KEY = "platform_brand_config";
   private static readonly CACHE_EXPIRY = 60 * 60 * 1000; // 1 hour
 
-  static getConfigSync(type: "corporate" | "personal"): BrandConfig {
+  static getConfigSync(
+    type: "corporate" | "personal" | "dashboard",
+  ): BrandConfig {
     if (this.config) return this.config;
 
     // Try to get from cache immediately if available
@@ -35,7 +37,21 @@ export class BrandConfigService {
     return this.getFallbackConfig(type);
   }
 
-  static getFallbackConfig(type: "corporate" | "personal"): BrandConfig {
+  static getFallbackConfig(
+    type: "corporate" | "personal" | "dashboard",
+  ): BrandConfig {
+    if (type === "dashboard") {
+      return {
+        brandName: "Platform Dashboard",
+        shortBrandName: "Dashboard",
+        meta: {
+          title: "Partner Dashboard",
+          description: "Manage your institutional services.",
+          author: "Platform Administration",
+        },
+      };
+    }
+
     return {
       brandName:
         type === "corporate" ? "Corporate Banking" : "Personal Banking",
@@ -52,7 +68,7 @@ export class BrandConfigService {
   }
 
   static async loadConfig(
-    type: "corporate" | "personal",
+    type: "corporate" | "personal" | "dashboard",
     configUrl?: string,
   ): Promise<BrandConfig> {
     if (this.config) return this.config;

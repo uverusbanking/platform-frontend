@@ -2,7 +2,12 @@ import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: [
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -14,7 +19,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'DM Sans', 'system-ui', 'sans-serif'],
+        sans: ["Inter", "DM Sans", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -58,12 +63,12 @@ export default {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
         },
-        uverus: {
-          purple: "hsl(var(--uverus-purple))",
-          "purple-light": "hsl(var(--uverus-purple-light))",
-          "purple-dark": "hsl(var(--uverus-purple-dark))",
-          indigo: "hsl(var(--uverus-indigo))",
-          violet: "hsl(var(--uverus-violet))",
+        brand: {
+          purple: "hsl(var(--brand-purple))",
+          "purple-light": "hsl(var(--brand-purple-light))",
+          "purple-dark": "hsl(var(--brand-purple-dark))",
+          indigo: "hsl(var(--brand-indigo))",
+          violet: "hsl(var(--brand-violet))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

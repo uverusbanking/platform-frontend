@@ -1,5 +1,5 @@
 -- =============================================
--- Uverus Database Schema Export
+-- Platform Database Schema Export
 -- Generated: 2026-02-14
 -- =============================================
 
@@ -81,7 +81,7 @@ CREATE TABLE public.virtual_accounts (
   wallet_id uuid NOT NULL REFERENCES public.wallets(id),
   account_number text NOT NULL,
   account_name text NOT NULL,
-  bank_name text NOT NULL DEFAULT 'Uverus Pay',
+  bank_name text NOT NULL DEFAULT 'Platform Bank',
   bank_code text NOT NULL DEFAULT '999',
   is_active boolean NOT NULL DEFAULT true,
   created_at timestamptz NOT NULL DEFAULT now()
@@ -114,7 +114,7 @@ CREATE TABLE public.beneficiaries (
   account_number text NOT NULL,
   bank_name text NOT NULL,
   bank_code text NOT NULL,
-  is_uverus_user boolean NOT NULL DEFAULT false,
+  is_platform_user boolean NOT NULL DEFAULT false,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 

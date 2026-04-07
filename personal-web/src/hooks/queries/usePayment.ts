@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { UVERUS_API_KEY } from "@/lib/constants";
+import { PLATFORM_API_KEY } from "@/lib/constants";
 import { useAuth } from "@/contexts/AuthContext";
 
 export interface Bank {
@@ -14,8 +14,8 @@ export const useBanks = () => {
   return useQuery({
     queryKey: ["payment", "banks"],
     queryFn: async (): Promise<Bank[]> => {
-      // Use UVERUS_API_KEY as base URL based on recent user edits
-      const baseUrl = UVERUS_API_KEY.replace(/\/$/, ""); // Remove trailing slash if present
+      // Use PLATFORM_API_KEY as base URL based on recent user edits
+      const baseUrl = PLATFORM_API_KEY.replace(/\/$/, ""); // Remove trailing slash if present
 
       const response = await fetch(`${baseUrl}/api/v1/transfers/banks`, {
         headers: {
@@ -25,9 +25,9 @@ export const useBanks = () => {
           // User also kept x-api-key in previous code, but typically Bearer token is enough.
           // Given the context of "pass token", I will prioritize Authorization header.
           // If the API requires an API Key as well, it should be in constants as a separate value,
-          // but UVERUS_API_KEY is currently acting as Base URL.
+          // but PLATFORM_API_KEY is currently acting as Base URL.
           // I will replicate the headers from the original code but add Authorization.
-          "x-api-key": UVERUS_API_KEY,
+          "x-api-key": PLATFORM_API_KEY,
         },
       });
 

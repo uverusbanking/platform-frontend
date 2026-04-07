@@ -1,22 +1,40 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { Loader2, ArrowLeft, Mail, RefreshCw, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { Loader2, ArrowLeft, Mail, RefreshCw, CheckCircle } from "lucide-react";
+import { BrandConfigService } from "@shared/core";
 
 const VerifyOTP = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { verifyOTP, verifyAndAuthenticate, resendOTP, pendingEmail, pendingPassword } = useAuth();
+  const {
+    verifyOTP,
+    verifyAndAuthenticate,
+    resendOTP,
+    pendingEmail,
+    pendingPassword,
+  } = useAuth();
+  const brandConfig = BrandConfigService.getConfigSync("personal");
 
   const email = location.state?.email || pendingEmail;
   const fromLogin = location.state?.fromLogin;
   const fromRegistration = location.state?.fromRegistration;
   const hasPassword = pendingPassword || false;
 
-  const [otp, setOtp] = useState('');
+  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +45,7 @@ const VerifyOTP = () => {
   // Redirect if no email provided
   useEffect(() => {
     if (!email) {
-      navigate('/auth/register');
+      navigate("/auth/register");
     }
   }, [email, navigate]);
 
@@ -41,7 +59,7 @@ const VerifyOTP = () => {
 
   const handleVerify = async () => {
     if (otp.length !== 6) {
-      setError('Please enter the complete 6-digit code');
+      setError("Please enter the complete 6-digit code");
       return;
     }
 
@@ -51,7 +69,11 @@ const VerifyOTP = () => {
 
     // If we have pending password (from login or registration), verify and auto-authenticate
     if (hasPassword && pendingPassword) {
-      const { error } = await verifyAndAuthenticate(email, otp, pendingPassword);
+      const { error } = await verifyAndAuthenticate(
+        email,
+        otp,
+        pendingPassword,
+      );
 
       if (error) {
         setError(error.message);
@@ -60,11 +82,11 @@ const VerifyOTP = () => {
       }
 
       setVerified(true);
-      setSuccess('Email verified successfully! Signing you in...');
+      setSuccess("Email verified successfully! Signing you in...");
 
       // Redirect to dashboard after verification
       setTimeout(() => {
-        navigate('/account/dashboard');
+        navigate("/account/dashboard");
       }, 1500);
     } else {
       // Just verify OTP without auto-login
@@ -77,11 +99,11 @@ const VerifyOTP = () => {
       }
 
       setVerified(true);
-      setSuccess('Email verified successfully! Please sign in.');
+      setSuccess("Email verified successfully! Please sign in.");
 
       // Redirect to login after verification
       setTimeout(() => {
-        navigate('/auth/login');
+        navigate("/auth/login");
       }, 1500);
     }
   };
@@ -99,9 +121,11 @@ const VerifyOTP = () => {
       return;
     }
 
-    setSuccess('A new verification code has been sent to your email. Please check your inbox and spam folder.');
+    setSuccess(
+      "A new verification code has been sent to your email. Please check your inbox and spam folder.",
+    );
     setCountdown(60);
-    setOtp('');
+    setOtp("");
     setResending(false);
   };
 
@@ -121,7 +145,7 @@ const VerifyOTP = () => {
       {/* Header */}
       <header className="p-4 safe-top">
         <button
-          onClick={() => navigate(fromLogin ? '/auth/login' : '/auth/register')}
+          onClick={() => navigate(fromLogin ? "/auth/login" : "/auth/register")}
           className="flex items-center gap-2 text-white/80 hover:text-white transition-colors p-2 -ml-2 rounded-lg touch-manipulation active:bg-white/10"
         >
           <ArrowLeft size={20} />
@@ -134,7 +158,9 @@ const VerifyOTP = () => {
         <Card className="w-full max-w-md shadow-xl border-0">
           <CardHeader className="text-center pb-2 px-4 sm:px-6">
             <div className="mx-auto mb-3 sm:mb-4">
-              <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl ${verified ? 'bg-success/10' : 'bg-gradient-primary'} flex items-center justify-center`}>
+              <div
+                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl ${verified ? "bg-success/10" : "bg-gradient-primary"} flex items-center justify-center`}
+              >
                 {verified ? (
                   <CheckCircle className="text-success" size={24} />
                 ) : (
@@ -143,14 +169,19 @@ const VerifyOTP = () => {
               </div>
             </div>
             <CardTitle className="text-xl sm:text-2xl">
-              {verified ? 'Email verified!' : 'Verify your email'}
+              {verified ? "Email verified!" : "Verify your email"}
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm">
               {verified ? (
-                hasPassword ? 'Signing you in...' : 'Redirecting to login...'
+                hasPassword ? (
+                  "Signing you in..."
+                ) : (
+                  "Redirecting to login..."
+                )
               ) : (
                 <>
-                  Enter the 6-digit code sent to<br />
+                  Enter the 6-digit code sent to
+                  <br />
                   <span className="font-medium text-foreground">{email}</span>
                 </>
               )}
@@ -172,7 +203,8 @@ const VerifyOTP = () => {
             {/* Helpful tip */}
             {!verified && !success && (
               <div className="mb-4 p-3 rounded-lg bg-muted/50 text-xs sm:text-sm text-muted-foreground text-center">
-                💡 Check your inbox and spam folder for the verification email from Uverus Pay.
+                💡 Check your inbox and spam folder for the verification email
+                from {brandConfig.brandName}.
               </div>
             )}
 
@@ -200,7 +232,11 @@ const VerifyOTP = () => {
                   variant="gradient"
                   disabled={loading || otp.length !== 6}
                 >
-                  {loading ? <Loader2 className="animate-spin" /> : 'Verify Email'}
+                  {loading ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    "Verify Email"
+                  )}
                 </Button>
 
                 <div className="text-center">
@@ -219,7 +255,7 @@ const VerifyOTP = () => {
                     ) : (
                       <RefreshCw className="mr-2" size={16} />
                     )}
-                    {countdown > 0 ? `Resend in ${countdown}s` : 'Resend code'}
+                    {countdown > 0 ? `Resend in ${countdown}s` : "Resend code"}
                   </Button>
                 </div>
               </div>

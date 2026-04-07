@@ -44,7 +44,7 @@ export interface Tier3Payload {
   idempotency_key: string;
 }
 
-const PLATFORM_API_BASE_URL = import.meta.env.VITE_UVERUS_API_BASE_URL || "";
+const PLATFORM_API_BASE_URL = import.meta.env.VITE_PLATFORM_API_BASE_URL || "";
 
 export const usePlatformKYC = () => {
   const { user } = useAuth();

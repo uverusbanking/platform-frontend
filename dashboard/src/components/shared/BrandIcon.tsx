@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { BrandConfigService } from "@shared/core";
 
 type BrandIconProps = {
   containerClassName?: string;
@@ -13,11 +14,12 @@ export function BrandIcon({
   imageClassName = "h-5 w-5 object-contain",
   size = 20,
 }: BrandIconProps) {
+  const brandConfig = BrandConfigService.getConfigSync("dashboard");
   return (
     <div className={containerClassName}>
       <Image
         src="/icon.png"
-        alt="Uverus icon"
+        alt={`${brandConfig.brandName} icon`}
         width={size}
         height={size}
         className={imageClassName}

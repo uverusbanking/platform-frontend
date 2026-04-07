@@ -191,7 +191,7 @@ const Dashboard = () => {
                 </p>
               )}
 
-              {/* Virtual Account Info - Prioritize Uverus data */}
+              {/* Virtual Account Info - Prioritize platform data */}
               {isLoading ? (
                 <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-white/10">
                   <div className="flex-1 space-y-2">

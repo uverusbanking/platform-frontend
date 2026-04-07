@@ -2,19 +2,19 @@
 
 ## Overview
 
-Personal Web is the consumer-facing interface for Uverus. Its design is vibrant, modern, and high-energy, using a Purple-Indigo-Violet theme with glassmorphism and subtle animations to create a premium feel.
+Personal Web is the consumer-facing interface for the Platform. Its design is vibrant, modern, and high-energy, using a Purple-Indigo-Violet theme with glassmorphism and subtle animations to create a premium feel.
 
 ## Color Palette
 
-### Uverus Core Palette
+### Platform Core Palette
 
-The design is built around the Uverus Purple brand identity:
+The design is built around the brand's primary Purple identity:
 
-- **Primary (Uverus Purple)**: `hsl(263 70% 50%)`
-- **Uverus Purple Light**: `hsl(263 70% 60%)`
-- **Uverus Purple Dark**: `hsl(263 70% 40%)`
-- **Uverus Indigo**: `hsl(245 58% 51%)`
-- **Uverus Violet**: `hsl(270 67% 58%)`
+- **Primary (Brand Purple)**: `hsl(263 70% 50%)`
+- **Brand Purple Light**: `hsl(263 70% 60%)`
+- **Brand Purple Dark**: `hsl(263 70% 40%)`
+- **Brand Indigo**: `hsl(245 58% 51%)`
+- **Brand Violet**: `hsl(270 67% 58%)`
 
 ### Status palette
 

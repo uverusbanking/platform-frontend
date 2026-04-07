@@ -7,14 +7,14 @@ export default defineConfig(({ mode: _mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    allowedHosts: ["preview.uveruspay.com", "uveruspay.com"],
+    allowedHosts: true,
     hmr: {
       overlay: false,
     },
   },
 
   preview: {
-    allowedHosts: ["preview.uveruspay.com", "uveruspay.com"],
+    allowedHosts: true,
   },
   plugins: [react()],
   resolve: {

@@ -1,11 +1,12 @@
-import { formatAccountNumber } from '@/lib/currency';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import PageHeader from '@/components/PageHeader';
-import { AppLayout } from '@/components/AppLayout';
-import { Copy, Share2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { useUserProfile } from '@/hooks/queries/useUser';
+import { formatAccountNumber } from "@/lib/currency";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import PageHeader from "@/components/PageHeader";
+import { AppLayout } from "@/components/AppLayout";
+import { Copy, Share2 } from "lucide-react";
+import { toast } from "sonner";
+import { useUserProfile } from "@/hooks/queries/useUser";
+import { BrandConfigService } from "@shared/core";
 
 const Receive = () => {
   const {
@@ -15,6 +16,7 @@ const Receive = () => {
   } = useUserProfile({
     refetchInterval: 5000, // Poll every 5 seconds to simulate socket
   });
+  const brandConfig = BrandConfigService.getConfigSync("personal");
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -24,19 +26,19 @@ const Receive = () => {
   const shareDetails = async () => {
     if (!profile) return;
 
-    const text = `Bank: ${profile.bankName}\nAccount Number: ${profile.accountNumber}\nAccount Name: ${profile.accountName || 'Uverus User'}`;
+    const text = `Bank: ${profile.bankName}\nAccount Number: ${profile.accountNumber}\nAccount Name: ${profile.accountName || brandConfig.brandName + " User"}`;
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'My Uverus Pay Account',
+          title: `My ${brandConfig.brandName} Account`,
           text,
         });
       } catch {
-        copyToClipboard(text, 'Account details');
+        copyToClipboard(text, "Account details");
       }
     } else {
-      copyToClipboard(text, 'Account details');
+      copyToClipboard(text, "Account details");
     }
   };
 
@@ -51,11 +53,17 @@ const Receive = () => {
           <div className="bg-gradient-hero p-4 sm:p-6 text-white">
             <div className="flex items-center gap-3 mb-3 sm:mb-4">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                <span className="font-bold text-lg sm:text-xl">U</span>
+                <span className="font-bold text-lg sm:text-xl">
+                  {brandConfig.shortBrandName.charAt(0)}
+                </span>
               </div>
               <div className="min-w-0">
-                <p className="text-white/70 text-xs sm:text-sm">{profile?.bankName || 'Uverus Pay'}</p>
-                <p className="font-semibold text-sm sm:text-base truncate">{profile?.accountName || 'Loading...'}</p>
+                <p className="text-white/70 text-xs sm:text-sm">
+                  {profile?.bankName || brandConfig.brandName}
+                </p>
+                <p className="font-semibold text-sm sm:text-base truncate">
+                  {profile?.accountName || "Loading..."}
+                </p>
               </div>
             </div>
 
@@ -63,13 +71,20 @@ const Receive = () => {
               <div className="h-10 sm:h-12 bg-white/20 rounded-lg animate-pulse" />
             ) : (
               <div className="bg-white/10 backdrop-blur rounded-xl p-3 sm:p-4">
-                <p className="text-white/60 text-xs sm:text-sm mb-1">Account Number</p>
+                <p className="text-white/60 text-xs sm:text-sm mb-1">
+                  Account Number
+                </p>
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-xl sm:text-2xl font-mono font-bold tracking-wider truncate">
-                    {formatAccountNumber(profile?.accountNumber || '')}
+                    {formatAccountNumber(profile?.accountNumber || "")}
                   </p>
                   <button
-                    onClick={() => copyToClipboard(profile?.accountNumber || '', 'Account number')}
+                    onClick={() =>
+                      copyToClipboard(
+                        profile?.accountNumber || "",
+                        "Account number",
+                      )
+                    }
                     className="p-2 sm:p-2.5 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors shrink-0 touch-manipulation"
                     aria-label="Copy account number"
                   >
@@ -120,20 +135,38 @@ const Receive = () => {
         {/* Instructions */}
         <Card>
           <CardHeader className="pb-2 sm:pb-4">
-            <CardTitle className="text-base sm:text-lg">How to Receive</CardTitle>
+            <CardTitle className="text-base sm:text-lg">
+              How to Receive
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 sm:space-y-4">
             {[
-              { step: 1, title: 'Share your account details', desc: 'Give the sender your Uverus Pay account number above' },
-              { step: 2, title: 'Receive bank transfer', desc: 'The sender transfers to your virtual account from any Nigerian bank' },
-              { step: 3, title: 'Funds credited instantly', desc: 'Money appears in your wallet within seconds' },
+              {
+                step: 1,
+                title: "Share your account details",
+                desc: `Give the sender your ${brandConfig.brandName} account number above`,
+              },
+              {
+                step: 2,
+                title: "Receive bank transfer",
+                desc: "The sender transfers to your virtual account from any Nigerian bank",
+              },
+              {
+                step: 3,
+                title: "Funds credited instantly",
+                desc: "Money appears in your wallet within seconds",
+              },
             ].map((item) => (
               <div key={item.step} className="flex gap-3 sm:gap-4">
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <span className="text-primary font-semibold text-xs sm:text-sm">{item.step}</span>
+                  <span className="text-primary font-semibold text-xs sm:text-sm">
+                    {item.step}
+                  </span>
                 </div>
                 <div className="min-w-0">
-                  <p className="font-medium text-sm sm:text-base">{item.title}</p>
+                  <p className="font-medium text-sm sm:text-base">
+                    {item.title}
+                  </p>
                   <p className="text-xs sm:text-sm text-muted-foreground">
                     {item.desc}
                   </p>

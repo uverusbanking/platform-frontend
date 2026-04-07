@@ -2,7 +2,7 @@
 
 ## Overview
 
-Corporate Web is the enterprise-facing terminal for Uverus. Its design is professional, stable, and rigid, using a Corporate Blue theme with a focus on data density and clear information architecture to facilitate complex financial operations.
+Corporate Web is the enterprise-facing terminal for the Platform. Its design is professional, stable, and rigid, using a Corporate Blue theme with a focus on data density and clear information architecture to facilitate complex financial operations.
 
 ## Color Palette
 

@@ -124,7 +124,7 @@ const BankList = ({
   );
 };
 
-const uverusPayEnabled = false;
+const internalTransferEnabled = false;
 
 const Send = () => {
   const navigate = useNavigate();
@@ -393,7 +393,7 @@ const Send = () => {
                   clearErrors();
                 }}
               >
-                {uverusPayEnabled && (
+                {internalTransferEnabled && (
                   <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6 h-10 sm:h-9">
                     <TabsTrigger
                       value="internal"
@@ -456,7 +456,7 @@ const Send = () => {
                     </div>
                   </div>
 
-                  {uverusPayEnabled && (
+                  {internalTransferEnabled && (
                     <TabsContent value="internal" className="mt-0 space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="email" className="text-sm">

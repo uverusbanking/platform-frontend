@@ -33,6 +33,7 @@ import { emailSchema } from "@/lib/schemas/fields/email.schema";
 import { otpSchema } from "@/lib/schemas/fields/otp.schema";
 import { passwordSchema } from "@/lib/schemas/fields/password.schema";
 import { BrandIcon } from "@/components/shared/BrandIcon";
+import { BrandConfigService } from "@shared/core";
 
 const EmailSchema = z.object({
   email: emailSchema,
@@ -57,6 +58,7 @@ type OTPFormValues = z.infer<typeof OTPSchema>;
 type PasswordFormValues = z.infer<typeof PasswordSchema>;
 
 export default function ForgotPassword() {
+  const brandConfig = BrandConfigService.getConfigSync("dashboard");
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [email, setEmail] = useState("");
   const [sessionId, setSessionId] = useState("");
@@ -285,7 +287,7 @@ export default function ForgotPassword() {
                       <Input
                         id="email"
                         type="email"
-                        placeholder="admin@uverus.tech"
+                        placeholder={`admin@${brandConfig.shortBrandName.toLowerCase()}.tech`}
                         {...emailForm.register("email")}
                         disabled={isSendingEmail}
                         className="h-12 bg-muted/30 border-border/40 focus:border-primary/50 focus:ring-primary/10 rounded-xl pl-10 transition-all font-medium"

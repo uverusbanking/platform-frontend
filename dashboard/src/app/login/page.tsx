@@ -30,6 +30,7 @@ import { getApiErrorMessage } from "@/utils/apiClient";
 import DisplayRespondsMessage from "@/components/DisplayResponse";
 import { useUserStore } from "@/state/userStore";
 import { BrandIcon } from "@/components/shared/BrandIcon";
+import { BrandConfigService } from "@shared/core";
 import { motion } from "framer-motion";
 
 const FormSchema = z.object({
@@ -44,6 +45,7 @@ const FormSchema = z.object({
 });
 
 export default function Login() {
+  const brandConfig = BrandConfigService.getConfigSync("dashboard");
   const [apiResponse, setApiResponse] = useState(defaultApiResponse);
   const { data: publicKey } = useGetEncryptionPublicKey();
   const { mutate: loginMutation, isPending: isLoggingIn } = useLogin();
@@ -155,7 +157,7 @@ export default function Login() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="font-sans text-3xl font-bold tracking-tight text-foreground"
             >
-              Welcome to Uverus
+              Welcome to {brandConfig.brandName}
             </motion.h1>
             <motion.p
               initial={{ opacity: 0 }}
@@ -221,7 +223,7 @@ export default function Login() {
                       inputMode="email"
                       aria-invalid={!!errors.email}
                       aria-describedby="email-error"
-                      placeholder="admin@uverus.tech"
+                      placeholder={`admin@${brandConfig.shortBrandName.toLowerCase()}.tech`}
                       {...register("email")}
                       disabled={isSubmitting}
                       className="h-12 bg-muted/30 border-border focus:border-primary/50 focus:ring-primary/10 rounded-xl px-4 transition-all font-medium font-sans"

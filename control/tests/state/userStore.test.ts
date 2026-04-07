@@ -27,7 +27,7 @@ describe("useUserStore", () => {
     id: "user-1",
     platform_id: "platform-1",
     organisation_id: "org-1",
-    email: "admin@uverus.tech",
+    email: "admin@platform.tech",
     phone_number: "+2348000000000",
     role: "PLATFORM_ADMIN",
     permissions: ["customers.read"],
@@ -47,7 +47,7 @@ describe("useUserStore", () => {
     organisation: {
       id: "org-1",
       platform_id: "platform-1",
-      organisation_name: "Uverus",
+      organisation_name: "Platform",
       cac_registration_number: "",
       tin: "",
       business_email: "",

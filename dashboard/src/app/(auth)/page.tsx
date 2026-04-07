@@ -31,10 +31,12 @@ import { useUserStore } from "@/state/userStore";
 import { loginSchema } from "@/lib/schemas/auth/login.schema";
 import { getApiErrorMessage } from "@/lib/axios";
 import { BrandIcon } from "@/components/shared/BrandIcon";
+import { BrandConfigService } from "@shared/core";
 
 const FormSchema = loginSchema;
 
 export default function Login() {
+  const brandConfig = BrandConfigService.getConfigSync("dashboard");
   const [apiResponse, setApiResponse] = useState(defaultApiResponse);
   const { data: publicKey } = useGetEncryptionPublicKey();
   const { mutate: loginMutation, isPending: isLoggingIn } = useLogin();
@@ -127,7 +129,7 @@ export default function Login() {
           />
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">
-              Welcome to Uverus
+              Welcome to {brandConfig.brandName}
             </h1>
             <p className="text-muted-foreground font-medium mt-1">
               Organisation Infrastructure
@@ -159,7 +161,7 @@ export default function Login() {
                     inputMode="email"
                     aria-invalid={!!errors.email}
                     aria-describedby="email-error"
-                    placeholder="admin@uverus.tech"
+                    placeholder={`admin@${brandConfig.shortBrandName.toLowerCase()}.tech`}
                     {...register("email")}
                     disabled={isSubmitting}
                     className="h-12 bg-muted/30 border-border/40 focus:border-primary/50 focus:ring-primary/10 rounded-xl px-4 transition-all font-medium"

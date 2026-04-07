@@ -43,10 +43,12 @@ import {
   VerifyPinDialog,
 } from "@/components/TransactionPinDialog";
 import { ChangePasswordDialog } from "@/components/settings/ChangePasswordDialog";
+import { BrandConfigService } from "@shared/core";
 
 const Settings = () => {
   const navigate = useNavigate();
   const { user, signOut, isAdmin } = useAuth();
+  const brandConfig = BrandConfigService.getConfigSync("personal");
 
   const {
     currentTier: apiTier,
@@ -358,7 +360,7 @@ const Settings = () => {
 
         {/* Version info */}
         <p className="text-center text-xs text-muted-foreground">
-          Version 1.0.0 • UverusPay
+          Version 1.0.0 • {brandConfig.brandName}
         </p>
       </div>
 

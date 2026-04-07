@@ -126,7 +126,7 @@ export default function Login() {
           />
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">
-              Welcome to Uverus
+              Welcome to Platform
             </h1>
             <p className="text-muted-foreground font-medium mt-1">
               Admin Banking Infrastructure
@@ -158,7 +158,7 @@ export default function Login() {
                     inputMode="email"
                     aria-invalid={!!errors.email}
                     aria-describedby="email-error"
-                    placeholder="admin@uverus.tech"
+                    placeholder="admin@platform.tech"
                     {...register("email")}
                     disabled={isSubmitting}
                     className="h-12 bg-muted/30 border-border/40 focus:border-primary/50 focus:ring-primary/10 rounded-xl px-4 transition-all font-medium"

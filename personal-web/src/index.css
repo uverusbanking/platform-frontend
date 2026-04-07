@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    /* Uverus brand colors - Purple/Indigo theme */
+    /* Platform brand colors */
     --background: 0 0% 100%;
     --foreground: 240 10% 10%;
 
@@ -47,23 +47,39 @@
 
     --radius: 0.75rem;
 
-    /* Custom Uverus tokens */
-    --uverus-purple: 263 70% 50%;
-    --uverus-purple-light: 263 70% 60%;
-    --uverus-purple-dark: 263 70% 40%;
-    --uverus-indigo: 245 58% 51%;
-    --uverus-violet: 270 67% 58%;
+    /* Custom brand tokens */
+    --brand-purple: 263 70% 50%;
+    --brand-purple-light: 263 70% 60%;
+    --brand-purple-dark: 263 70% 40%;
+    --brand-indigo: 245 58% 51%;
+    --brand-violet: 270 67% 58%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(263 70% 50%) 0%, hsl(245 58% 51%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(263 70% 50% / 0.05) 0%, transparent 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(263 70% 50%) 0%, hsl(270 67% 58%) 50%, hsl(245 58% 51%) 100%);
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(263 70% 50%) 0%,
+      hsl(245 58% 51%) 100%
+    );
+    --gradient-card: linear-gradient(
+      180deg,
+      hsl(263 70% 50% / 0.05) 0%,
+      transparent 100%
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(263 70% 50%) 0%,
+      hsl(270 67% 58%) 50%,
+      hsl(245 58% 51%) 100%
+    );
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+    --shadow-md:
+      0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    --shadow-lg:
+      0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    --shadow-xl:
+      0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.05);
     --shadow-glow: 0 0 40px -10px hsl(263 70% 50% / 0.4);
 
     --sidebar-background: 0 0% 98%;
@@ -126,7 +142,7 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', 'DM Sans', system-ui, sans-serif;
+    font-family: "Inter", "DM Sans", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -145,7 +161,9 @@
   }
 
   /* Touch-friendly interactive elements */
-  button, a, [role="button"] {
+  button,
+  a,
+  [role="button"] {
     @apply touch-manipulation;
   }
 
@@ -239,13 +257,23 @@
 
 /* Custom animations */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes pulse-soft {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 @keyframes slide-up {
@@ -260,13 +288,21 @@
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .animate-float {
@@ -286,12 +322,25 @@
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent, hsl(var(--muted)) 50%, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--muted)) 50%,
+    transparent
+  );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
 
-.animation-delay-100 { animation-delay: 0.1s; }
-.animation-delay-200 { animation-delay: 0.2s; }
-.animation-delay-300 { animation-delay: 0.3s; }
-.animation-delay-400 { animation-delay: 0.4s; }
+.animation-delay-100 {
+  animation-delay: 0.1s;
+}
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+.animation-delay-300 {
+  animation-delay: 0.3s;
+}
+.animation-delay-400 {
+  animation-delay: 0.4s;
+}
