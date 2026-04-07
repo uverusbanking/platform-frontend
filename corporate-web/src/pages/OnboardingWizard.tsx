@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Building2, Users, Settings, ClipboardCheck, FileUp, Check, ArrowRight, Save, HelpCircle, Info, Shield, Wand2 } from "lucide-react";
+import { BrandConfigService } from "@shared/core";
 import type { CompanyInfo, Director, AccountConfig, KYCDocument } from "@/types/onboarding";
 
 const MOCK_COMPANY_INFO: CompanyInfo = {
@@ -129,6 +130,7 @@ export default function OnboardingWizard() {
 
   const [application, setApplication] = useState<Application>(existing ?? createBlankApplication());
   const [currentStep, setCurrentStep] = useState(application.current_step);
+  const brand = BrandConfigService.getConfigSync("corporate");
 
   const updateApp = (partial: Partial<Application>) => {
     setApplication((prev) => ({ ...prev, ...partial, updated_at: new Date().toISOString() }));
@@ -204,12 +206,18 @@ export default function OnboardingWizard() {
       {/* Top header */}
       <header className="h-14 flex items-center justify-between border-b border-surface-high bg-surface-container px-6 shrink-0">
         <div className="flex items-center gap-3">
-          <Building2 className="h-6 w-6 text-primary" />
+          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            {brand.brandLogoUrl ? (
+              <img src={brand.brandLogoUrl} alt={brand.brandName} className="w-5 h-5 object-contain" />
+            ) : (
+              <Building2 className="h-5 w-5 text-primary" />
+            )}
+          </div>
           <span
             className="font-bold text-base text-foreground"
             style={{ fontFamily: 'Manrope, sans-serif' }}
           >
-            Uverus Banking
+            {brand.brandName}
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -391,7 +399,7 @@ export default function OnboardingWizard() {
                     Secure Vaulting
                   </h4>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Uverus Banking utilizes hardware security modules (HSM) to protect your institutional identity. Your registration data is stored in air-gapped environments.
+                    {brand.brandName} utilizes hardware security modules (HSM) to protect your institutional identity. Your registration data is stored in air-gapped environments.
                   </p>
                 </div>
               </div>

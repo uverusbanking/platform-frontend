@@ -129,10 +129,12 @@ export function AppSidebar() {
             <div className="flex flex-col px-2 py-4 gap-4">
               {!collapsed ? (
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-sidebar-accent flex items-center justify-center shrink-0">
-                    <span className="text-sm font-bold text-sidebar-primary">
-                      {initials}
-                    </span>
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    {brand.brandLogoUrl ? (
+                      <img src={brand.brandLogoUrl} alt={brand.brandName} className="w-6 h-6 object-contain" />
+                    ) : (
+                      <Building2 className="h-5 w-5 text-primary" />
+                    )}
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1">
@@ -151,7 +153,13 @@ export function AppSidebar() {
                 </div>
               ) : (
                 <div className="flex justify-center">
-                  <Building2 className="h-7 w-7 text-sidebar-primary" />
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                    {brand.brandLogoUrl ? (
+                      <img src={brand.brandLogoUrl} alt={brand.brandName} className="w-5 h-5 object-contain" />
+                    ) : (
+                      <Building2 className="h-5 w-5 text-primary" />
+                    )}
+                  </div>
                 </div>
               )}
               {!collapsed && role === "owner" && (

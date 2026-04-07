@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Building2, ArrowRight } from "lucide-react";
+import { BrandConfigService } from "@shared/core";
 
 export default function RegisterPage() {
   const { register, isAuthenticated } = useAuth();
@@ -12,6 +13,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({ email: "", password: "", full_name: "", phone_number: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const brand = BrandConfigService.getConfigSync("corporate");
 
   if (isAuthenticated) {
     navigate("/dashboard", { replace: true });
@@ -45,12 +47,17 @@ export default function RegisterPage() {
           backgroundSize: '80px 80px',
         }} />
 
-        {/* Brand */}
         <div className="relative z-10">
           <div className="flex items-center gap-3">
-            <Building2 className="h-8 w-8 text-[hsl(210,60%,55%)]" />
+            <div className="w-10 h-10 rounded-xl bg-[hsl(210,60%,55%)]/10 flex items-center justify-center shrink-0">
+              {brand.brandLogoUrl ? (
+                <img src={brand.brandLogoUrl} alt={brand.brandName} className="w-6 h-6 object-contain" />
+              ) : (
+                <Building2 className="h-6 w-6 text-[hsl(210,60%,55%)]" />
+              )}
+            </div>
             <span className="font-bold text-xl text-[hsl(210,20%,90%)]" style={{ fontFamily: 'Manrope, sans-serif' }}>
-              Uverus Banking
+              {brand.brandName}
             </span>
           </div>
         </div>
@@ -83,9 +90,15 @@ export default function RegisterPage() {
         <div className="w-full max-w-[420px] space-y-10">
           {/* Mobile brand (hidden on lg+) */}
           <div className="flex items-center gap-3 lg:hidden">
-            <Building2 className="h-7 w-7 text-primary" />
+            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              {brand.brandLogoUrl ? (
+                <img src={brand.brandLogoUrl} alt={brand.brandName} className="w-5 h-5 object-contain" />
+              ) : (
+                <Building2 className="h-5 w-5 text-primary" />
+              )}
+            </div>
             <span className="font-bold text-lg text-foreground" style={{ fontFamily: 'Manrope, sans-serif' }}>
-              Uverus Banking
+              {brand.brandName}
             </span>
           </div>
 
