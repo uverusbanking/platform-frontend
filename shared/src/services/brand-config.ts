@@ -2,20 +2,38 @@ export interface BrandConfig {
   brandName: string;
   shortBrandName: string;
   brandLogoUrl?: string;
-  brandLogoBase64?: string;
   supportEmail?: string;
-  meta?: {
+  meta: {
     title?: string;
     description?: string;
     author?: string;
   };
 }
 
-const CONFIG_CACHE_KEY = "platform_brand_config";
-const CONFIG_CACHE_EXPIRY = 60 * 60 * 1000; // 1 hour
-
 export class BrandConfigService {
   private static config: BrandConfig | null = null;
+  private static readonly CACHE_KEY = "platform_brand_config";
+  private static readonly CACHE_EXPIRY = 60 * 60 * 1000; // 1 hour
+
+  static getConfigSync(type: "corporate" | "personal"): BrandConfig {
+    if (this.config) return this.config;
+
+    // Try to get from cache immediately if available
+    const cached = localStorage.getItem(this.CACHE_KEY);
+    if (cached) {
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < this.CACHE_EXPIRY) {
+          this.config = data;
+          return data;
+        }
+      } catch (e) {
+        console.error("Error parsing cached brand config", e);
+      }
+    }
+
+    return this.getFallbackConfig(type);
+  }
 
   static getFallbackConfig(type: "corporate" | "personal"): BrandConfig {
     return {
@@ -35,26 +53,21 @@ export class BrandConfigService {
 
   static async loadConfig(
     type: "corporate" | "personal",
+    configUrl?: string,
   ): Promise<BrandConfig> {
     if (this.config) return this.config;
 
     // Check Cache
-    const cached = localStorage.getItem(CONFIG_CACHE_KEY);
+    const cached = localStorage.getItem(this.CACHE_KEY);
     if (cached) {
       try {
         const { data, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < CONFIG_CACHE_EXPIRY) {
+        if (Date.now() - timestamp < this.CACHE_EXPIRY) {
           this.config = data;
           return data;
         }
-      } catch (e) {
-        localStorage.removeItem(CONFIG_CACHE_KEY);
-      }
+      } catch (e) {}
     }
-
-    // Load from public endpoint (placeholder URL)
-    // In a real scenario, this would be a URL like /api/brand-config or an external CDN
-    const configUrl = import.meta.env.VITE_BRAND_CONFIG_URL;
 
     if (configUrl) {
       try {
@@ -63,21 +76,17 @@ export class BrandConfigService {
           const data = await response.json();
           this.config = data;
           localStorage.setItem(
-            CONFIG_CACHE_KEY,
+            this.CACHE_KEY,
             JSON.stringify({ data, timestamp: Date.now() }),
           );
           return data;
         }
       } catch (e) {
-        console.warn("Failed to load brand config, using fallback", e);
+        console.error("Failed to fetch brand config, using fallback", e);
       }
     }
 
     this.config = this.getFallbackConfig(type);
     return this.config;
-  }
-
-  static getConfigSync(type: "corporate" | "personal"): BrandConfig {
-    return this.config || this.getFallbackConfig(type);
   }
 }

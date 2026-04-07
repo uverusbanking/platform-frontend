@@ -29,7 +29,7 @@ import {
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { z } from "zod";
-import { BrandConfigService } from "@/lib/brand-config";
+import { BrandConfigService } from "@uverus/shared";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },

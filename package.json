@@ -122,6 +122,9 @@
   },
   "workspaces": [
     "personal-web",
-    "corporate-web"
+    "corporate-web",
+    "shared",
+    "control",
+    "dashboard"
   ]
 }

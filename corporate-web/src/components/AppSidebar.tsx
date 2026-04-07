@@ -29,7 +29,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { BrandConfigService } from "@/lib/brand-config";
+import { BrandConfigService } from "@uverus/shared";
 import type { PermissionCategory } from "@/types/roles";
 import type { LucideIcon } from "lucide-react";
 

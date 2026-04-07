@@ -1,3 +1,6 @@
 packages:
   - "personal-web"
   - "corporate-web"
+  - "shared"
+  - "control"
+  - "dashboard"

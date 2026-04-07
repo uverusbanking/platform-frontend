@@ -44,7 +44,7 @@ import {
 import { TransferService } from "@/services/transfer.service";
 import { useBanks } from "@/hooks/queries/useTransfers";
 import { BankListResponseDto } from "@/types";
-import { BrandConfigService } from "@/lib/brand-config";
+import { BrandConfigService } from "@uverus/shared";
 
 // Isolated BankList component to handle virtualization correctly within Popover
 const BankList = ({

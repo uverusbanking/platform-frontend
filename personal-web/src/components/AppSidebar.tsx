@@ -42,7 +42,7 @@ const accountNavItems = [
 
 const adminNavItems = [{ title: "Admin Panel", url: "/admin", icon: Shield }];
 
-import { BrandConfigService } from "@/lib/brand-config";
+import { BrandConfigService } from "@uverus/shared";
 
 export function AppSidebar() {
   const { state } = useSidebar();
