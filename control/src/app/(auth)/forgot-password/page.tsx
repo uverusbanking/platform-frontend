@@ -32,6 +32,7 @@ import {
   useVerifyForgotOtp,
   useGetEncryptionPublicKey,
 } from "@/hooks/endpoints/useAuth";
+import { VerifyOtpResponse } from "@shared/types/auth.types";
 import { useResetPassword } from "@/hooks/mutations/useAuthMutations";
 import { encryptPassword } from "@/lib/encryption";
 import { emailSchema } from "@/lib/schemas/fields/email.schema";
@@ -65,13 +66,6 @@ type ApiError = {
     data?: {
       message?: string;
     };
-  };
-};
-
-type VerifyOtpResponse = {
-  session_id?: string;
-  data?: {
-    session_id?: string;
   };
 };
 
@@ -160,7 +154,6 @@ function EmailStep({ onSuccess }: { onSuccess: (email: string) => void }) {
     try {
       await forgotPasswordMutation({
         email: formData.email,
-        type: "PLATFORM",
       });
 
       toast.success("Recovery link sent to your email");
@@ -300,7 +293,6 @@ function OtpStep({
     verifyOtpMutation(
       {
         email,
-        type: "PLATFORM",
         otp: otpValue,
       },
       {

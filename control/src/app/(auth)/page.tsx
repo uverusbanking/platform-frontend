@@ -84,7 +84,7 @@ export default function Login() {
           _setTempLoginData(payload);
 
           reset(); // after submit
-          router.replace(`/verify/${data.data.sessionId}`);
+          router.replace(`/verify/${data.data.session_id}`);
         },
         onError: (error) => {
           const message =

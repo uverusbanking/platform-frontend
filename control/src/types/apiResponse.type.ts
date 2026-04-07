@@ -2,10 +2,10 @@ export interface TError {
   response: TErrorResponse;
   message?: string;
 }
-interface TErrorResponse {
+export interface TErrorResponse {
   success: boolean;
   error: string;
-  data?: {
+  data: {
     message?: string;
   };
   errors?: unknown[];

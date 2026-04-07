@@ -23,15 +23,15 @@ const apiClient = axios.create(baseClientConfig);
 const sessionClient = axios.create(baseClientConfig);
 
 const AUTH_BYPASS_PATHS = [
-  "/auth/login",
-  "/auth/verify-code",
-  "/auth/refresh-token",
-  "/auth/logout",
-  "/auth/public-key",
-  "/auth/forgot-password",
-  "/auth/verify-forgot-otp",
-  "/auth/reset-password",
-  "/auth/resend-forgot-otp",
+  "/platform/auth/login",
+  "/platform/auth/verify-code",
+  "/platform/auth/refresh-token",
+  "/platform/auth/logout",
+  "/platform/auth/public-key",
+  "/platform/auth/forgot-password",
+  "/platform/auth/verify-forgot-otp",
+  "/platform/auth/reset-password",
+  "/platform/auth/resend-forgot-otp",
 ];
 
 const isAuthBypassPath = (url?: string) =>
@@ -53,12 +53,12 @@ const getSessionPayload = () => {
     useUserStore.getState().sessionId ||
     "";
 
-  return { sessionId };
+  return { session_id: sessionId };
 };
 
 export const refreshSession = async () => {
   const response = await sessionClient.post(
-    "/auth/refresh-token",
+    "/platform/auth/refresh-token",
     getSessionPayload(),
   );
   return response.data;
@@ -66,7 +66,7 @@ export const refreshSession = async () => {
 
 export const logoutSession = async () => {
   const response = await sessionClient.post(
-    "/auth/logout",
+    "/platform/auth/logout",
     getSessionPayload(),
   );
   return response.data;
@@ -161,15 +161,22 @@ apiClient.interceptors.response.use(
 
 export default apiClient;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function apiErrorResponse(
-  error: any,
+  error: unknown,
   defaultErrorMsg = "Something went wrong",
 ) {
-  const err =
-    error.response && error.response.data ? error.response.data : error;
+  const errorObj = error as Record<string, unknown> & {
+    response?: { data?: Record<string, unknown> };
+  };
+  const err: Record<string, unknown> = errorObj?.response?.data ?? errorObj;
   console.log(err);
-  const message = err?.error?.message || err?.message || defaultErrorMsg;
+  const errorField = err?.error as Record<string, unknown> | string | undefined;
+  const message =
+    (typeof errorField === "object" && errorField !== null
+      ? (errorField as Record<string, unknown>).message
+      : undefined) ??
+    err?.message ??
+    defaultErrorMsg;
 
   let msg = "";
   if (typeof message === "string") {
@@ -181,7 +188,7 @@ export function apiErrorResponse(
       msg = message[0];
     }
   } else {
-    msg = message;
+    msg = String(message);
   }
 
   return {

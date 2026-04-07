@@ -22,7 +22,7 @@ import { useLogin } from "@/hooks/mutations/useAuthMutations";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { defaultApiResponse, passwordRegex } from "@/lib/resources";
+import { defaultApiResponse } from "@/lib/resources";
 import { encryptPassword } from "@/lib/encryption";
 import DisplayRespondsMessage from "@/components/DisplayResponse";
 import { useUserStore } from "@/state/userStore";
@@ -78,9 +78,9 @@ export default function Login() {
         formData.password,
         publicKey.public_key,
       );
+
       const payload = {
         email: formData.email,
-        type: "PLATFORM",
         encrypted_password: encryptedPassword,
       };
 
@@ -90,7 +90,7 @@ export default function Login() {
           _setTempLoginData(payload);
 
           reset(); // after submit
-          router.replace(`/verify/${data.data.sessionId}`);
+          router.replace(`/verify/${data.data.session_id}`);
         },
         onError: (error) => {
           const message =

@@ -1,8 +1,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { login, resetPassword } from "@/hooks/endpoints/useAuth";
+import {
+  login,
+  resetPassword,
+  verifyLogin,
+  resendForgotOtp,
+} from "@/hooks/endpoints/useAuth";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { IApiResponse, TError } from "@/types/apiResponse.type";
-import { ILoginPayload, ILoginResponse } from "@/types/auth.types";
+import {
+  ILoginPayload,
+  ILoginResponse,
+  IVerifyLoginPayload,
+  IResetPasswordPayload,
+  IResendForgotOTPPayload,
+} from "@shared/types/auth.types";
+import { IVerifyLoginResponse } from "@/types/auth.types";
 
 export const useLogin = () => {
   const queryClient = useQueryClient();
@@ -13,18 +25,35 @@ export const useLogin = () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.AUTH.COMPANY_LOGIN],
       });
-      // You might want to show a success toast message here
-      // toast.success(data.message || "Profile updated successfully", {description: ""});
     },
   });
 };
 
 export const useResetPassword = () => {
-  return useMutation<
-    IApiResponse<unknown>,
-    TError,
-    { session_id: string; new_password: string }
-  >({
+  return useMutation<IApiResponse<unknown>, TError, IResetPasswordPayload>({
     mutationFn: resetPassword,
+  });
+};
+
+export const useResendForgotOtp = () => {
+  return useMutation<IApiResponse<unknown>, TError, IResendForgotOTPPayload>({
+    mutationFn: resendForgotOtp,
+  });
+};
+
+export const useVerifyLogin = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    IApiResponse<IVerifyLoginResponse>,
+    TError,
+    IVerifyLoginPayload
+  >({
+    mutationFn: verifyLogin,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.AUTH.COMPANY_LOGIN],
+      });
+    },
   });
 };

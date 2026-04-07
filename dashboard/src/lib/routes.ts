@@ -14,7 +14,7 @@ export const APP_ROUTES = {
     LOGIN: "/login",
     REGISTER: "/register",
     FORGOT_PASSWORD: "/forgot-password",
-    VERIFY: (sessionId: string) => `/verify/${sessionId}`,
+    VERIFY: (session_id: string) => `/verify/${session_id}`,
   },
   ACCOUNT: {
     DASHBOARD: `${ACCOUNT_ROOT}/dashboard`,
