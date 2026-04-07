@@ -23,6 +23,7 @@ import NewPayment from "@/pages/NewPayment";
 import PaymentDetail from "@/pages/PaymentDetail";
 import UserManagement from "@/pages/UserManagement";
 import NotFound from "@/pages/NotFound";
+import UnderConstruction from "@/pages/UnderConstruction";
 
 const queryClient = new QueryClient();
 
@@ -34,17 +35,17 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            {/* Public routes */}
+            {/* Global Under Construction Override */}
+            <Route path="*" element={<UnderConstruction />} />
+
+            {/*
+            --- ORIGINAL ROUTES DISABLED ---
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/change-password" element={<ChangePasswordPage />} />
-
-            {/* Onboarding (protected but outside dashboard layout) */}
             <Route element={<OnboardingLayout />}>
               <Route path="/onboarding/:id" element={<OnboardingWizard />} />
             </Route>
-
-            {/* Protected routes */}
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/accounts" element={<AccountsPage />} />
@@ -58,10 +59,9 @@ const App = () => (
               <Route path="/roles" element={<RequirePermission action="usr_roles"><RolesPermissionsPage /></RequirePermission>} />
               <Route path="/settings/approval-rules" element={<RequirePermission action="apr_config"><ApprovalRulesPage /></RequirePermission>} />
             </Route>
-
-            {/* Redirects */}
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<NotFound />} />
+            */}
           </Routes>
         </AuthProvider>
       </BrowserRouter>
