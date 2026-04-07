@@ -9,7 +9,7 @@ import {
   IVerifyForgotOTPResponse,
   IResetPasswordPayload,
   IResendForgotOTPPayload,
-} from "@shared/types/auth.types";
+} from "@shared/core";
 import { IVerifyLoginResponse } from "@/types/auth.types";
 import apiClient from "@/lib/axios";
 import { useMutation, useQuery } from "@tanstack/react-query";

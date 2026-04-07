@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import { BrandConfigService } from "@uverus/shared";
+import { BrandConfigService } from "@shared/core";
 
 async function init() {
   // Load brand config (asynchronously, with fallback)

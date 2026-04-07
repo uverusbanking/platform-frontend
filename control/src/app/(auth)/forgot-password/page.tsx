@@ -32,7 +32,7 @@ import {
   useVerifyForgotOtp,
   useGetEncryptionPublicKey,
 } from "@/hooks/endpoints/useAuth";
-import { VerifyOtpResponse } from "@shared/types/auth.types";
+import { VerifyOtpResponse } from "@shared/core";
 import { useResetPassword } from "@/hooks/mutations/useAuthMutations";
 import { encryptPassword } from "@/lib/encryption";
 import { emailSchema } from "@/lib/schemas/fields/email.schema";

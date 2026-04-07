@@ -11,7 +11,7 @@ import {
   IVerifyForgotOTPResponse,
   IResetPasswordPayload,
   IResendForgotOTPPayload,
-} from "@shared/types/auth.types";
+} from "@shared/core";
 
 export const getEncryptionPublicKey = async (): Promise<
   IApiResponse<IPublicKey>

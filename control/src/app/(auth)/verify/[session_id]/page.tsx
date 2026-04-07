@@ -25,7 +25,7 @@ import { useLogin } from "@/hooks/mutations/useAuthMutations";
 import { codeSchema } from "@/lib/schemas/fields/code.schema";
 import { resolveUserPermissions } from "@/auth/resolveUserPermissions";
 import { IVerifyLoginResponse } from "@/types/auth.types";
-import { ResendLoginResponse } from "@shared/types/auth.types";
+import { ResendLoginResponse } from "@shared/core";
 import { BrandIcon } from "@/components/layouts/layout/BrandIcon";
 import { IApiResponse, TErrorResponse } from "@/types/apiResponse.type";
 

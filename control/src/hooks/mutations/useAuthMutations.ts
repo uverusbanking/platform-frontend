@@ -13,7 +13,7 @@ import {
   IVerifyLoginPayload,
   IResetPasswordPayload,
   IResendForgotOTPPayload,
-} from "@shared/types/auth.types";
+} from "@shared/core";
 import { IVerifyLoginResponse } from "@/types/auth.types";
 
 export const useLogin = () => {

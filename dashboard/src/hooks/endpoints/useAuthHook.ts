@@ -10,7 +10,7 @@ import {
   IVerifyForgotOTPResponse,
   IResetPasswordPayload,
   IResendForgotOTPPayload,
-} from "@shared/types/auth.types";
+} from "@shared/core";
 import {
   getEncryptionPublicKey,
   login,

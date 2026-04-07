@@ -20,7 +20,7 @@ import {
   useGetEncryptionPublicKey,
   useLogin,
 } from "@/hooks/endpoints/useAuthHook";
-import { ILoginPayload } from "@shared/types/auth.types";
+import { ILoginPayload } from "@shared/core";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
