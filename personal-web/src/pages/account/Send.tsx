@@ -37,10 +37,14 @@ import { cn } from "@/lib/utils";
 import { EnterPinDialog } from "@/components/TransactionPinDialog";
 import { useUserProfile } from "@/hooks/queries/useUser";
 import { usePinStatus } from "@/hooks/queries/useSecurity";
-import { useInitiateTransfer, useResolveAccount } from "@/hooks/mutations/useTransferMutations";
+import {
+  useInitiateTransfer,
+  useResolveAccount,
+} from "@/hooks/mutations/useTransferMutations";
 import { TransferService } from "@/services/transfer.service";
 import { useBanks } from "@/hooks/queries/useTransfers";
 import { BankListResponseDto } from "@/types";
+import { BrandConfigService } from "@/lib/brand-config";
 
 // Isolated BankList component to handle virtualization correctly within Popover
 const BankList = ({
@@ -54,7 +58,7 @@ const BankList = ({
   selectedCode: string;
   onSelect: (code: string) => void;
 }) => {
-  const { } = useInitiateTransfer()
+  const {} = useInitiateTransfer();
   const [searchBank, setSearchBank] = useState("");
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -126,10 +130,7 @@ const Send = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const {
-    data: banksResponse,
-    isLoading: loadingBanks,
-  } = useBanks();
+  const { data: banksResponse, isLoading: loadingBanks } = useBanks();
 
   const banks = banksResponse?.data || [];
 
@@ -140,6 +141,7 @@ const Send = () => {
   } = usePinStatus();
   const [verifyOpen, setVerifyOpen] = useState(false);
   const { data: profile, isLoading, error: profileError } = useUserProfile();
+  const brand = BrandConfigService.getConfigSync("personal");
 
   // Calculate available balance safely with memoization
   const availableBalance = useMemo(() => {
@@ -149,7 +151,7 @@ const Send = () => {
 
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<"form" | "confirm" | "success">("form");
-  const [transferType, setTransferType] = useState<"uverus" | "bank">("bank");
+  const [transferType, setTransferType] = useState<"internal" | "bank">("bank");
 
   // Form state
   const [amount, setAmount] = useState("");
@@ -165,7 +167,7 @@ const Send = () => {
 
   // Helper function to add error
   const addError = (error: string) => {
-    setErrors(prev => {
+    setErrors((prev) => {
       if (!prev.includes(error)) {
         return [...prev, error];
       }
@@ -182,8 +184,8 @@ const Send = () => {
 
   // Helper function to remove specific error
   const removeError = (error: string) => {
-    setErrors(prev => {
-      const filtered = prev.filter(e => !e.includes(error.split(' ')[0])); // Remove errors that start with the same word
+    setErrors((prev) => {
+      const filtered = prev.filter((e) => !e.includes(error.split(" ")[0])); // Remove errors that start with the same word
       if (filtered.length === 0) {
         setIsFormValid(true);
       }
@@ -199,7 +201,10 @@ const Send = () => {
       <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 mb-4">
         <div className="space-y-2">
           {errors.map((error, index) => (
-            <div key={index} className="flex items-center gap-2 text-destructive text-sm">
+            <div
+              key={index}
+              className="flex items-center gap-2 text-destructive text-sm"
+            >
               <AlertCircle size={14} className="shrink-0" />
               <span>{error}</span>
             </div>
@@ -228,22 +233,25 @@ const Send = () => {
     setAccountName("");
     removeError("Account");
 
-    resolveAccount({ bankCode, accountNumber }, {
-      onSuccess: (data) => {
-        setAccountName(data.accountName);
-        removeError("Account");
-        toast.success("Account verified");
+    resolveAccount(
+      { bankCode, accountNumber },
+      {
+        onSuccess: (data) => {
+          setAccountName(data.accountName);
+          removeError("Account");
+          toast.success("Account verified");
+        },
+        onError: (error) => {
+          const errorMessage = error.message || "Could not verify account";
+          setAccountName("");
+          addError(`Account verification failed: ${errorMessage}`);
+          toast.error(errorMessage);
+        },
+        onSettled: () => {
+          setLookingUp(false);
+        },
       },
-      onError: (error) => {
-        const errorMessage = error.message || "Could not verify account";
-        setAccountName("");
-        addError(`Account verification failed: ${errorMessage}`);
-        toast.error(errorMessage);
-      },
-      onSettled: () => {
-        setLookingUp(false);
-      }
-    })
+    );
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -261,22 +269,28 @@ const Send = () => {
       validationErrors.push("Insufficient balance for this transaction");
     }
 
-    if (transferType === "uverus" && !recipientEmail) {
-      validationErrors.push("Recipient email is required for Uverus Pay");
+    if (transferType === "internal" && !recipientEmail) {
+      validationErrors.push(
+        `Recipient email is required for ${brand.shortBrandName} Transfer`,
+      );
     }
 
     if (
       transferType === "bank" &&
       (!bankCode || !accountNumber || !accountName)
     ) {
-      validationErrors.push("Please complete all bank details (bank, account number, and verify account)");
+      validationErrors.push(
+        "Please complete all bank details (bank, account number, and verify account)",
+      );
     }
 
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       setIsFormValid(false);
       // Still show toast for immediate feedback
-      toast.error(`${validationErrors.length} error(s) found. Please review and correct.`);
+      toast.error(
+        `${validationErrors.length} error(s) found. Please review and correct.`,
+      );
       return;
     }
 
@@ -285,7 +299,8 @@ const Send = () => {
 
   const handleConfirm = () => {
     if (!pinStatus?.status) {
-      const errorMessage = "Please set up a transaction PIN in your dashboard settings to continue";
+      const errorMessage =
+        "Please set up a transaction PIN in your dashboard settings to continue";
       addError(errorMessage);
       toast.error(errorMessage);
       return;
@@ -331,7 +346,8 @@ const Send = () => {
         }
       } else {
         // Internal transfer not implemented yet
-        const errorMessage = "Internal transfers are not yet supported. Please use bank transfer.";
+        const errorMessage =
+          "Internal transfers are not yet supported. Please use bank transfer.";
         addError(errorMessage);
         toast.error(errorMessage);
       }
@@ -373,18 +389,18 @@ const Send = () => {
               <Tabs
                 value={transferType}
                 onValueChange={(v) => {
-                  setTransferType(v as "uverus" | "bank");
+                  setTransferType(v as "internal" | "bank");
                   clearErrors();
                 }}
               >
                 {uverusPayEnabled && (
                   <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6 h-10 sm:h-9">
                     <TabsTrigger
-                      value="uverus"
+                      value="internal"
                       className="gap-1.5 text-xs sm:text-sm"
                     >
                       <User size={14} />
-                      Uverus Pay
+                      {brand.shortBrandName} Transfer
                     </TabsTrigger>
                     <TabsTrigger
                       value="bank"
@@ -416,7 +432,13 @@ const Send = () => {
                       }}
                       className={cn(
                         "text-xl sm:text-2xl h-12 sm:h-14",
-                        !isFormValid && errors.some(e => e.toLowerCase().includes('amount') || e.toLowerCase().includes('insufficient')) && "border-destructive focus-visible:ring-destructive"
+                        !isFormValid &&
+                          errors.some(
+                            (e) =>
+                              e.toLowerCase().includes("amount") ||
+                              e.toLowerCase().includes("insufficient"),
+                          ) &&
+                          "border-destructive focus-visible:ring-destructive",
                       )}
                       required
                     />
@@ -435,7 +457,7 @@ const Send = () => {
                   </div>
 
                   {uverusPayEnabled && (
-                    <TabsContent value="uverus" className="mt-0 space-y-4">
+                    <TabsContent value="internal" className="mt-0 space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="email" className="text-sm">
                           Recipient Email
@@ -455,7 +477,13 @@ const Send = () => {
                           }}
                           className={cn(
                             "h-11 sm:h-10",
-                            !isFormValid && errors.some(e => e.toLowerCase().includes('email') || e.toLowerCase().includes('recipient')) && "border-destructive focus-visible:ring-destructive"
+                            !isFormValid &&
+                              errors.some(
+                                (e) =>
+                                  e.toLowerCase().includes("email") ||
+                                  e.toLowerCase().includes("recipient"),
+                              ) &&
+                              "border-destructive focus-visible:ring-destructive",
                           )}
                         />
                       </div>
@@ -476,13 +504,17 @@ const Send = () => {
                             aria-expanded={openBankSelect}
                             className={cn(
                               "w-full justify-between h-11 sm:h-10 font-normal",
-                              !isFormValid && errors.some(e => e.toLowerCase().includes('bank')) && "border-destructive"
+                              !isFormValid &&
+                                errors.some((e) =>
+                                  e.toLowerCase().includes("bank"),
+                                ) &&
+                                "border-destructive",
                             )}
                           >
                             {bankCode
                               ? banks.find(
-                                (bank) => bank.bank_code === bankCode,
-                              )?.bank_name
+                                  (bank) => bank.bank_code === bankCode,
+                                )?.bank_name
                               : loadingBanks
                                 ? "Loading banks..."
                                 : "Select a bank"}
@@ -539,7 +571,13 @@ const Send = () => {
                         onBlur={lookupAccountName}
                         className={cn(
                           "h-11 sm:h-10",
-                          !isFormValid && errors.some(e => e.toLowerCase().includes('bank') || e.toLowerCase().includes('account')) && "border-destructive focus-visible:ring-destructive"
+                          !isFormValid &&
+                            errors.some(
+                              (e) =>
+                                e.toLowerCase().includes("bank") ||
+                                e.toLowerCase().includes("account"),
+                            ) &&
+                            "border-destructive focus-visible:ring-destructive",
                         )}
                       />
                     </div>
@@ -608,7 +646,7 @@ const Send = () => {
                 <div className="flex justify-between text-sm sm:text-base">
                   <span className="text-muted-foreground">Recipient</span>
                   <span className="font-medium truncate ml-4 text-right">
-                    {transferType === "uverus" ? recipientEmail : accountName}
+                    {transferType === "internal" ? recipientEmail : accountName}
                   </span>
                 </div>
                 {transferType === "bank" && (

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { UVERUS_API_KEY } from "@/lib/constants";
 import { UserService } from "@/services/user.service";
 
 export type UserTier = "tier_1" | "tier_2" | "tier_3";
@@ -45,9 +44,9 @@ export interface Tier3Payload {
   idempotency_key: string;
 }
 
-const UVERUS_API_BASE_URL = import.meta.env.VITE_UVERUS_API_BASE_URL || "";
+const PLATFORM_API_BASE_URL = import.meta.env.VITE_UVERUS_API_BASE_URL || "";
 
-export const useUverusKYC = () => {
+export const usePlatformKYC = () => {
   const { user } = useAuth();
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [middleName, setMiddleName] = useState<string | null>(null);
@@ -67,22 +66,18 @@ export const useUverusKYC = () => {
         if (data.customerId) {
           setCustomerId(data.customerId);
         }
-        // Middle name not available in standard profile? Ignore or mock.
         setMiddleName("");
       } catch (e) {
         console.error(e);
-      } finally {
-        // Keep loading true until tier is fetched if customerId exists
       }
     };
     fetchProfile();
   }, [user]);
 
-  // Fetch Static Tier Limits - Mocked since DB removal
+  // Fetch Static Tier Limits - Mocked
   useEffect(() => {
     const fetchAllTiers = async () => {
       try {
-        // Mock data or empty
         setAllTiers([]);
       } catch (e) {
         console.error("Error fetching tier limits:", e);
@@ -99,17 +94,19 @@ export const useUverusKYC = () => {
     }
     try {
       const response = await fetch(
-        `${UVERUS_API_BASE_URL}/payment/${customerId}/tier`,
+        `${PLATFORM_API_BASE_URL}/payment/${customerId}/tier`,
         {
           headers: {
             accept: "*/*",
-            "x-api-key": UVERUS_API_KEY,
+            // x-api-key removed as per requirements (handled by allowedHosts/DEVOPS)
           },
         },
       );
-      const result = await response.json();
-      if (result.status === "success") {
-        setCurrentTier(result.data);
+      if (response.ok) {
+        const result = await response.json();
+        if (result.status === "success") {
+          setCurrentTier(result.data);
+        }
       }
     } catch (e) {
       console.error("Error fetching tier level:", e);
@@ -134,13 +131,12 @@ export const useUverusKYC = () => {
     };
 
     const response = await fetch(
-      `${UVERUS_API_BASE_URL}/customers/${customerId}/upgrade-tier-2`,
+      `${PLATFORM_API_BASE_URL}/customers/${customerId}/upgrade-tier-2`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           accept: "*/*",
-          "x-api-key": UVERUS_API_KEY,
         },
         body: JSON.stringify(payload),
       },
@@ -161,13 +157,12 @@ export const useUverusKYC = () => {
     };
 
     const response = await fetch(
-      `${UVERUS_API_BASE_URL}/customers/${customerId}/upgrade-tier-3`,
+      `${PLATFORM_API_BASE_URL}/customers/${customerId}/upgrade-tier-3`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           accept: "*/*",
-          "x-api-key": UVERUS_API_KEY,
         },
         body: JSON.stringify(payload),
       },

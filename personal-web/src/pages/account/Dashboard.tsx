@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTransactions } from "@/hooks/queries/useTransactions";
 import { useNotifications } from "@/hooks/useNotifications";
 import { UserTier, TierLimits } from "@/hooks/useUserTier";
-import { useUverusKYC } from "@/hooks/useUverusKYC";
+import { usePlatformKYC } from "@/hooks/usePlatformKYC";
 import {
   formatCurrency,
   formatAccountNumber,
@@ -56,7 +56,7 @@ const Dashboard = () => {
   const transactions = transactionsResponse?.data || [];
   const { unreadCount } = useNotifications();
 
-  const { currentTier: apiTier, loading: statusLoading } = useUverusKYC();
+  const { currentTier: apiTier, loading: statusLoading } = usePlatformKYC();
 
   const currentTierLevel = apiTier?.kyc_level || 1;
   const currentTier = `tier_${currentTierLevel}` as UserTier;

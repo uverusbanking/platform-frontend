@@ -1,13 +1,25 @@
-import { useState, useRef } from 'react';
-import { useKYC } from '@/hooks/useKYC';
-import { useUverusKYC } from '@/hooks/useUverusKYC';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from 'sonner';
+import { useState, useRef } from "react";
+import { useKYC } from "@/hooks/useKYC";
+import { usePlatformKYC } from "@/hooks/usePlatformKYC";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 import {
   Upload,
   Loader2,
@@ -15,8 +27,8 @@ import {
   CreditCard,
   Banknote,
   Image as ImageIcon,
-  X
-} from 'lucide-react';
+  X,
+} from "lucide-react";
 
 interface KYCTier2FormProps {
   onSuccess: () => void;
@@ -24,14 +36,14 @@ interface KYCTier2FormProps {
 
 export const KYCTier2Form = ({ onSuccess }: KYCTier2FormProps) => {
   const { uploadDocument } = useKYC();
-  const { upgradeToTier2, middleName, loading: kycLoading } = useUverusKYC();
+  const { upgradeToTier2, middleName, loading: kycLoading } = usePlatformKYC();
 
   const [formData, setFormData] = useState({
-    employer_name: '',
-    monthly_income: '',
-    occupation: '',
-    employment_status: '',
-    nin: ''
+    employer_name: "",
+    monthly_income: "",
+    occupation: "",
+    employment_status: "",
+    nin: "",
   });
 
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -45,13 +57,13 @@ export const KYCTier2Form = ({ onSuccess }: KYCTier2FormProps) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('File size must be less than 5MB');
+      toast.error("File size must be less than 5MB");
       return;
     }
 
@@ -66,19 +78,23 @@ export const KYCTier2Form = ({ onSuccess }: KYCTier2FormProps) => {
   const clearPhoto = () => {
     setPhotoFile(null);
     setPhotoPreview(null);
-    if (photoInputRef.current) photoInputRef.current.value = '';
+    if (photoInputRef.current) photoInputRef.current.value = "";
   };
 
   const handleSubmit = async () => {
     // Basic validation
-    if (!formData.employer_name ||
-      !formData.occupation || !formData.employment_status || !formData.nin) {
-      toast.error('Please fill in all required fields');
+    if (
+      !formData.employer_name ||
+      !formData.occupation ||
+      !formData.employment_status ||
+      !formData.nin
+    ) {
+      toast.error("Please fill in all required fields");
       return;
     }
 
     if (!photoFile) {
-      toast.error('Please upload a passport photograph');
+      toast.error("Please upload a passport photograph");
       return;
     }
 
@@ -86,30 +102,36 @@ export const KYCTier2Form = ({ onSuccess }: KYCTier2FormProps) => {
 
     try {
       // 1. Upload Photo
-      setUploadMessage('Uploading passport photo...');
-      const uploadResult = await uploadDocument(photoFile, 'passport_photograph');
+      setUploadMessage("Uploading passport photo...");
+      const uploadResult = await uploadDocument(
+        photoFile,
+        "passport_photograph",
+      );
 
       if (!uploadResult.success || !uploadResult.document?.document_url) {
-        throw new Error(uploadResult.error || 'Failed to upload photo');
+        throw new Error(uploadResult.error || "Failed to upload photo");
       }
 
       // 2. Submit Upgrade Request
-      setUploadMessage('Submitting verification...');
+      setUploadMessage("Submitting verification...");
       const response = await upgradeToTier2({
         ...formData,
-        middle_name: middleName || '',
-        passport_photograph_url: uploadResult.document.document_url
+        middle_name: middleName || "",
+        passport_photograph_url: uploadResult.document.document_url,
       });
 
-      if (response && (response.data || response.message?.toLowerCase().includes('success'))) {
-        toast.success('Tier 2 upgrade submitted successfully');
+      if (
+        response &&
+        (response.data || response.message?.toLowerCase().includes("success"))
+      ) {
+        toast.success("Tier 2 upgrade submitted successfully");
         onSuccess();
       } else {
-        throw new Error(response.message || 'Failed to submit upgrade request');
+        throw new Error(response.message || "Failed to submit upgrade request");
       }
     } catch (error: any) {
-      console.error('Tier 2 upgrade error:', error);
-      toast.error(error.message || 'An error occurred during verification');
+      console.error("Tier 2 upgrade error:", error);
+      toast.error(error.message || "An error occurred during verification");
     } finally {
       setSubmitting(false);
       setUploadMessage(null);
@@ -134,7 +156,8 @@ export const KYCTier2Form = ({ onSuccess }: KYCTier2FormProps) => {
             <div>
               <p className="font-medium text-sm">Tier 2 Verification</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Provide your employment and identification details to upgrade to Tier 2.
+                Provide your employment and identification details to upgrade to
+                Tier 2.
               </p>
             </div>
           </div>
@@ -143,7 +166,9 @@ export const KYCTier2Form = ({ onSuccess }: KYCTier2FormProps) => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Personal & Employment Details</CardTitle>
+          <CardTitle className="text-base">
+            Personal & Employment Details
+          </CardTitle>
           <CardDescription>All fields are required</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -157,7 +182,12 @@ export const KYCTier2Form = ({ onSuccess }: KYCTier2FormProps) => {
                   placeholder="National Identity Number"
                   className="pl-9"
                   value={formData.nin}
-                  onChange={(e) => setFormData(prev => ({ ...prev, nin: e.target.value.replace(/\D/g, '').slice(0, 11) }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      nin: e.target.value.replace(/\D/g, "").slice(0, 11),
+                    }))
+                  }
                   maxLength={11}
                 />
               </div>
@@ -167,7 +197,9 @@ export const KYCTier2Form = ({ onSuccess }: KYCTier2FormProps) => {
               <Label htmlFor="employment_status">Employment Status</Label>
               <Select
                 value={formData.employment_status}
-                onValueChange={(val) => setFormData(prev => ({ ...prev, employment_status: val }))}
+                onValueChange={(val) =>
+                  setFormData((prev) => ({ ...prev, employment_status: val }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
@@ -191,7 +223,12 @@ export const KYCTier2Form = ({ onSuccess }: KYCTier2FormProps) => {
                   placeholder="Your Occupation"
                   className="pl-9"
                   value={formData.occupation}
-                  onChange={(e) => setFormData(prev => ({ ...prev, occupation: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      occupation: e.target.value,
+                    }))
+                  }
                 />
               </div>
             </div>
@@ -202,12 +239,20 @@ export const KYCTier2Form = ({ onSuccess }: KYCTier2FormProps) => {
                 id="employer_name"
                 placeholder="Company / Employer Name"
                 value={formData.employer_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, employer_name: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    employer_name: e.target.value,
+                  }))
+                }
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="monthly_income">Monthly Income <small className='text-muted-foreground'>Optional</small> </Label>
+              <Label htmlFor="monthly_income">
+                Monthly Income{" "}
+                <small className="text-muted-foreground">Optional</small>{" "}
+              </Label>
               <div className="relative">
                 <Banknote className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -216,7 +261,12 @@ export const KYCTier2Form = ({ onSuccess }: KYCTier2FormProps) => {
                   placeholder="0.00"
                   className="pl-9"
                   value={formData.monthly_income}
-                  onChange={(e) => setFormData(prev => ({ ...prev, monthly_income: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      monthly_income: e.target.value,
+                    }))
+                  }
                 />
               </div>
             </div>
@@ -259,7 +309,9 @@ export const KYCTier2Form = ({ onSuccess }: KYCTier2FormProps) => {
               className="w-full h-32 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 hover:bg-muted/30 transition-colors"
             >
               <ImageIcon className="w-8 h-8 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Click to upload photo</span>
+              <span className="text-sm text-muted-foreground">
+                Click to upload photo
+              </span>
             </button>
           )}
         </CardContent>
@@ -274,7 +326,7 @@ export const KYCTier2Form = ({ onSuccess }: KYCTier2FormProps) => {
         {submitting ? (
           <>
             <Loader2 className="mr-2 animate-spin" size={18} />
-            {uploadMessage || 'Submitting...'}
+            {uploadMessage || "Submitting..."}
           </>
         ) : (
           <>

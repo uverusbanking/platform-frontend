@@ -1,0 +1,11 @@
+{
+  "brandName": "Uverus Pay",
+  "shortBrandName": "Uverus",
+  "brandLogoUrl": "https://example.com/logo.png",
+  "supportEmail": "support@uverus.com",
+  "meta": {
+    "title": "Uverus Pay - Digital Banking",
+    "description": "Secure digital banking and instant transfers.",
+    "author": "Uverus Corp."
+  }
+}

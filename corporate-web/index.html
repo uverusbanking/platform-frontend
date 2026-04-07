@@ -4,9 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- TODO: Set the document title to the name of your application -->
-    <title>Uverus Corp. – Corporate Banking Portal</title>
-    <meta name="description" content="Uverus Corp. corporate banking portal for account management, approvals, and onboarding.">
-    <meta name="author" content="Uverus Corp." />
+    <title>Corporate Banking</title>
+    <meta name="description" content="Secure corporate banking portal.">
+    <meta name="author" content="Platform Admin" />
+    <script>
+      (function() {
+        try {
+          const cached = localStorage.getItem("platform_brand_config");
+          if (cached) {
+            const { data } = JSON.parse(cached);
+            if (data && data.meta) {
+              if (data.meta.title) document.title = data.meta.title;
+              if (data.meta.description) document.querySelector('meta[name="description"]')?.setAttribute("content", data.meta.description);
+              if (data.meta.author) document.querySelector('meta[name="author"]')?.setAttribute("content", data.meta.author);
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,11 +31,11 @@
     
     
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Uverus Corp. – Corporate Banking Portal">
-    <meta property="og:description" content="Uverus Corp. corporate banking portal for account management, approvals, and onboarding.">
+    <meta property="og:title" content="Corporate Banking">
+    <meta property="og:description" content="Secure corporate banking portal.">
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Uverus Corp. – Corporate Banking Portal">
-    <meta name="twitter:description" content="Uverus Corp. corporate banking portal for account management, approvals, and onboarding.">
+    <meta name="twitter:title" content="Corporate Banking">
+    <meta name="twitter:description" content="Secure corporate banking portal.">
 </head>
 
   <body>

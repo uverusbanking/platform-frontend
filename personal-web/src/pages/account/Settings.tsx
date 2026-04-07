@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { useKYC } from "@/hooks/useKYC";
-import { useUverusKYC, UserTier } from "@/hooks/useUverusKYC";
+import { usePlatformKYC, UserTier } from "@/hooks/usePlatformKYC";
 import { AppLayout } from "@/components/AppLayout";
 import { TierCard } from "@/components/settings/TierCard";
 import { TierComparisonTable } from "@/components/settings/TierComparisonTable";
@@ -52,7 +52,9 @@ const Settings = () => {
     currentTier: apiTier,
     allTiers,
     loading: statusLoading,
-  } = useUverusKYC();
+    customerId,
+    fetchTierLevel,
+  } = usePlatformKYC();
 
   const currentTierLevel = apiTier?.kyc_level || 1;
   const currentTier = `tier_${currentTierLevel}` as UserTier;

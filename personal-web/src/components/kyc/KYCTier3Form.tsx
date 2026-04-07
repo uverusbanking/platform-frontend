@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useKYC } from "@/hooks/useKYC";
-import { useUverusKYC } from "@/hooks/useUverusKYC";
+import { usePlatformKYC } from "@/hooks/usePlatformKYC";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,7 +27,7 @@ interface KYCTier3FormProps {
 
 export const KYCTier3Form = ({ onSuccess }: KYCTier3FormProps) => {
   const { uploadDocument } = useKYC();
-  const { upgradeToTier3 } = useUverusKYC();
+  const { upgradeToTier3 } = usePlatformKYC();
 
   const [idType, setIdType] = useState<
     "passport" | "drivers_license" | "national_id"

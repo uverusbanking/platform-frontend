@@ -29,6 +29,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { BrandConfigService } from "@/lib/brand-config";
 import type { PermissionCategory } from "@/types/roles";
 import type { LucideIcon } from "lucide-react";
 
@@ -44,15 +45,48 @@ interface NavItem {
 
 const mainNav: NavItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Payments", url: "/payments", icon: CircleDot, requiredCategory: "transactions" },
-  { title: "Transactions", url: "/transactions", icon: ArrowLeftRight, requiredCategory: "transactions" },
-  { title: "Accounts", url: "/accounts", icon: Layers, requiredCategory: "accounts" },
+  {
+    title: "Payments",
+    url: "/payments",
+    icon: CircleDot,
+    requiredCategory: "transactions",
+  },
+  {
+    title: "Transactions",
+    url: "/transactions",
+    icon: ArrowLeftRight,
+    requiredCategory: "transactions",
+  },
+  {
+    title: "Accounts",
+    url: "/accounts",
+    icon: Layers,
+    requiredCategory: "accounts",
+  },
 ];
 
 const adminSubNav: NavItem[] = [
-  { title: "User Management", url: "/users", icon: Building2, requiredCategory: "users", requiredAction: "usr_invite" },
-  { title: "Roles & Permissions", url: "/roles", icon: Shield, requiredCategory: "users", requiredAction: "usr_roles" },
-  { title: "Approval Rules", url: "/settings/approval-rules", icon: Settings, requiredCategory: "approvals", requiredAction: "apr_config" },
+  {
+    title: "User Management",
+    url: "/users",
+    icon: Building2,
+    requiredCategory: "users",
+    requiredAction: "usr_invite",
+  },
+  {
+    title: "Roles & Permissions",
+    url: "/roles",
+    icon: Shield,
+    requiredCategory: "users",
+    requiredAction: "usr_roles",
+  },
+  {
+    title: "Approval Rules",
+    url: "/settings/approval-rules",
+    icon: Settings,
+    requiredCategory: "approvals",
+    requiredAction: "apr_config",
+  },
 ];
 
 export function AppSidebar() {
@@ -62,13 +96,15 @@ export function AppSidebar() {
   const location = useLocation();
   const { logout, user } = useAuth();
   const { can, canAccessCategory, role } = usePermissions();
+  const brand = BrandConfigService.getConfigSync("corporate");
 
-  const initials = user?.full_name
-    ?.split(" ")
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase() ?? "SV";
+  const initials =
+    user?.full_name
+      ?.split(" ")
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join("")
+      .toUpperCase() ?? "SV";
 
   const isVisible = (item: NavItem) => {
     if (item.requiredAction) return can(item.requiredAction);
@@ -79,7 +115,9 @@ export function AppSidebar() {
   const visibleMain = mainNav.filter(isVisible);
   const visibleAdmin = adminSubNav.filter(isVisible);
 
-  const isAdminActive = visibleAdmin.some((i) => location.pathname.startsWith(i.url));
+  const isAdminActive = visibleAdmin.some((i) =>
+    location.pathname.startsWith(i.url),
+  );
   const [adminOpen, setAdminOpen] = useState(isAdminActive);
 
   return (
@@ -92,12 +130,17 @@ export function AppSidebar() {
               {!collapsed ? (
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-sidebar-accent flex items-center justify-center shrink-0">
-                    <span className="text-sm font-bold text-sidebar-primary">{initials}</span>
+                    <span className="text-sm font-bold text-sidebar-primary">
+                      {initials}
+                    </span>
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1">
-                      <span className="font-semibold text-sm text-sidebar-foreground truncate" style={{ fontFamily: "Manrope, sans-serif" }}>
-                        Uverus Corp.
+                      <span
+                        className="font-semibold text-sm text-sidebar-foreground truncate"
+                        style={{ fontFamily: "Manrope, sans-serif" }}
+                      >
+                        {brand.brandName}
                       </span>
                       <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                     </div>
@@ -139,7 +182,9 @@ export function AppSidebar() {
                       activeClassName="text-sidebar-primary font-medium"
                     >
                       <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span className="flex-1">{item.title}</span>}
+                      {!collapsed && (
+                        <span className="flex-1">{item.title}</span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -157,26 +202,30 @@ export function AppSidebar() {
                       {!collapsed && (
                         <>
                           <span className="flex-1">Administration</span>
-                          <ChevronRight className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${adminOpen ? "rotate-90" : ""}`} />
+                          <ChevronRight
+                            className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${adminOpen ? "rotate-90" : ""}`}
+                          />
                         </>
                       )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
 
-                  {adminOpen && !collapsed && visibleAdmin.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
-                        <NavLink
-                          to={item.url}
-                          className="hover:bg-sidebar-accent/50 pl-8"
-                          activeClassName="text-sidebar-primary font-medium"
-                        >
-                          <item.icon className="mr-2 h-4 w-4" />
-                          <span className="flex-1">{item.title}</span>
-                        </NavLink>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                  {adminOpen &&
+                    !collapsed &&
+                    visibleAdmin.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink
+                            to={item.url}
+                            className="hover:bg-sidebar-accent/50 pl-8"
+                            activeClassName="text-sidebar-primary font-medium"
+                          >
+                            <item.icon className="mr-2 h-4 w-4" />
+                            <span className="flex-1">{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
                 </>
               )}
             </SidebarMenu>

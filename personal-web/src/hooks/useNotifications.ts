@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { BrandConfigService } from "@/lib/brand-config";
 
 export interface Notification {
   id: string;
@@ -14,6 +15,7 @@ export interface Notification {
 
 export const useNotifications = () => {
   const { user } = useAuth();
+  const brand = BrandConfigService.getConfigSync("personal");
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -40,7 +42,7 @@ export const useNotifications = () => {
         {
           id: "1",
           user_id: user.id,
-          title: "Welcome to UverusPay",
+          title: `Welcome to ${brand.brandName}`,
           message: "Thank you for signing up!",
           type: "system",
           is_read: false,

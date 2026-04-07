@@ -29,6 +29,7 @@ import {
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { z } from "zod";
+import { BrandConfigService } from "@/lib/brand-config";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
@@ -50,6 +51,7 @@ const Index = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const brand = BrandConfigService.getConfigSync("personal");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,12 +97,12 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-hidden selection:bg-white/30">
       <Helmet>
-        <title>Login - UverusPay Personal Banking</title>
+        <title>Login - {brand.brandName}</title>
         <meta
           name="description"
-          content="Login to your UverusPay account. Access secure digital banking, instant transfers, and financial management for African businesses."
+          content={`Login to your ${brand.brandName} account. Access secure digital banking and instant transfers.`}
         />
-        <meta name="robots" content="index, nofollow" />
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       {/* Hero / Background Section */}
@@ -175,10 +177,20 @@ const Index = () => {
               onClick={() => navigate("/")}
             >
               <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shadow-lg backdrop-blur-sm border border-white/20">
-                <span className="text-white font-bold text-xl">U</span>
+                {brand.brandLogoUrl ? (
+                  <img
+                    src={brand.brandLogoUrl}
+                    alt={brand.brandName}
+                    className="w-6 h-6 object-contain"
+                  />
+                ) : (
+                  <span className="text-white font-bold text-xl">
+                    {brand.brandName.charAt(0)}
+                  </span>
+                )}
               </div>
               <span className="font-bold text-xl tracking-tight text-white">
-                Uverus Pay
+                {brand.brandName}
               </span>
             </motion.div>
           </div>
@@ -250,7 +262,7 @@ const Index = () => {
                     Welcome back
                   </CardTitle>
                   <CardDescription className="text-sm">
-                    Sign in to your personal banking portal
+                    Sign in to your {brand.shortBrandName} banking portal
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -320,7 +332,7 @@ const Index = () => {
                       {loading ? (
                         <Loader2 className="animate-spin" />
                       ) : (
-                        "Sign In to UverusPay"
+                        `Sign In to ${brand.shortBrandName}`
                       )}
                     </Button>
                   </form>
