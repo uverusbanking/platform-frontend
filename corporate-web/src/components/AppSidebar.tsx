@@ -98,14 +98,6 @@ export function AppSidebar() {
   const { can, canAccessCategory, role } = usePermissions();
   const brand = BrandConfigService.getConfigSync("corporate");
 
-  const initials =
-    user?.full_name
-      ?.split(" ")
-      .slice(0, 2)
-      .map((w) => w[0])
-      .join("")
-      .toUpperCase() ?? "SV";
-
   const isVisible = (item: NavItem) => {
     if (item.requiredAction) return can(item.requiredAction);
     if (item.requiredCategory) return canAccessCategory(item.requiredCategory);
@@ -131,7 +123,11 @@ export function AppSidebar() {
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     {brand.brandLogoUrl ? (
-                      <img src={brand.brandLogoUrl} alt={brand.brandName} className="w-6 h-6 object-contain" />
+                      <img
+                        src={brand.brandLogoUrl}
+                        alt={brand.brandName}
+                        className="w-6 h-6 object-contain"
+                      />
                     ) : (
                       <Building2 className="h-5 w-5 text-primary" />
                     )}
@@ -155,7 +151,11 @@ export function AppSidebar() {
                 <div className="flex justify-center">
                   <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
                     {brand.brandLogoUrl ? (
-                      <img src={brand.brandLogoUrl} alt={brand.brandName} className="w-5 h-5 object-contain" />
+                      <img
+                        src={brand.brandLogoUrl}
+                        alt={brand.brandName}
+                        className="w-5 h-5 object-contain"
+                      />
                     ) : (
                       <Building2 className="h-5 w-5 text-primary" />
                     )}

@@ -4,14 +4,45 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, ArrowRight, Shield, Send, CheckSquare, Eye } from "lucide-react";
+import {
+  Building2,
+  ArrowRight,
+  Shield,
+  Send,
+  CheckSquare,
+  Eye,
+} from "lucide-react";
 import { BrandConfigService } from "@shared/core";
 
 const DEMO_USERS = [
-  { label: "Super Admin", email: "admin@technovasolutions.com", role: "owner" as const, icon: Shield, description: "Full access to all features" },
-  { label: "Initiator", email: "initiator@technovasolutions.com", role: "initiator" as const, icon: Send, description: "Create & submit transactions" },
-  { label: "Authorizer", email: "authorizer@technovasolutions.com", role: "authorizer" as const, icon: CheckSquare, description: "Review & approve requests" },
-  { label: "Viewer / Auditor", email: "auditor@technovasolutions.com", role: "viewer" as const, icon: Eye, description: "Read-only monitoring" },
+  {
+    label: "Super Admin",
+    email: "admin@technovasolutions.com",
+    role: "owner" as const,
+    icon: Shield,
+    description: "Full access to all features",
+  },
+  {
+    label: "Initiator",
+    email: "initiator@technovasolutions.com",
+    role: "initiator" as const,
+    icon: Send,
+    description: "Create & submit transactions",
+  },
+  {
+    label: "Authorizer",
+    email: "authorizer@technovasolutions.com",
+    role: "authorizer" as const,
+    icon: CheckSquare,
+    description: "Review & approve requests",
+  },
+  {
+    label: "Viewer / Auditor",
+    email: "auditor@technovasolutions.com",
+    role: "viewer" as const,
+    icon: Eye,
+    description: "Read-only monitoring",
+  },
 ];
 
 export default function LoginPage() {
@@ -46,22 +77,32 @@ export default function LoginPage() {
       {/* Left panel — brand / editorial */}
       <div className="hidden lg:flex lg:w-[45%] bg-[hsl(215,30%,15%)] relative overflow-hidden flex-col justify-between p-12">
         {/* Subtle geometric texture */}
-        <div className="absolute inset-0 opacity-[0.04]" style={{
-          backgroundImage: `linear-gradient(135deg, transparent 40%, hsl(210 60% 55% / 0.3) 40%, hsl(210 60% 55% / 0.3) 41%, transparent 41%),
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `linear-gradient(135deg, transparent 40%, hsl(210 60% 55% / 0.3) 40%, hsl(210 60% 55% / 0.3) 41%, transparent 41%),
                             linear-gradient(225deg, transparent 60%, hsl(210 60% 55% / 0.15) 60%, hsl(210 60% 55% / 0.15) 61%, transparent 61%)`,
-          backgroundSize: '80px 80px',
-        }} />
+            backgroundSize: "80px 80px",
+          }}
+        />
 
         <div className="relative z-10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[hsl(210,60%,55%)]/10 flex items-center justify-center shrink-0">
               {brand.brandLogoUrl ? (
-                <img src={brand.brandLogoUrl} alt={brand.brandName} className="w-6 h-6 object-contain" />
+                <img
+                  src={brand.brandLogoUrl}
+                  alt={brand.brandName}
+                  className="w-6 h-6 object-contain"
+                />
               ) : (
                 <Building2 className="h-6 w-6 text-[hsl(210,60%,55%)]" />
               )}
             </div>
-            <span className="font-bold text-xl text-[hsl(210,20%,90%)]" style={{ fontFamily: 'Manrope, sans-serif' }}>
+            <span
+              className="font-bold text-xl text-[hsl(210,20%,90%)]"
+              style={{ fontFamily: "Manrope, sans-serif" }}
+            >
               {brand.brandName}
             </span>
           </div>
@@ -71,14 +112,20 @@ export default function LoginPage() {
         <div className="relative z-10 space-y-6">
           <h1
             className="text-[3rem] leading-[1.05] font-extrabold text-[hsl(210,20%,92%)]"
-            style={{ fontFamily: 'Manrope, sans-serif', letterSpacing: '-0.03em' }}
+            style={{
+              fontFamily: "Manrope, sans-serif",
+              letterSpacing: "-0.03em",
+            }}
           >
-            Corporate<br />
-            onboarding,<br />
+            Corporate
+            <br />
+            onboarding,
+            <br />
             simplified.
           </h1>
           <p className="text-[hsl(215,15%,60%)] text-base max-w-sm leading-relaxed">
-            Open accounts, manage compliance, and track approvals — all from one powerful portal.
+            Open accounts, manage compliance, and track approvals — all from one
+            powerful portal.
           </p>
         </div>
 
@@ -97,12 +144,19 @@ export default function LoginPage() {
           <div className="flex items-center gap-3 lg:hidden">
             <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
               {brand.brandLogoUrl ? (
-                <img src={brand.brandLogoUrl} alt={brand.brandName} className="w-5 h-5 object-contain" />
+                <img
+                  src={brand.brandLogoUrl}
+                  alt={brand.brandName}
+                  className="w-5 h-5 object-contain"
+                />
               ) : (
                 <Building2 className="h-5 w-5 text-primary" />
               )}
             </div>
-            <span className="font-bold text-lg text-foreground" style={{ fontFamily: 'Manrope, sans-serif' }}>
+            <span
+              className="font-bold text-lg text-foreground"
+              style={{ fontFamily: "Manrope, sans-serif" }}
+            >
               {brand.brandName}
             </span>
           </div>
@@ -111,7 +165,10 @@ export default function LoginPage() {
           <div className="space-y-2">
             <h2
               className="text-[2.25rem] font-bold text-foreground leading-tight"
-              style={{ fontFamily: 'Manrope, sans-serif', letterSpacing: '-0.02em' }}
+              style={{
+                fontFamily: "Manrope, sans-serif",
+                letterSpacing: "-0.02em",
+              }}
             >
               Welcome back
             </h2>
@@ -170,7 +227,9 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full h-12 rounded-lg text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-foreground border-0 shadow-none transition-all duration-150 gap-2"
             >
-              {loading ? "Signing in…" : (
+              {loading ? (
+                "Signing in…"
+              ) : (
                 <>
                   Sign in
                   <ArrowRight className="h-4 w-4" />
@@ -181,8 +240,11 @@ export default function LoginPage() {
 
           {/* Footer */}
           <p className="text-center text-sm text-muted-foreground">
-            Don't have an account?{" "}
-            <Link to="/register" className="text-primary hover:underline font-medium">
+            Don&apos;t have an account?{" "}
+            <Link
+              to="/register"
+              className="text-primary hover:underline font-medium"
+            >
               Register
             </Link>
           </p>
@@ -191,7 +253,9 @@ export default function LoginPage() {
           <div className="space-y-3 pt-2">
             <div className="flex items-center gap-3">
               <div className="h-px flex-1 bg-border" />
-              <span className="text-xs text-muted-foreground uppercase tracking-widest">Demo accounts</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-widest">
+                Demo accounts
+              </span>
               <div className="h-px flex-1 bg-border" />
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -210,8 +274,12 @@ export default function LoginPage() {
                 >
                   <u.icon className="h-4 w-4 mt-0.5 text-muted-foreground group-hover:text-primary shrink-0 transition-colors" />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground leading-tight">{u.label}</p>
-                    <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">{u.description}</p>
+                    <p className="text-sm font-medium text-foreground leading-tight">
+                      {u.label}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">
+                      {u.description}
+                    </p>
                   </div>
                 </button>
               ))}
