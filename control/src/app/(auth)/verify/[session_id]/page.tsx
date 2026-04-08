@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,12 +38,8 @@ const FormSchema = z.object({
   code: codeSchema,
 });
 
-export default function Verify({
-  params,
-}: {
-  params: Promise<{ session_id: string }>;
-}) {
-  const { session_id } = use(params);
+export default function Verify({ params }: { params: { session_id: string } }) {
+  const { session_id } = params;
   const [apiResponse, setApiResponse] = useState(defaultApiResponse);
   const router = useRouter();
   const _loginUser = useUserStore((state) => state._loginUser);
