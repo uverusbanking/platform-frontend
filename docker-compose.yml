@@ -8,6 +8,7 @@ services:
       - .env
     environment:
       - PORT=3000
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     networks:
       - uverus-network
       - dokploy-network
@@ -27,6 +28,7 @@ services:
       - .env
     environment:
       - PORT=3000
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     networks:
       - uverus-network
       - dokploy-network
