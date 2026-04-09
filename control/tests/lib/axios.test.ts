@@ -88,8 +88,8 @@ describe("apiClient auth flow", () => {
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    process.env.NEXT_PUBLIC_API_URL = "https://api.example.com";
-    process.env.NEXT_PUBLIC_API_VERSION = "v1";
+    vi.stubEnv("VITE_API_URL", "https://api.example.com");
+    vi.stubEnv("VITE_API_VERSION", "v1");
 
     apiClient = createAxiosInstance();
     sessionClient = createAxiosInstance();

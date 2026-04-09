@@ -10,6 +10,8 @@ import {
 import { AddressSteps } from "@/components/features/customers/newCustomerSteps/AddressSteps";
 import { useGetLocations } from "@/hooks/queries/useOptionsQueries";
 import { ICustomerData } from "@/components/features/customers/AddCustomerDialog";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import React from "react";
 
 // Mock the hook
 vi.mock("@/hooks/queries/useOptionsQueries");
@@ -30,13 +32,25 @@ vi.mock("@/components/ui/select", () => ({
       </select>
     </div>
   ),
-  SelectTrigger: ({ children }: any) => <div>{children}</div>,
+  SelectTrigger: ({ children }: any) => <>{children}</>,
   SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
   SelectContent: ({ children }: any) => <>{children}</>,
   SelectItem: ({ children, value }: any) => (
     <option value={value}>{children}</option>
   ),
 }));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
 
 const mockCustomerData: ICustomerData = {
   address: "",
@@ -80,6 +94,7 @@ describe("AddressSteps Component", () => {
       data: { data: [] },
       isLoading: false,
     });
+    queryClient.clear();
   });
 
   it("renders correctly and loads countries", async () => {
@@ -99,6 +114,7 @@ describe("AddressSteps Component", () => {
           nextStep={nextStep}
           prevStep={prevStep}
         />,
+        { wrapper },
       );
     });
 
@@ -133,6 +149,7 @@ describe("AddressSteps Component", () => {
         nextStep={nextStep}
         prevStep={prevStep}
       />,
+      { wrapper },
     );
 
     const selects = screen.getAllByTestId("mock-select");
@@ -172,6 +189,7 @@ describe("AddressSteps Component", () => {
         nextStep={nextStep}
         prevStep={prevStep}
       />,
+      { wrapper },
     );
 
     fireEvent.change(
