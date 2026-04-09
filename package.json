@@ -8,7 +8,7 @@
     "dev:dashboard": "next dev dashboard -p 3001",
     "dev:personal-web": "pnpm --filter personal-web dev",
     "dev:corporate-web": "pnpm --filter corporate-web dev",
-    "build": "pnpm run build:control && pnpm run build:dashboard && pnpm run build:personal-web && pnpm run build:corporate-web",
+    "build": "pnpm --filter @shared/core build && pnpm run build:control && pnpm run build:dashboard && pnpm run build:personal-web && pnpm run build:corporate-web",
     "build:control": "next build control",
     "build:dashboard": "next build dashboard",
     "build:personal-web": "pnpm --filter personal-web build",
