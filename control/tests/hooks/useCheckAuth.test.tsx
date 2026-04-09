@@ -33,7 +33,7 @@ describe("useCheckAuth", () => {
     vi.clearAllMocks();
     localStorage.clear();
 
-    (useUserStore as Mock).mockImplementation(
+    (useUserStore as unknown as Mock).mockImplementation(
       (selector: (state: typeof storeState) => unknown) => selector(storeState),
     );
   });

@@ -7,6 +7,10 @@ import {
   setEncryptedLocalStorage,
 } from "@/lib/storage";
 import { useUserStore } from "@/state/userStore";
+import { Gender } from "@/types/enums";
+import { UserStatus } from "@/types/user.types";
+import { ROLES } from "@/auth/roles";
+import { PERMISSIONS } from "@/auth/permissions";
 
 vi.mock("@/lib/authSync", () => ({
   broadcastLogoutEvent: vi.fn(),
@@ -30,10 +34,10 @@ describe("useUserStore", () => {
     organisation_id: "org-1",
     email: "admin@platform.tech",
     phone_number: "+2348000000000",
-    role: "PLATFORM_ADMIN",
-    permissions: ["customers.read"],
-    status: "ACTIVE",
-    gender: "MALE",
+    role: ROLES.PLATFORM_ADMIN,
+    permissions: [PERMISSIONS.FREEZE_CUSTOMER],
+    status: UserStatus.ACTIVE,
+    gender: Gender.MALE,
     first_name: "Ada",
     last_name: "Lovelace",
     middle_name: "",
@@ -42,7 +46,7 @@ describe("useUserStore", () => {
     kyc_verified: false,
     kyc_level: 0,
     kyc_id: null,
-    view_mode: "LIVE",
+    view_mode: "LIVE" as "LIVE" | "SANDBOX",
     created_at: "",
     updated_at: "",
     organisation: {
@@ -126,7 +130,6 @@ describe("useUserStore", () => {
     useUserStore.getState()._setTempLoginData({
       email: mockUser.email,
       encrypted_password: "encrypted-password",
-      type: "PLATFORM",
     });
     useUserStore.getState()._updateUser({
       ...mockUser,
@@ -137,7 +140,6 @@ describe("useUserStore", () => {
     expect(useUserStore.getState().tempLoginData).toEqual({
       email: mockUser.email,
       encrypted_password: "encrypted-password",
-      type: "PLATFORM",
     });
     expect(useUserStore.getState().userData.first_name).toBe("Grace");
     expect(getDecryptedLocalStorage("user")).toMatchObject({

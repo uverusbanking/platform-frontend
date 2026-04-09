@@ -4,6 +4,7 @@ import { useUpdateProfile } from "@/hooks/endpoints/useAccount";
 import apiClient from "@/lib/axios";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useUserStore } from "@/state/userStore";
+import { Gender } from "@/types/enums";
 import React from "react";
 
 // Mock apiClient and useUserStore
@@ -49,7 +50,7 @@ describe("useUpdateProfile", () => {
       first_name: "John",
       last_name: "Doe",
       phone_number: "+2348123456789",
-      gender: "MALE",
+      gender: Gender.MALE,
     };
 
     await result.current.mutateAsync(payload);

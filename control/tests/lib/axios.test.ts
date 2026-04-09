@@ -236,7 +236,7 @@ describe("apiClient auth flow", () => {
       "fresh-access-token",
       "fresh-session",
     );
-    expect(originalRequest._retry).toBe(true);
+    expect((originalRequest as any)._retry).toBe(true);
     expect(originalRequest.headers.Authorization).toBe(
       "Bearer fresh-access-token",
     );

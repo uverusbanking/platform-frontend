@@ -24,7 +24,7 @@ vi.mock("@/components/ui/select", () => ({
       </select>
     </div>
   ),
-  SelectTrigger: ({ children }: any) => <div>{children}</div>,
+  SelectTrigger: ({ children }: any) => <>{children}</>,
   SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
   SelectContent: ({ children }: any) => <>{children}</>,
   SelectItem: ({ children, value }: any) => (
