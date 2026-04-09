@@ -26,7 +26,7 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ARG VITE_API_BASE_URL
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
-RUN pnpm run build:control
+RUN cd control && pnpm run build
 RUN pnpm run build:dashboard
 RUN pnpm run build:personal-web
 RUN pnpm run build:corporate-web

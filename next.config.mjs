@@ -1,2 +1,6 @@
-// This file is deprecated. Please use next.config.mjs
-export default {};
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'standalone',
+};
+
+export default nextConfig;
