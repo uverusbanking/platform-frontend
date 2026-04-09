@@ -1,66 +1,68 @@
+import { Mock, MockInstance, vi } from "vitest";
+
 type InterceptorHandler<T = unknown> = {
   onFulfilled: (value: T) => unknown;
   onRejected?: (error: unknown) => unknown;
 };
 
-type MockAxiosInstance = jest.Mock & {
+type MockAxiosInstance = Mock & {
   interceptors: {
-    request: { use: jest.Mock };
-    response: { use: jest.Mock };
+    request: { use: Mock };
+    response: { use: Mock };
   };
-  post: jest.Mock;
+  post: Mock;
   __requestHandlers: InterceptorHandler[];
   __responseHandlers: InterceptorHandler[];
 };
 
-const mockAxiosCreate = jest.fn();
-const mockResolveUserPermissions = jest.fn();
-const mockGetDecryptedLocalStorage = jest.fn();
-const mockUseUserStore = jest.fn();
+const mockAxiosCreate = vi.fn();
+const mockResolveUserPermissions = vi.fn();
+const mockGetDecryptedLocalStorage = vi.fn();
+const mockUseUserStore = vi.fn();
 
-(mockUseUserStore as jest.Mock & { getState: jest.Mock }).getState = jest.fn();
+(mockUseUserStore as Mock & { getState: Mock }).getState = vi.fn();
 
-jest.mock("axios", () => ({
+vi.mock("axios", () => ({
   __esModule: true,
   default: {
     create: (...args: unknown[]) => mockAxiosCreate(...args),
   },
 }));
 
-jest.mock("@/auth/resolveUserPermissions", () => ({
+vi.mock("@/auth/resolveUserPermissions", () => ({
   resolveUserPermissions: (...args: unknown[]) =>
     mockResolveUserPermissions(...args),
 }));
 
-jest.mock("@/lib/storage", () => ({
+vi.mock("@/lib/storage", () => ({
   getDecryptedLocalStorage: (...args: unknown[]) =>
     mockGetDecryptedLocalStorage(...args),
 }));
 
-jest.mock("@/state/userStore", () => ({
+vi.mock("@/state/userStore", () => ({
   useUserStore: mockUseUserStore,
 }));
 
 const createAxiosInstance = (): MockAxiosInstance => {
   const requestHandlers: InterceptorHandler[] = [];
   const responseHandlers: InterceptorHandler[] = [];
-  const instance = jest.fn() as MockAxiosInstance;
+  const instance = vi.fn() as MockAxiosInstance;
 
   instance.interceptors = {
     request: {
-      use: jest.fn((onFulfilled, onRejected) => {
+      use: vi.fn((onFulfilled, onRejected) => {
         requestHandlers.push({ onFulfilled, onRejected });
         return requestHandlers.length - 1;
       }),
     },
     response: {
-      use: jest.fn((onFulfilled, onRejected) => {
+      use: vi.fn((onFulfilled, onRejected) => {
         responseHandlers.push({ onFulfilled, onRejected });
         return responseHandlers.length - 1;
       }),
     },
   };
-  instance.post = jest.fn();
+  instance.post = vi.fn();
   instance.__requestHandlers = requestHandlers;
   instance.__responseHandlers = responseHandlers;
 
@@ -70,21 +72,21 @@ const createAxiosInstance = (): MockAxiosInstance => {
 describe("apiClient auth flow", () => {
   let apiClient: MockAxiosInstance;
   let sessionClient: MockAxiosInstance;
-  let consoleErrorSpy: jest.SpyInstance;
-  let consoleLogSpy: jest.SpyInstance;
+  let consoleErrorSpy: MockInstance;
+  let consoleLogSpy: MockInstance;
   let storeState: {
     accessToken: string;
     sessionId: string;
-    _loginUser: jest.Mock;
-    _clearUserSession: jest.Mock;
+    _loginUser: Mock;
+    _clearUserSession: Mock;
   };
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
     localStorage.clear();
-    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-    consoleLogSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
     process.env.NEXT_PUBLIC_API_URL = "https://api.example.com";
     process.env.NEXT_PUBLIC_API_VERSION = "v1";
@@ -100,16 +102,16 @@ describe("apiClient auth flow", () => {
     storeState = {
       accessToken: "stored-access-token",
       sessionId: "store-session",
-      _loginUser: jest.fn(),
-      _clearUserSession: jest.fn(),
+      _loginUser: vi.fn(),
+      _clearUserSession: vi.fn(),
     };
 
     mockUseUserStore.mockImplementation(
       (selector: (state: typeof storeState) => unknown) => selector(storeState),
     );
-    (
-      mockUseUserStore as jest.Mock & { getState: jest.Mock }
-    ).getState.mockImplementation(() => storeState);
+    (mockUseUserStore as Mock & { getState: Mock }).getState.mockImplementation(
+      () => storeState,
+    );
     mockResolveUserPermissions.mockImplementation((user) => user);
     mockGetDecryptedLocalStorage.mockReset().mockReturnValue(null);
   });

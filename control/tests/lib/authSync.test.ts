@@ -4,20 +4,21 @@ import {
   broadcastLogoutEvent,
   subscribeToLogoutEvent,
 } from "@/lib/authSync";
+import { vi } from "vitest";
 
 class MockBroadcastChannel {
   static instances: MockBroadcastChannel[] = [];
 
   name: string;
   onmessage: ((event: MessageEvent) => void) | null = null;
-  postMessage = jest.fn((message: unknown) => {
+  postMessage = vi.fn((message: unknown) => {
     MockBroadcastChannel.instances
       .filter((instance) => instance.name === this.name && instance !== this)
       .forEach((instance) =>
         instance.onmessage?.({ data: message } as MessageEvent),
       );
   });
-  close = jest.fn();
+  close = vi.fn();
 
   constructor(name: string) {
     this.name = name;
@@ -29,6 +30,7 @@ describe("authSync", () => {
   const originalBroadcastChannel = global.BroadcastChannel;
 
   beforeEach(() => {
+    vi.clearAllMocks();
     localStorage.clear();
     sessionStorage.clear();
     MockBroadcastChannel.instances = [];
@@ -47,7 +49,7 @@ describe("authSync", () => {
 
   it("broadcasts logout events to other listeners", () => {
     sessionStorage.setItem(AUTH_SYNC_TAB_ID_STORAGE_KEY, "tab-a");
-    const handleLogout = jest.fn();
+    const handleLogout = vi.fn();
     const unsubscribe = subscribeToLogoutEvent(handleLogout);
 
     sessionStorage.setItem(AUTH_SYNC_TAB_ID_STORAGE_KEY, "tab-b");
@@ -59,7 +61,7 @@ describe("authSync", () => {
 
   it("reacts to storage fallback events from other tabs and ignores same-tab events", () => {
     sessionStorage.setItem(AUTH_SYNC_TAB_ID_STORAGE_KEY, "tab-a");
-    const handleLogout = jest.fn();
+    const handleLogout = vi.fn();
     const unsubscribe = subscribeToLogoutEvent(handleLogout);
 
     window.dispatchEvent(

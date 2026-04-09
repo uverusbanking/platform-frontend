@@ -1,3 +1,4 @@
+import { Mock, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import {
   useGetLocations,
@@ -9,7 +10,7 @@ import apiClient from "@/lib/axios";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 
-jest.mock("@/lib/axios");
+vi.mock("@/lib/axios");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,13 +26,13 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe("useOptionsHook", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 
   it("useGetLocations fetches locations successfully", async () => {
     const mockLocations = [{ label: "Nigeria", value: "NG", slug: "nigeria" }];
-    (apiClient.get as jest.Mock).mockResolvedValue({
+    (apiClient.get as Mock).mockResolvedValue({
       data: { status: "success", data: mockLocations },
     });
 
@@ -46,7 +47,7 @@ describe("useOptionsHook", () => {
 
   it("useGetKYCDocumentTypes fetches KYC types successfully", async () => {
     const mockTypes = [{ label: "BVN", value: "BVN" }];
-    (apiClient.get as jest.Mock).mockResolvedValue({
+    (apiClient.get as Mock).mockResolvedValue({
       data: { status: "success", data: mockTypes },
     });
 
@@ -59,7 +60,7 @@ describe("useOptionsHook", () => {
 
   it("useGetEmploymentStatuses fetches statuses successfully", async () => {
     const mockStatuses = [{ label: "Employed", value: "employed" }];
-    (apiClient.get as jest.Mock).mockResolvedValue({
+    (apiClient.get as Mock).mockResolvedValue({
       data: { status: "success", data: mockStatuses },
     });
 
@@ -74,7 +75,7 @@ describe("useOptionsHook", () => {
 
   it("useGetNextOfKinRelationships fetches relationships successfully", async () => {
     const mockRels = [{ label: "Spouse", value: "spouse" }];
-    (apiClient.get as jest.Mock).mockResolvedValue({
+    (apiClient.get as Mock).mockResolvedValue({
       data: { status: "success", data: mockRels },
     });
 

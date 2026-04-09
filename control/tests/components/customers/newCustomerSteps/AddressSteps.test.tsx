@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Mock, vi } from "vitest";
 import {
   render,
   screen,
@@ -11,10 +12,11 @@ import { useGetLocations } from "@/hooks/queries/useOptionsQueries";
 import { ICustomerData } from "@/components/features/customers/AddCustomerDialog";
 
 // Mock the hook
-jest.mock("@/hooks/queries/useOptionsQueries");
+vi.mock("@/hooks/queries/useOptionsQueries");
+vi.mock("@/state/userStore");
 
 // Mock UI components
-jest.mock("@/components/ui/select", () => ({
+vi.mock("@/components/ui/select", () => ({
   Select: ({ children, onValueChange, value, disabled }: any) => (
     <div data-testid="select-wrapper">
       <select
@@ -42,17 +44,16 @@ const mockCustomerData: ICustomerData = {
   state: "",
   postalCode: "",
   country: "",
-  first_name: "",
-  last_name: "",
+  firstName: "",
+  lastName: "",
   email: "",
-  phone_number: "",
-  date_of_birth: "",
-  gender: "",
+  phoneNumber: "",
+  dob: "",
+  gender: "MALE" as any,
   bvn: "",
-  kyc_level: 1,
-  environment: "SANDBOX",
   idType: "",
   idNumber: "",
+  nin: "",
   occupation: "",
   employmentStatus: "",
   employer: "",
@@ -62,22 +63,27 @@ const mockCustomerData: ICustomerData = {
   nextOfKinRelationship: "",
   nextOfKinPhone: "",
   nextOfKinAddress: "",
+  middleName: "",
+  idDocument: "",
+  proofOfAddress: "",
+  passportPhotograph: "",
+  nextOfKinMiddleName: "",
 };
 
 describe("AddressSteps Component", () => {
-  const nextStep = jest.fn();
-  const prevStep = jest.fn();
+  const nextStep = vi.fn();
+  const prevStep = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGetLocations as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useGetLocations as Mock).mockReturnValue({
       data: { data: [] },
       isLoading: false,
     });
   });
 
   it("renders correctly and loads countries", async () => {
-    (useGetLocations as jest.Mock).mockImplementation((parentSlug) => {
+    (useGetLocations as Mock).mockImplementation((parentSlug) => {
       if (parentSlug === undefined)
         return {
           data: { data: [{ name: "Nigeria", slug: "nigeria", id: "1" }] },
@@ -101,7 +107,7 @@ describe("AddressSteps Component", () => {
   });
 
   it("resets state and city when country changes", async () => {
-    (useGetLocations as jest.Mock).mockImplementation((parentSlug) => {
+    (useGetLocations as Mock).mockImplementation((parentSlug) => {
       if (!parentSlug)
         return {
           data: {
@@ -141,7 +147,7 @@ describe("AddressSteps Component", () => {
   });
 
   it("calls nextStep with form data on submit", async () => {
-    (useGetLocations as jest.Mock).mockImplementation((parentSlug) => {
+    (useGetLocations as Mock).mockImplementation((parentSlug) => {
       if (!parentSlug)
         return {
           data: { data: [{ name: "Nigeria", slug: "nigeria", id: "1" }] },

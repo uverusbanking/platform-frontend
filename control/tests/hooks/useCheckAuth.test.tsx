@@ -1,38 +1,39 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { Mock, vi } from "vitest";
 import { resolveUserPermissions } from "@/auth/resolveUserPermissions";
 import { useCheckAuth } from "@/hooks/useCheckAuth";
 import { apiErrorResponse, refreshSession } from "@/lib/axios";
 import { getDecryptedLocalStorage } from "@/lib/storage";
 import { useUserStore } from "@/state/userStore";
 
-jest.mock("@/lib/axios", () => ({
-  apiErrorResponse: jest.fn(),
-  refreshSession: jest.fn(),
+vi.mock("@/lib/axios", () => ({
+  apiErrorResponse: vi.fn(),
+  refreshSession: vi.fn(),
 }));
 
-jest.mock("@/lib/storage", () => ({
-  getDecryptedLocalStorage: jest.fn(),
+vi.mock("@/lib/storage", () => ({
+  getDecryptedLocalStorage: vi.fn(),
 }));
 
-jest.mock("@/auth/resolveUserPermissions", () => ({
-  resolveUserPermissions: jest.fn(),
+vi.mock("@/auth/resolveUserPermissions", () => ({
+  resolveUserPermissions: vi.fn(),
 }));
 
-jest.mock("@/state/userStore", () => ({
-  useUserStore: jest.fn(),
+vi.mock("@/state/userStore", () => ({
+  useUserStore: vi.fn(),
 }));
 
 describe("useCheckAuth", () => {
   const storeState = {
-    _loginUser: jest.fn(),
-    _clearUserSession: jest.fn(),
+    _loginUser: vi.fn(),
+    _clearUserSession: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
 
-    (useUserStore as jest.Mock).mockImplementation(
+    (useUserStore as Mock).mockImplementation(
       (selector: (state: typeof storeState) => unknown) => selector(storeState),
     );
   });
@@ -55,15 +56,13 @@ describe("useCheckAuth", () => {
 
     localStorage.setItem("session_id", "persisted-session");
 
-    (getDecryptedLocalStorage as jest.Mock).mockImplementation(
-      (key: string) => {
-        if (key === "user") return storedUser;
-        return null;
-      },
-    );
+    (getDecryptedLocalStorage as Mock).mockImplementation((key: string) => {
+      if (key === "user") return storedUser;
+      return null;
+    });
 
-    (resolveUserPermissions as jest.Mock).mockReturnValue(resolvedUser);
-    (refreshSession as jest.Mock).mockResolvedValue({
+    (resolveUserPermissions as Mock).mockReturnValue(resolvedUser);
+    (refreshSession as Mock).mockResolvedValue({
       data: {
         user: refreshedUser,
         access_token: "fresh-access-token",
@@ -96,14 +95,12 @@ describe("useCheckAuth", () => {
 
     localStorage.setItem("session_id", "persisted-session");
 
-    (getDecryptedLocalStorage as jest.Mock).mockImplementation(
-      (key: string) => {
-        if (key === "user") return { id: "stored-user" };
-        return null;
-      },
-    );
+    (getDecryptedLocalStorage as Mock).mockImplementation((key: string) => {
+      if (key === "user") return { id: "stored-user" };
+      return null;
+    });
 
-    (refreshSession as jest.Mock).mockRejectedValue(refreshError);
+    (refreshSession as Mock).mockRejectedValue(refreshError);
 
     const { result } = renderHook(() => useCheckAuth());
 
@@ -123,8 +120,8 @@ describe("useCheckAuth", () => {
   });
 
   it("does not clear auth state when refresh fails without any persisted session", async () => {
-    (getDecryptedLocalStorage as jest.Mock).mockReturnValue(null);
-    (refreshSession as jest.Mock).mockRejectedValue(new Error("offline"));
+    (getDecryptedLocalStorage as Mock).mockReturnValue(null);
+    (refreshSession as Mock).mockRejectedValue(new Error("offline"));
 
     const { result } = renderHook(() => useCheckAuth());
 

@@ -12,23 +12,13 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "types": ["vite/client"],
+    "types": ["vite/client", "vitest/globals"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@shared/core": ["../shared/src/index.ts"]
     }
   },
-  "include": ["src", "vite.config.ts", "vitest.config.ts"],
-  "exclude": [
-    "node_modules",
-    "src/**/*.test.tsx",
-    "src/**/*.test.ts",
-    "src/**/*.spec.tsx",
-    "src/**/*.spec.ts",
-    "tests/**/*.test.tsx",
-    "tests/**/*.test.ts",
-    "tests/**/*.spec.tsx",
-    "tests/**/*.spec.ts"
-  ]
+  "include": ["src", "tests", "vite.config.ts", "vitest.config.ts"],
+  "exclude": ["node_modules"]
 }

@@ -1,3 +1,4 @@
+import { Mock, vi } from "vitest";
 import { broadcastLogoutEvent } from "@/lib/authSync";
 import { logoutSession } from "@/lib/axios";
 import { queryClient } from "@/lib/queryClient";
@@ -7,17 +8,17 @@ import {
 } from "@/lib/storage";
 import { useUserStore } from "@/state/userStore";
 
-jest.mock("@/lib/authSync", () => ({
-  broadcastLogoutEvent: jest.fn(),
+vi.mock("@/lib/authSync", () => ({
+  broadcastLogoutEvent: vi.fn(),
 }));
 
-jest.mock("@/lib/axios", () => ({
-  logoutSession: jest.fn(() => Promise.resolve({ status: true })),
+vi.mock("@/lib/axios", () => ({
+  logoutSession: vi.fn(() => Promise.resolve({ status: true })),
 }));
 
-jest.mock("@/lib/queryClient", () => ({
+vi.mock("@/lib/queryClient", () => ({
   queryClient: {
-    clear: jest.fn(),
+    clear: vi.fn(),
   },
 }));
 
@@ -73,7 +74,7 @@ describe("useUserStore", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
     useUserStore.setState(initialState, true);
   });

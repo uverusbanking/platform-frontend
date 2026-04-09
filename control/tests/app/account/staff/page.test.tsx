@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Mock, vi } from "vitest";
 import {
   render,
   screen,
@@ -21,19 +21,19 @@ import { Gender } from "@/types/enums";
 import { ROLES } from "@/auth/roles";
 
 // Mock the hooks - Updated to new paths
-jest.mock("@/hooks/queries/usePlatformUserQueries");
-jest.mock("@/hooks/queries/usePlatformQueries");
-jest.mock("@/hooks/mutations/usePlatformUserMutations");
-jest.mock("@/hooks/endpoints/useAuth");
-jest.mock("@/state/userStore", () => ({
-  useUserStore: jest.fn(),
+vi.mock("@/hooks/queries/usePlatformUserQueries");
+vi.mock("@/hooks/queries/usePlatformQueries");
+vi.mock("@/hooks/mutations/usePlatformUserMutations");
+vi.mock("@/hooks/endpoints/useAuth");
+vi.mock("@/state/userStore", () => ({
+  useUserStore: vi.fn(),
 }));
-jest.mock("@/lib/encryption");
+vi.mock("@/lib/encryption");
 
 import { useUserStore } from "@/state/userStore";
 
 // Mock UI components that are hard to interact with in JSDOM
-jest.mock("@/components/ui/select", () => ({
+vi.mock("@/components/ui/select", () => ({
   Select: ({ children, onValueChange, value }: any) => (
     <select
       data-testid="mock-select"
@@ -52,7 +52,7 @@ jest.mock("@/components/ui/select", () => ({
   ),
 }));
 
-jest.mock("@/components/ui/dialog", () => ({
+vi.mock("@/components/ui/dialog", () => ({
   Dialog: ({ children }: any) => <div className="mock-dialog">{children}</div>,
   DialogTrigger: ({ children }: any) => <>{children}</>,
   DialogContent: ({ children }: any) => (
@@ -91,8 +91,8 @@ const mockStaffData = [
 
 describe("Staff Page", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useUserStore as unknown as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useUserStore as unknown as Mock).mockReturnValue({
       userData: {
         platform_id: "test-platform-id",
         organisation_id: "test-org-id",
@@ -100,23 +100,23 @@ describe("Staff Page", () => {
         last_name: "User",
       },
     });
-    (useGetEncryptionPublicKey as jest.Mock).mockReturnValue({
+    (useGetEncryptionPublicKey as Mock).mockReturnValue({
       data: { public_key: "test-key" },
       isLoading: false,
       isError: false,
     });
     // Updated mocks to new hooks
-    (useCreatePlatformUser as jest.Mock).mockReturnValue({
-      mutateAsync: jest.fn(),
+    (useCreatePlatformUser as Mock).mockReturnValue({
+      mutateAsync: vi.fn(),
       isPending: false,
     });
-    (useUpdatePlatformUser as jest.Mock).mockReturnValue({
-      mutateAsync: jest.fn(),
+    (useUpdatePlatformUser as Mock).mockReturnValue({
+      mutateAsync: vi.fn(),
     });
-    (useDeletePlatformUser as jest.Mock).mockReturnValue({
-      mutateAsync: jest.fn(),
+    (useDeletePlatformUser as Mock).mockReturnValue({
+      mutateAsync: vi.fn(),
     });
-    (useGetRoles as jest.Mock).mockReturnValue({
+    (useGetRoles as Mock).mockReturnValue({
       data: [
         { name: "Admin", value: ROLES.PLATFORM_ADMIN },
         { name: "Compliance", value: ROLES.PLATFORM_COMPLIANCE },
@@ -126,7 +126,7 @@ describe("Staff Page", () => {
   });
 
   it("renders loading state initially", () => {
-    (useGetPlatformUsers as jest.Mock).mockReturnValue({
+    (useGetPlatformUsers as Mock).mockReturnValue({
       data: undefined,
       isLoading: true,
       isError: false,
@@ -137,7 +137,7 @@ describe("Staff Page", () => {
   });
 
   it("renders staff members correctly when data is fetched", () => {
-    (useGetPlatformUsers as jest.Mock).mockReturnValue({
+    (useGetPlatformUsers as Mock).mockReturnValue({
       data: {
         data: mockStaffData,
         meta: { total: 1, page: 1, limit: 10, totalPages: 1 },
@@ -156,12 +156,12 @@ describe("Staff Page", () => {
   });
 
   it("opens add staff dialog and submits correctly", async () => {
-    const mutateAsync = jest.fn().mockResolvedValue({ status: true });
-    (useCreatePlatformUser as jest.Mock).mockReturnValue({
+    const mutateAsync = vi.fn().mockResolvedValue({ status: true });
+    (useCreatePlatformUser as Mock).mockReturnValue({
       mutateAsync,
       isPending: false,
     });
-    (useGetPlatformUsers as jest.Mock).mockReturnValue({
+    (useGetPlatformUsers as Mock).mockReturnValue({
       data: {
         data: [],
         meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
@@ -169,7 +169,7 @@ describe("Staff Page", () => {
       isLoading: false,
       isError: false,
     });
-    (encryptPassword as jest.Mock).mockResolvedValue("encrypted-password");
+    (encryptPassword as Mock).mockResolvedValue("encrypted-password");
 
     render(<Staff />);
 
@@ -230,7 +230,7 @@ describe("Staff Page", () => {
   });
 
   it("opens view details modal correctly", () => {
-    (useGetPlatformUsers as jest.Mock).mockReturnValue({
+    (useGetPlatformUsers as Mock).mockReturnValue({
       data: {
         data: mockStaffData,
         meta: { total: 1, page: 1, limit: 10, totalPages: 1 },
@@ -253,11 +253,11 @@ describe("Staff Page", () => {
   });
 
   it("opens edit modal, pre-fills data, and submits correctly", async () => {
-    const mutateAsync = jest.fn().mockResolvedValue({ status: true });
-    (useUpdatePlatformUser as jest.Mock).mockReturnValue({
+    const mutateAsync = vi.fn().mockResolvedValue({ status: true });
+    (useUpdatePlatformUser as Mock).mockReturnValue({
       mutateAsync,
     });
-    (useGetPlatformUsers as jest.Mock).mockReturnValue({
+    (useGetPlatformUsers as Mock).mockReturnValue({
       data: {
         data: mockStaffData,
         meta: { total: 1, page: 1, limit: 10, totalPages: 1 },
@@ -302,11 +302,11 @@ describe("Staff Page", () => {
   });
 
   it("opens delete confirmation and submits correctly", async () => {
-    const mutateAsync = jest.fn().mockResolvedValue({ status: true });
-    (useDeletePlatformUser as jest.Mock).mockReturnValue({
+    const mutateAsync = vi.fn().mockResolvedValue({ status: true });
+    (useDeletePlatformUser as Mock).mockReturnValue({
       mutateAsync,
     });
-    (useGetPlatformUsers as jest.Mock).mockReturnValue({
+    (useGetPlatformUsers as Mock).mockReturnValue({
       data: {
         data: mockStaffData,
         meta: { total: 1, page: 1, limit: 10, totalPages: 1 },

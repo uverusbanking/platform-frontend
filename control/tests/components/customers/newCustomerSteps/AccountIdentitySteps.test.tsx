@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Mock, vi } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import { AccountIdentitySteps } from "@/components/features/customers/newCustomerSteps/AccountIdentitySteps";
 import { useGetKYCDocumentTypes } from "@/hooks/queries/useOptionsQueries";
 import { ICustomerData } from "@/components/features/customers/AddCustomerDialog";
 import { useUserStore } from "@/state/userStore";
 
-jest.mock("@/hooks/queries/useOptionsQueries");
-jest.mock("@/state/userStore");
+vi.mock("@/hooks/queries/useOptionsQueries");
+vi.mock("@/state/userStore");
 
 // Mock UI components
-jest.mock("@/components/ui/select", () => ({
+vi.mock("@/components/ui/select", () => ({
   Select: ({ children, onValueChange, value, disabled }: any) => (
     <div data-testid="select-wrapper">
       <select
@@ -37,15 +38,14 @@ const mockCustomerData: ICustomerData = {
   state: "",
   postalCode: "",
   country: "",
-  first_name: "John",
-  last_name: "Doe",
+  firstName: "John",
+  lastName: "Doe",
   email: "john@doe.com",
-  phone_number: "",
-  date_of_birth: "",
-  gender: "",
+  phoneNumber: "",
+  dob: "",
+  gender: "MALE" as any,
   bvn: "",
-  kyc_level: 1,
-  environment: "SANDBOX",
+  nin: "",
   idType: "",
   idNumber: "",
   occupation: "",
@@ -57,15 +57,20 @@ const mockCustomerData: ICustomerData = {
   nextOfKinRelationship: "",
   nextOfKinPhone: "",
   nextOfKinAddress: "",
+  middleName: "",
+  idDocument: "",
+  proofOfAddress: "",
+  passportPhotograph: "",
+  nextOfKinMiddleName: "",
 };
 
 describe("AccountIdentitySteps", () => {
-  const nextStep = jest.fn();
-  const prevStep = jest.fn();
+  const nextStep = vi.fn();
+  const prevStep = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGetKYCDocumentTypes as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useGetKYCDocumentTypes as Mock).mockReturnValue({
       data: { data: [{ label: "Passport", value: "PASSPORT" }] },
       isLoading: false,
     });

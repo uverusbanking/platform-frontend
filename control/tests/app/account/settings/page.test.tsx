@@ -1,3 +1,4 @@
+import { Mock, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ProfileSettingsPage from "@/app/account/settings/profile/page";
 import { useUserStore } from "@/state/userStore";
@@ -6,8 +7,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 
 // Mock the hooks
-jest.mock("@/state/userStore");
-jest.mock("@/hooks/endpoints/useAccount");
+vi.mock("@/state/userStore");
+vi.mock("@/hooks/endpoints/useAccount");
 
 const queryClient = new QueryClient();
 
@@ -24,14 +25,14 @@ describe("Settings Page - Profile Tab", () => {
     gender: "MALE",
   };
 
-  const mockMutate = jest.fn();
+  const mockMutate = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (useUserStore as any).mockReturnValue({ userData: mockUserData });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (useUpdateProfile as any).mockReturnValue({
+    vi.clearAllMocks();
+    (useUserStore as unknown as Mock).mockReturnValue({
+      userData: mockUserData,
+    });
+    (useUpdateProfile as Mock).mockReturnValue({
       mutate: mockMutate,
       isPending: false,
     });
