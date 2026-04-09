@@ -20,11 +20,9 @@ import {
   documentInterface,
 } from "@/types/companyRegistration";
 import { getApiErrorMessage } from "@/utils/apiClient";
-import {
-  registerCompany,
-  ICompanyRegistrationPayload,
-} from "@/services/companyService";
+import { ICompanyRegistrationPayload } from "@/types/company.types";
 import { defaultApiResponse } from "@/utils/resources";
+import { registerCompany } from "@/hooks/endpoints/useCompany";
 
 const steps = [
   { id: 1, title: "Company Details", description: "Basic company information" },
