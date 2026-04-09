@@ -1,9 +1,8 @@
 import type { Config } from "jest";
 import nextJest from "next/jest.js";
 
-// Create a separate Jest config for each app, since each has its own @/ alias root
+// Dashboard has been migrated to Vite + Vitest — run its tests with `pnpm --filter dashboard test`
 const createControlConfig = nextJest({ dir: "./control" });
-const createDashboardConfig = nextJest({ dir: "./dashboard" });
 
 const sharedConfig: Partial<Config> = {
   coverageProvider: "v8",
@@ -11,7 +10,6 @@ const sharedConfig: Partial<Config> = {
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
 };
 
-// Use an async function export to avoid top-level await
 export default async function (): Promise<Config> {
   const controlConfig = await createControlConfig({
     ...sharedConfig,
@@ -25,17 +23,7 @@ export default async function (): Promise<Config> {
     },
   })();
 
-  const dashboardConfig = await createDashboardConfig({
-    ...sharedConfig,
-    displayName: "dashboard",
-    roots: ["<rootDir>/dashboard"],
-    moduleNameMapper: {
-      "^@/(.*)$": "<rootDir>/dashboard/src/$1",
-      "^@shared/(.*)$": "<rootDir>/shared/$1",
-    },
-  })();
-
   return {
-    projects: [controlConfig as Config, dashboardConfig as Config],
+    projects: [controlConfig as Config],
   };
 }

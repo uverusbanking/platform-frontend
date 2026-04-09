@@ -8,15 +8,15 @@ import {
 } from "@/hooks/mutations/useApiKeysMutations";
 import { useGetApiKeys } from "@/hooks/queries/useApiKeysQueries";
 
-jest.mock("@/state/userStore");
-jest.mock("@/hooks/queries/useApiKeysQueries");
-jest.mock("@/hooks/mutations/useApiKeysMutations");
+vi.mock("@/state/userStore");
+vi.mock("@/hooks/queries/useApiKeysQueries");
+vi.mock("@/hooks/mutations/useApiKeysMutations");
 
 function MockWrapper({ children }: PropsWithChildren) {
   return <div>{children}</div>;
 }
 
-jest.mock("@/components/ui/dialog", () => ({
+vi.mock("@/components/ui/dialog", () => ({
   Dialog: MockWrapper,
   DialogContent: MockWrapper,
   DialogHeader: MockWrapper,
@@ -25,7 +25,7 @@ jest.mock("@/components/ui/dialog", () => ({
   DialogFooter: MockWrapper,
 }));
 
-jest.mock("@/components/ui/alert-dialog", () => ({
+vi.mock("@/components/ui/alert-dialog", () => ({
   AlertDialog: MockWrapper,
   AlertDialogContent: MockWrapper,
   AlertDialogHeader: MockWrapper,
@@ -36,7 +36,7 @@ jest.mock("@/components/ui/alert-dialog", () => ({
   AlertDialogAction: MockWrapper,
 }));
 
-jest.mock("@/components/ui/select", () => ({
+vi.mock("@/components/ui/select", () => ({
   Select: MockWrapper,
   SelectTrigger: MockWrapper,
   SelectValue: MockWrapper,
@@ -45,21 +45,21 @@ jest.mock("@/components/ui/select", () => ({
 }));
 
 describe("API Keys Settings Page", () => {
-  const mockedUseUserStore = useUserStore as jest.MockedFunction<
+  const mockedUseUserStore = useUserStore as vi.MockedFunction<
     typeof useUserStore
   >;
-  const mockedUseGetApiKeys = useGetApiKeys as jest.MockedFunction<
+  const mockedUseGetApiKeys = useGetApiKeys as vi.MockedFunction<
     typeof useGetApiKeys
   >;
-  const mockedUseCreateApiKey = useCreateApiKey as jest.MockedFunction<
+  const mockedUseCreateApiKey = useCreateApiKey as vi.MockedFunction<
     typeof useCreateApiKey
   >;
-  const mockedUseDeleteApiKey = useDeleteApiKey as jest.MockedFunction<
+  const mockedUseDeleteApiKey = useDeleteApiKey as vi.MockedFunction<
     typeof useDeleteApiKey
   >;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUseUserStore.mockReturnValue({
       userData: { view_mode: "LIVE" },
     });
@@ -67,14 +67,14 @@ describe("API Keys Settings Page", () => {
       data: { data: [] },
       isLoading: false,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     mockedUseCreateApiKey.mockReturnValue({
-      mutateAsync: jest.fn(),
+      mutateAsync: vi.fn(),
       isPending: false,
     });
     mockedUseDeleteApiKey.mockReturnValue({
-      mutateAsync: jest.fn(),
+      mutateAsync: vi.fn(),
       isPending: false,
     });
   });
@@ -99,7 +99,7 @@ describe("API Keys Settings Page", () => {
       data: undefined,
       isLoading: true,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { container } = render(<ApiKeysSettingsPage />);
@@ -118,7 +118,7 @@ describe("API Keys Settings Page", () => {
       data: undefined,
       isLoading: false,
       isError: true,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(<ApiKeysSettingsPage />);
@@ -145,7 +145,7 @@ describe("API Keys Settings Page", () => {
       },
       isLoading: false,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(<ApiKeysSettingsPage />);

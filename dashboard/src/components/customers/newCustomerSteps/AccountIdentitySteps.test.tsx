@@ -5,11 +5,11 @@ import { useGetKYCDocumentTypes } from "@/hooks/queries/useOptionsQueries";
 import { ICustomerData } from "../AddCustomerDialog";
 import { useUserStore } from "@/state/userStore";
 
-jest.mock("@/hooks/queries/useOptionsQueries");
-jest.mock("@/state/userStore");
+vi.mock("@/hooks/queries/useOptionsQueries");
+vi.mock("@/state/userStore");
 
 // Mock UI components
-jest.mock("@/components/ui/select", () => ({
+vi.mock("@/components/ui/select", () => ({
   Select: ({ children, onValueChange, value, disabled }: any) => (
     <select
       data-testid="mock-select"
@@ -62,12 +62,12 @@ const mockCustomerData: ICustomerData = {
 };
 
 describe("AccountIdentitySteps", () => {
-  const nextStep = jest.fn();
-  const prevStep = jest.fn();
+  const nextStep = vi.fn();
+  const prevStep = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGetKYCDocumentTypes as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useGetKYCDocumentTypes as vi.Mock).mockReturnValue({
       data: { data: [{ label: "Passport", value: "PASSPORT" }] },
       isLoading: false,
     });

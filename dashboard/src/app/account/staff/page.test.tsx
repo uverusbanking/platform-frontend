@@ -17,13 +17,13 @@ import { useGetEncryptionPublicKey } from "@/hooks/queries/useAuthQueries";
 import { encryptPassword } from "@/utils/encryption";
 
 // Mock the hooks
-jest.mock("@/hooks/queries/useCompanyQueries");
-jest.mock("@/hooks/mutations/useCompanyMutations");
-jest.mock("@/hooks/queries/useAuthQueries");
-jest.mock("@/utils/encryption");
+vi.mock("@/hooks/queries/useCompanyQueries");
+vi.mock("@/hooks/mutations/useCompanyMutations");
+vi.mock("@/hooks/queries/useAuthQueries");
+vi.mock("@/utils/encryption");
 
 // Mock UI components that are hard to interact with in JSDOM
-jest.mock("@/components/ui/select", () => ({
+vi.mock("@/components/ui/select", () => ({
   Select: ({ children, onValueChange, value }: any) => (
     <select
       data-testid="mock-select"
@@ -42,7 +42,7 @@ jest.mock("@/components/ui/select", () => ({
   ),
 }));
 
-jest.mock("@/components/ui/dialog", () => ({
+vi.mock("@/components/ui/dialog", () => ({
   Dialog: ({ children }: any) => <div className="mock-dialog">{children}</div>,
   DialogTrigger: ({ children }: any) => <>{children}</>,
   DialogContent: ({ children }: any) => (
@@ -79,27 +79,27 @@ const mockStaffData = [
 
 describe("Staff Page", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGetEncryptionPublicKey as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useGetEncryptionPublicKey as vi.Mock).mockReturnValue({
       data: {
         data: { public_key: "test-key" },
       },
       isLoading: false,
       isError: false,
     });
-    (useAddBrandUser as jest.Mock).mockReturnValue({
-      mutate: jest.fn(),
+    (useAddBrandUser as vi.Mock).mockReturnValue({
+      mutate: vi.fn(),
     });
-    (useUpdateBrandUser as jest.Mock).mockReturnValue({
-      mutate: jest.fn(),
+    (useUpdateBrandUser as vi.Mock).mockReturnValue({
+      mutate: vi.fn(),
     });
-    (useDeleteBrandUser as jest.Mock).mockReturnValue({
-      mutate: jest.fn(),
+    (useDeleteBrandUser as vi.Mock).mockReturnValue({
+      mutate: vi.fn(),
     });
   });
 
   it("renders loading state initially", () => {
-    (useGetCompanyUsers as jest.Mock).mockReturnValue({
+    (useGetCompanyUsers as vi.Mock).mockReturnValue({
       data: undefined,
       isLoading: true,
       isError: false,
@@ -110,7 +110,7 @@ describe("Staff Page", () => {
   });
 
   it("renders staff members correctly when data is fetched", () => {
-    (useGetCompanyUsers as jest.Mock).mockReturnValue({
+    (useGetCompanyUsers as vi.Mock).mockReturnValue({
       data: {
         data: mockStaffData,
         meta: {
@@ -130,11 +130,11 @@ describe("Staff Page", () => {
   });
 
   it("opens add staff dialog and submits correctly", async () => {
-    const mutate = jest.fn();
-    (useAddBrandUser as jest.Mock).mockReturnValue({
+    const mutate = vi.fn();
+    (useAddBrandUser as vi.Mock).mockReturnValue({
       mutate,
     });
-    (useGetCompanyUsers as jest.Mock).mockReturnValue({
+    (useGetCompanyUsers as vi.Mock).mockReturnValue({
       data: {
         data: [],
         meta: {
@@ -144,7 +144,7 @@ describe("Staff Page", () => {
       isLoading: false,
       isError: false,
     });
-    (encryptPassword as jest.Mock).mockResolvedValue("encrypted-password");
+    (encryptPassword as vi.Mock).mockResolvedValue("encrypted-password");
 
     render(<Staff />);
 
@@ -202,7 +202,7 @@ describe("Staff Page", () => {
   });
 
   it("opens view details modal correctly", () => {
-    (useGetCompanyUsers as jest.Mock).mockReturnValue({
+    (useGetCompanyUsers as vi.Mock).mockReturnValue({
       data: {
         data: mockStaffData,
         meta: {
@@ -227,11 +227,11 @@ describe("Staff Page", () => {
   });
 
   it("opens edit modal, pre-fills data, and submits correctly", async () => {
-    const mutate = jest.fn();
-    (useUpdateBrandUser as jest.Mock).mockReturnValue({
+    const mutate = vi.fn();
+    (useUpdateBrandUser as vi.Mock).mockReturnValue({
       mutate,
     });
-    (useGetCompanyUsers as jest.Mock).mockReturnValue({
+    (useGetCompanyUsers as vi.Mock).mockReturnValue({
       data: {
         data: mockStaffData,
         meta: {
@@ -279,11 +279,11 @@ describe("Staff Page", () => {
   });
 
   it("opens delete confirmation and submits correctly", async () => {
-    const mutate = jest.fn();
-    (useDeleteBrandUser as jest.Mock).mockReturnValue({
+    const mutate = vi.fn();
+    (useDeleteBrandUser as vi.Mock).mockReturnValue({
       mutate,
     });
-    (useGetCompanyUsers as jest.Mock).mockReturnValue({
+    (useGetCompanyUsers as vi.Mock).mockReturnValue({
       data: {
         data: mockStaffData,
         meta: {

@@ -11,10 +11,10 @@ import { useGetLocations } from "@/hooks/queries/useOptionsQueries";
 import { ICustomerData } from "../AddCustomerDialog";
 
 // Mock the hook
-jest.mock("@/hooks/queries/useOptionsQueries");
+vi.mock("@/hooks/queries/useOptionsQueries");
 
 // Mock UI components
-jest.mock("@/components/ui/select", () => ({
+vi.mock("@/components/ui/select", () => ({
   Select: ({ children, onValueChange, value, disabled }: any) => (
     <select
       data-testid="mock-select"
@@ -67,19 +67,19 @@ const mockCustomerData: ICustomerData = {
 };
 
 describe("AddressSteps Component", () => {
-  const nextStep = jest.fn();
-  const prevStep = jest.fn();
+  const nextStep = vi.fn();
+  const prevStep = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGetLocations as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useGetLocations as vi.Mock).mockReturnValue({
       data: { data: [] },
       isLoading: false,
     });
   });
 
   it("renders correctly and loads countries", async () => {
-    (useGetLocations as jest.Mock).mockImplementation((parentSlug) => {
+    (useGetLocations as vi.Mock).mockImplementation((parentSlug) => {
       if (parentSlug === undefined)
         return {
           data: { data: [{ name: "Nigeria", slug: "nigeria", id: "1" }] },
@@ -103,7 +103,7 @@ describe("AddressSteps Component", () => {
   });
 
   it("resets state and city when country changes", async () => {
-    (useGetLocations as jest.Mock).mockImplementation((parentSlug) => {
+    (useGetLocations as vi.Mock).mockImplementation((parentSlug) => {
       if (!parentSlug)
         return {
           data: {
@@ -143,7 +143,7 @@ describe("AddressSteps Component", () => {
   });
 
   it("calls nextStep with form data on submit", async () => {
-    (useGetLocations as jest.Mock).mockImplementation((parentSlug) => {
+    (useGetLocations as vi.Mock).mockImplementation((parentSlug) => {
       if (!parentSlug)
         return {
           data: { data: [{ name: "Nigeria", slug: "nigeria", id: "1" }] },

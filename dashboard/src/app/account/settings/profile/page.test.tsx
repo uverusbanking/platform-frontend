@@ -6,8 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 
 // Mock the hooks
-jest.mock("@/state/userStore");
-jest.mock("@/hooks/mutations/useAccountMutations");
+vi.mock("@/state/userStore");
+vi.mock("@/hooks/mutations/useAccountMutations");
 
 const queryClient = new QueryClient();
 
@@ -25,10 +25,10 @@ describe("Profile Settings Page", () => {
     gender: "MALE",
   };
 
-  const mockMutateAsync = jest.fn();
+  const mockMutateAsync = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     (useUserStore as any).mockReturnValue({ userData: mockUserData });
     (useUpdateProfile as any).mockReturnValue({
       mutate: mockMutateAsync,

@@ -6,12 +6,14 @@ import { useUserStore } from "@/state/userStore";
 import React from "react";
 
 // Mock apiClient and useUserStore
-jest.mock("@/lib/axios");
-jest.mock("@/state/userStore");
-jest.mock("../mutations/useAccountMutations", () => ({
-  useUpdateProfile: jest.requireActual("../mutations/useAccountMutations")
-    .useUpdateProfile,
-}));
+vi.mock("@/lib/axios");
+vi.mock("@/state/userStore");
+vi.mock("../mutations/useAccountMutations", async () => {
+  const actual = await vi.importActual<
+    typeof import("../mutations/useAccountMutations")
+  >("../mutations/useAccountMutations");
+  return { useUpdateProfile: actual.useUpdateProfile };
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,10 +28,10 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe("useUpdateProfile", () => {
-  const mockUpdateUser = jest.fn();
+  const mockUpdateUser = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (useUserStore as any).mockReturnValue({
       _updateUser: mockUpdateUser,
@@ -39,7 +41,7 @@ describe("useUpdateProfile", () => {
 
   it("should call apiClient.patch and update user store on success", async () => {
     const mockData = { id: "1", first_name: "John", last_name: "Doe" };
-    (apiClient.patch as jest.Mock).mockResolvedValue({
+    (apiClient.patch as vi.Mock).mockResolvedValue({
       data: {
         status: true,
         message: "Success",

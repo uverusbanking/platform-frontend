@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 
 // Mock apiClient
-jest.mock("@/lib/axios");
+vi.mock("@/lib/axios");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,7 +21,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe("useGetWallets", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 
@@ -45,7 +45,7 @@ describe("useGetWallets", () => {
         totalPages: 1,
       },
     };
-    (apiClient.get as jest.Mock).mockResolvedValue({
+    (apiClient.get as vi.Mock).mockResolvedValue({
       data: {
         status: "success",
         data: mockResponse,

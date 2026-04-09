@@ -7,10 +7,10 @@ import {
   useGetNextOfKinRelationships,
 } from "@/hooks/queries/useOptionsQueries";
 
-jest.mock("@/hooks/queries/useOptionsQueries");
+vi.mock("@/hooks/queries/useOptionsQueries");
 
 // Mock UI components
-jest.mock("@/components/ui/select", () => ({
+vi.mock("@/components/ui/select", () => ({
   Select: ({ children, onValueChange, value, disabled }: any) => (
     <select
       data-testid="mock-select"
@@ -63,16 +63,16 @@ const mockCustomerData: ICustomerData = {
 };
 
 describe("EmploymentSteps", () => {
-  const nextStep = jest.fn();
-  const prevStep = jest.fn();
+  const nextStep = vi.fn();
+  const prevStep = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGetEmploymentStatuses as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useGetEmploymentStatuses as vi.Mock).mockReturnValue({
       data: { data: [{ label: "Employed", value: "employed" }] },
       isLoading: false,
     });
-    (useGetNextOfKinRelationships as jest.Mock).mockReturnValue({
+    (useGetNextOfKinRelationships as vi.Mock).mockReturnValue({
       data: { data: [{ label: "Spouse", value: "spouse" }] },
       isLoading: false,
     });
