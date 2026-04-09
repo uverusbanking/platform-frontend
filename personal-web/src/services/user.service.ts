@@ -6,10 +6,11 @@ import type {
 } from "@/types";
 
 export const UserService = {
-  getProfile: () => api.get<UserResponseDto>("/api/v1/users/me"),
+  getProfile: () =>
+    api.get<UserResponseDto>("/api/v1/customers/personal/auth/me"),
 
   updateProfile: (data: UpdateProfileDto) =>
-    api.patch<UserResponseDto>("/api/v1/users/me", data),
+    api.patch<UserResponseDto>("/api/v1/account/profile", data),
 
   getKycStatus: () => api.get<KycStatusResponseDto>("/api/v1/users/kyc/status"),
 };

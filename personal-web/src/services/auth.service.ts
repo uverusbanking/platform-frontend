@@ -13,23 +13,38 @@ import type {
 
 export const AuthService = {
   register: (data: RegisterDto) =>
-    api.post<MessageResponseDto>("/api/v1/auth/register", data),
+    api.post<MessageResponseDto>("/api/v1/auth/register", data), // TODO: Verify if registration is public or org-invitation based
 
   login: (data: LoginDto) =>
-    api.post<AuthResponseDto>("/api/v1/auth/login", data),
+    api.post<AuthResponseDto>("/api/v1/customers/personal/auth/login", data),
 
   sendOtp: (data: SendOtpDto) =>
-    api.post<MessageResponseDto>("/api/v1/auth/send-otp", data),
+    api.post<MessageResponseDto>(
+      "/api/v1/customers/personal/auth/resend-forgot-otp",
+      data,
+    ),
 
   verifyOtp: (data: VerifyOtpDto) =>
-    api.post<MessageResponseDto>("/api/v1/auth/verify-otp", data),
+    api.post<MessageResponseDto>(
+      "/api/v1/customers/personal/auth/verify-forgot-otp",
+      data,
+    ),
 
   resendOtp: (data: ResendOtpDto) =>
-    api.post<MessageResponseDto>("/api/v1/auth/resend-otp", data),
+    api.post<MessageResponseDto>(
+      "/api/v1/customers/personal/auth/resend-forgot-otp",
+      data,
+    ),
 
   forgotPassword: (data: ForgotPasswordDto) =>
-    api.post<MessageResponseDto>("/api/v1/auth/forgot-password", data),
+    api.post<MessageResponseDto>(
+      "/api/v1/customers/personal/auth/forgot-password",
+      data,
+    ),
 
   resetPassword: (data: ResetPasswordDto) =>
-    api.post<MessageResponseDto>("/api/v1/auth/reset-password", data),
+    api.post<MessageResponseDto>(
+      "/api/v1/customers/personal/auth/reset-password",
+      data,
+    ),
 };

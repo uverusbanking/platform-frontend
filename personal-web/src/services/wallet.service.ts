@@ -5,10 +5,10 @@ import type {
 } from "@/types";
 
 export const WalletService = {
-  getBalance: () => api.get<WalletBalanceResponseDto>("/api/v1/wallets/me"),
+  getBalance: () => api.get<WalletBalanceResponseDto>("/api/v1/wallets"),
 
   getVirtualAccount: () =>
     api.get<VirtualAccountResponseDto>("/api/v1/wallets/virtual-account"),
 
-  createWallet: () => api.post<void>("/api/v1/wallets/create"),
+  createWallet: () => api.post<void>("/api/v1/wallets"),
 };
