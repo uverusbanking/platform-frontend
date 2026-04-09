@@ -1,3 +1,4 @@
+<<<<<<<< HEAD:next.config.mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   /* config options here */
@@ -28,3 +29,7 @@ const nextConfig = {
 };
 
 export default nextConfig;
+========
+// This file is deprecated. Please use next.config.mjs
+export default {};
+>>>>>>>> 65101d0 (fix: resolve next.config.ts jest conflict and react 19 label type errors):next.config.ts
