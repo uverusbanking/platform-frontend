@@ -1,5 +1,1 @@
-import { redirect } from "next/navigation";
-
-export default function Home() {
-  redirect("/login");
-}
+// Root route is handled by React Router in src/App.tsx.

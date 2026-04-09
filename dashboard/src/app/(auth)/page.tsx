@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { APP_ROUTES } from "@/lib/routes";
 import { useLogin } from "@/hooks/mutations/useAuthMutations";
 import { useGetEncryptionPublicKey } from "@/hooks/queries/useAuthQueries";
@@ -38,7 +38,7 @@ export default function Login() {
   const [apiResponse, setApiResponse] = useState(defaultApiResponse);
   const { data: publicKey } = useGetEncryptionPublicKey();
   const { mutate: loginMutation, isPending: isLoggingIn } = useLogin();
-  const router = useRouter();
+  const navigate = useNavigate();
   const isLoggedIn = useUserStore((state) => state.isLoggedIn);
   const _setTempLoginData = useUserStore((state) => state._setTempLoginData);
 
@@ -55,9 +55,9 @@ export default function Login() {
   // Redirect if already logged in
   useEffect(() => {
     if (isLoggedIn) {
-      router.replace(APP_ROUTES.ACCOUNT.DASHBOARD);
+      navigate(APP_ROUTES.ACCOUNT.DASHBOARD, { replace: true });
     }
-  }, [isLoggedIn, router]);
+  }, [isLoggedIn, navigate]);
   if (isLoggedIn) return null;
 
   const onSubmit = async (formData: z.infer<typeof FormSchema>) => {
@@ -89,7 +89,9 @@ export default function Login() {
           _setTempLoginData(payload);
 
           reset();
-          router.replace(APP_ROUTES.AUTH.VERIFY(response.data.session_id));
+          navigate(APP_ROUTES.AUTH.VERIFY(response.data.session_id), {
+            replace: true,
+          });
         },
         onError: (error: unknown) => {
           const message = getApiErrorMessage(
@@ -184,7 +186,7 @@ export default function Login() {
                   >
                     Password
                   </Label>
-                  <Link href={APP_ROUTES.AUTH.FORGOT_PASSWORD}>
+                  <Link to={APP_ROUTES.AUTH.FORGOT_PASSWORD}>
                     <button
                       type="button"
                       className="text-[10px] font-bold text-primary hover:underline uppercase tracking-tight"

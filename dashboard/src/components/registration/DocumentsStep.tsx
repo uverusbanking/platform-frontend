@@ -16,7 +16,6 @@ import { Button } from "../ui/button";
 import { apiErrorResponse, getApiErrorMessage } from "@/utils/apiClient";
 import { documentInterface } from "@/types/companyRegistration";
 import { uploadFile } from "@/hooks/endpoints/useFile";
-import Image from "next/image";
 
 interface DocumentsStepProps {
   data: CompanyData;
@@ -287,11 +286,16 @@ export function DocumentsStep({
                             height: 100,
                           }}
                         >
-                          <Image
+                          <img
                             src={doc.fileUrl}
                             alt={doc.title}
-                            fill
-                            className="object-cover" // or object-contain
+                            style={{
+                              position: "absolute",
+                              inset: 0,
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
                           />
                         </div>
                       </div>

@@ -1,6 +1,18 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
+@font-face {
+  font-family: "Inter";
+  src: url("../../../shared/fonts/inter.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../../../shared/fonts/jetbrains-mono.woff2") format("woff2");
+  font-display: swap;
+}
+
 @theme {
   --font-sans: "Inter", Arial, Helvetica, sans-serif;
   --font-mono: "JetBrains Mono", monospace;

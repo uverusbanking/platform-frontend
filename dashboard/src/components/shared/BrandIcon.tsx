@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { BrandConfigService } from "@shared/core";
 
 type BrandIconProps = {
@@ -17,12 +16,13 @@ export function BrandIcon({
   const brandConfig = BrandConfigService.getConfigSync("dashboard");
   return (
     <div className={containerClassName}>
-      <Image
+      <img
         src="/icon.png"
         alt={`${brandConfig.brandName} icon`}
         width={size}
         height={size}
         className={imageClassName}
+        loading="lazy"
       />
     </div>
   );

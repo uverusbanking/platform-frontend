@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { APP_ROUTES } from "@/lib/routes";
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   // const { login, isLoading, user } = useAuth();
   const isLoading = false;
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +34,7 @@ export default function Login() {
     try {
       // await login(email, password);
       toast.success("Logged in successfully");
-      router.push(APP_ROUTES.ACCOUNT.DASHBOARD);
+      navigate(APP_ROUTES.ACCOUNT.DASHBOARD);
     } catch {
       toast.error("Invalid credentials");
     }

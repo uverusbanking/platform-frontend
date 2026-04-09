@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useUserStore } from "@/state/userStore";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { APP_ROUTES } from "@/lib/routes";
 enum eventTypes {
   ACTIVITY_UPDATE = "ACTIVITY_UPDATE",
@@ -8,9 +8,9 @@ enum eventTypes {
 }
 // Configuration constants
 const INACTIVITY_LIMIT =
-  Number(process.env.NEXT_PUBLIC_INACTIVITY_LIMIT) || 5 * 60 * 1000; // 5 minutes
+  Number(import.meta.env.VITE_INACTIVITY_LIMIT) || 5 * 60 * 1000; // 5 minutes
 const WARNING_DURATION =
-  Number(process.env.NEXT_PUBLIC_WARNING_DURATION) || 30 * 1000; // 30 seconds
+  Number(import.meta.env.VITE_WARNING_DURATION) || 30 * 1000; // 30 seconds
 const ACTIVITY_EVENTS = [
   "mousemove",
   "mousedown",
@@ -21,7 +21,7 @@ const ACTIVITY_EVENTS = [
 ];
 
 export const useInactivity = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { isLoggedIn, _logOutUser } = useUserStore();
 
   // State
@@ -142,11 +142,11 @@ export const useInactivity = () => {
       _logOutUser();
 
       // 4. Redirect
-      router.replace(APP_ROUTES.AUTH.LOGIN);
+      navigate(APP_ROUTES.AUTH.LOGIN, { replace: true });
 
       setShowModal(false);
     },
-    [broadcast, _logOutUser, router],
+    [broadcast, _logOutUser, navigate],
   );
 
   // Timer Logic

@@ -26,7 +26,6 @@ import { Loader2, Upload } from "lucide-react";
 import { ICustomerData } from "../AddCustomerDialog";
 import DisplayRespondsMessage from "@/components/DisplayResponse";
 // import { Textarea } from "@/components/ui/textarea";
-import Image from "next/image";
 import { getApiErrorMessage } from "@/utils/apiClient";
 import { useUserStore } from "@/state/userStore";
 import { uploadFile } from "@/hooks/endpoints/useFile";
@@ -342,11 +341,17 @@ export function AccountIdentitySteps({ data, nextStep, prevStep }: Props) {
                       </div>
                     ) : doc.fileUrl ? (
                       <div className="relative w-full h-full rounded-lg overflow-hidden group/image">
-                        <Image
+                        <img
                           src={doc.fileUrl}
                           alt={doc.title}
-                          fill
-                          className="object-cover transition-transform duration-500 group-hover/image:scale-110"
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                          className="transition-transform duration-500 group-hover/image:scale-110"
                         />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/image:opacity-100 transition-opacity flex items-center justify-center">
                           <div className="bg-white/90 p-2 rounded-full shadow-lg">

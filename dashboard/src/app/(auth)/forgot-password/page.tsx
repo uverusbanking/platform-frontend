@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,7 +26,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { encryptPassword } from "@/utils/encryption";
 import { getApiErrorMessage } from "@/utils/apiClient";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { APP_ROUTES } from "@/lib/routes";
 import { emailSchema } from "@/lib/schemas/fields/email.schema";
@@ -63,7 +63,7 @@ export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [sessionId, setSessionId] = useState("");
   const [resendCountdown, setResendCountdown] = useState(0);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const { mutate: forgotPasswordMutation, isPending: isSendingEmail } =
     useForgotPassword();
@@ -159,7 +159,7 @@ export default function ForgotPassword() {
           onSuccess: () => {
             toast.success("Password reset successfully!", {
               description: "Redirecting to login...",
-              onAutoClose: () => router.push(APP_ROUTES.AUTH.LOGIN),
+              onAutoClose: () => navigate(APP_ROUTES.AUTH.LOGIN),
             });
           },
           onError: (error: unknown) => {
@@ -481,7 +481,7 @@ export default function ForgotPassword() {
         {/* Back to Login */}
         <div className="mt-6 text-center">
           <Link
-            href={APP_ROUTES.AUTH.LOGIN}
+            to={APP_ROUTES.AUTH.LOGIN}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary font-medium transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />

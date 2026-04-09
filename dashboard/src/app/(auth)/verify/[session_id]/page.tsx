@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, use, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { APP_ROUTES } from "@/lib/routes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,14 +32,10 @@ const FormSchema = z.object({
   code: codeSchema,
 });
 
-export default function Verify({
-  params,
-}: {
-  params: Promise<{ session_id: string }>;
-}) {
-  const { session_id } = use(params);
+export default function Verify() {
+  const { session_id } = useParams<{ session_id: string }>();
   const [apiResponse, setApiResponse] = useState(defaultApiResponse);
-  const router = useRouter();
+  const navigate = useNavigate();
   const _loginUser = useUserStore((state) => state._loginUser);
   const tempLoginData = useUserStore((state) => state.tempLoginData);
   const { mutate: verifyLoginMutation, isPending: isVerifying } =
@@ -85,7 +81,7 @@ export default function Verify({
         _loginUser(userWithPermissions, accessToken, response.data.session_id);
 
         reset();
-        router.replace(APP_ROUTES.ACCOUNT.DASHBOARD);
+        navigate(APP_ROUTES.ACCOUNT.DASHBOARD, { replace: true });
       },
       onError: (error: unknown) => {
         const message = getApiErrorMessage(error, "Something went wrong");
@@ -104,7 +100,7 @@ export default function Verify({
 
     if (!tempLoginData) {
       toast.error("Please login again to request a new code");
-      router.push(APP_ROUTES.AUTH.LOGIN);
+      navigate(APP_ROUTES.AUTH.LOGIN);
       return;
     }
 
@@ -117,7 +113,9 @@ export default function Verify({
           (data.data as any).sessionId &&
           (data.data as any).sessionId !== session_id
         ) {
-          router.replace(APP_ROUTES.AUTH.VERIFY((data.data as any).sessionId));
+          navigate(APP_ROUTES.AUTH.VERIFY((data.data as any).sessionId), {
+            replace: true,
+          });
         }
       },
       onError: (error: unknown) => {

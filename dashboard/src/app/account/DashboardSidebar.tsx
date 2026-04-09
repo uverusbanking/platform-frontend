@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, useLocation } from "react-router-dom";
 import { APP_ROUTES } from "@/lib/routes";
 
 import {
@@ -132,7 +131,7 @@ export function DashboardSidebar() {
   const role = userData.role;
   const formattedRole = role.replace(/_/g, " ");
 
-  const currentPath = usePathname();
+  const { pathname: currentPath } = useLocation();
   // const params = useSearchParams();
 
   const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>({});
@@ -260,7 +259,7 @@ export function DashboardSidebar() {
                                   size="sm"
                                 >
                                   <Link
-                                    href={subItem.url}
+                                    to={subItem.url}
                                     className={getNavClass(subItem.url)}
                                   >
                                     <span>{subItem.title}</span>
@@ -277,7 +276,7 @@ export function DashboardSidebar() {
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
-                        <Link href={item.url} className={getNavClass(item.url)}>
+                        <Link to={item.url} className={getNavClass(item.url)}>
                           <item.icon className="w-5 h-5" />
                           {!collapsed && <span>{item.title}</span>}
                         </Link>

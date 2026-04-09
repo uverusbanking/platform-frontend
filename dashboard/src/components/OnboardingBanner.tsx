@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { AlertCircle, ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { APP_ROUTES } from "@/lib/routes";
 import { useUserStore } from "@/state/userStore";
 import { useGetOrganisationDocuments } from "@/hooks/queries/useOrganisationQueries";
@@ -53,7 +53,7 @@ export function OnboardingBanner() {
             </p>
           </div>
         </div>
-        <Link href={APP_ROUTES.ACCOUNT.SETTINGS.DOCUMENTS}>
+        <Link to={APP_ROUTES.ACCOUNT.SETTINGS.DOCUMENTS}>
           <Button
             size="sm"
             className="bg-warning text-warning-foreground hover:bg-warning/90 border-none shadow-sm font-bold h-9"

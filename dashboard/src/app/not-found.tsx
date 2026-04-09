@@ -1,13 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Building2, Home, ArrowLeft } from "lucide-react";
 import { APP_ROUTES } from "@/lib/routes";
 
 export default function NotFound() {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -39,7 +39,7 @@ export default function NotFound() {
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Button
-                onClick={() => router.back()}
+                onClick={() => navigate(-1)}
                 variant="outline"
                 size="lg"
                 className="w-full sm:w-auto min-w-[180px]"
@@ -48,7 +48,7 @@ export default function NotFound() {
                 Go Back
               </Button>
               <Button
-                onClick={() => router.push(APP_ROUTES.ACCOUNT.DASHBOARD)}
+                onClick={() => navigate(APP_ROUTES.ACCOUNT.DASHBOARD)}
                 size="lg"
                 className="w-full sm:w-auto min-w-[180px]"
               >

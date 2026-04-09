@@ -30,7 +30,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useGetOrganisationDocuments } from "@/hooks/queries/useOrganisationQueries";
 import { getApiErrorMessage } from "@/utils/apiClient";
 import { uploadFile } from "@/hooks/endpoints/useFile";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import {
   IOrganisationDocument,
@@ -355,11 +354,16 @@ export default function OrganisationDocumentsPage() {
                     {/* Document Preview */}
                     <div className="relative w-full h-32 bg-muted/30 rounded-lg overflow-hidden">
                       {doc.file_url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
-                        <Image
+                        <img
                           src={doc.file_url}
                           alt={docType.title}
-                          fill
-                          className="object-cover"
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
                         />
                       ) : (
                         <div className="flex items-center justify-center h-full">

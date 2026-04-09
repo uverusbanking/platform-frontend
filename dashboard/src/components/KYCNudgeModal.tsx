@@ -10,9 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useNavigate, Link } from "react-router-dom";
 import { useUserStore } from "@/state/userStore";
-import Link from "next/link";
 import { APP_ROUTES } from "@/lib/routes";
 import { useGetOrganisationDocuments } from "@/hooks/queries/useOrganisationQueries";
 
@@ -32,7 +31,7 @@ const DOCUMENT_TYPES = [
 export function KYCNudgeModal() {
   const [isOpen, setIsOpen] = useState(false);
   const { userData, isLoggedIn } = useUserStore();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const { data: documentsData, isLoading } = useGetOrganisationDocuments();
 
@@ -57,7 +56,7 @@ export function KYCNudgeModal() {
   const handleCompleteNow = () => {
     setIsOpen(false);
     sessionStorage.setItem("kyc_nudge_seen", "true");
-    router.push(APP_ROUTES.ACCOUNT.SETTINGS.ROOT);
+    navigate(APP_ROUTES.ACCOUNT.SETTINGS.ROOT);
   };
 
   const handleRemindLater = () => {
@@ -101,7 +100,7 @@ export function KYCNudgeModal() {
         <div className="px-6 pb-6 space-y-6">
           <div className="space-y-3">
             <Link
-              href={APP_ROUTES.ACCOUNT.SETTINGS.DOCUMENTS}
+              to={APP_ROUTES.ACCOUNT.SETTINGS.DOCUMENTS}
               className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30 border border-border/50 transition-colors hover:bg-secondary/50"
             >
               <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 border border-primary/20 shadow-sm">

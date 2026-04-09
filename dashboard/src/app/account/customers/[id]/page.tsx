@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState } from "react";
 import {
   ArrowLeft,
   Mail,
@@ -22,7 +22,7 @@ import {
   Banknote,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { APP_ROUTES } from "@/lib/routes";
 import { useGetCustomerById } from "@/hooks/queries/useCustomerQueries";
 import { ICustomer } from "@/types/customer.types";
@@ -45,7 +45,6 @@ import { UnFreezeCustomerDialog } from "@/components/customers/UnFreezeCustomerD
 import { can } from "@/auth/can";
 import { PERMISSIONS } from "@/auth/permissions";
 // import { Tabs } from "@/components/ui/tabs";
-import { useRouter } from "next/navigation";
 import { WalletMetadata } from "@/types/wallet.types";
 
 const containerVariants = {
@@ -70,12 +69,8 @@ const itemVariants = {
   },
 };
 
-export default function CustomerDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
+export default function CustomerDetailPage() {
+  const { id = "" } = useParams<{ id: string }>();
   const [showFreezeDialog, setShowFreezeDialog] = useState(false);
   const [showUnfreezeDialog, setShowUnfreezeDialog] = useState(false);
   const { data: customerResponse, isLoading } = useGetCustomerById(id);
@@ -87,7 +82,7 @@ export default function CustomerDetailPage({
     customer_id: id,
     environment: view_mode,
   });
-  const router = useRouter();
+  const navigate = useNavigate();
 
   if (isLoading) return <CustomerDetailSkeleton />;
 
@@ -106,7 +101,7 @@ export default function CustomerDetailPage({
           The customer record you&apos;re looking for might have been moved or
           deleted from our platform.
         </p>
-        <Link href={APP_ROUTES.ACCOUNT.CUSTOMERS.LIST}>
+        <Link to={APP_ROUTES.ACCOUNT.CUSTOMERS.LIST}>
           <Button
             variant="outline"
             className="h-12 px-10 rounded-2xl font-bold shadow-sm hover:shadow-md transition-all active:scale-95"
@@ -149,7 +144,7 @@ export default function CustomerDetailPage({
         <div className="relative p-8 md:p-12 flex flex-col md:flex-row md:items-end justify-between gap-10">
           <div className="space-y-8 flex-1">
             <div className="flex items-center gap-3">
-              <Link href={APP_ROUTES.ACCOUNT.CUSTOMERS.LIST}>
+              <Link to={APP_ROUTES.ACCOUNT.CUSTOMERS.LIST}>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -231,7 +226,7 @@ export default function CustomerDetailPage({
                 <DropdownMenuItem
                   className="h-12 rounded-xl cursor-pointer gap-3 font-bold"
                   onClick={() =>
-                    router.push(
+                    navigate(
                       `/account/banking/transactions?customer_id=${customer.id}&tab=bank-transfer`,
                     )
                   }

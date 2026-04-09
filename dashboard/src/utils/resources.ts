@@ -1,5 +1,4 @@
-// export const apiEndpoint = `${import.meta.env.VITE_API_BASE_URL}/api/v1`;
-export const apiEndpoint = `${process.env.VITE_API_BASE_URL}/api/v1`;
+export const apiEndpoint = `${import.meta.env.VITE_API_URL}/api/v1`;
 
 export const passwordRegex =
   /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[~!@#$^&*()_\-+={}[\]\\|"'`;<>,.?/]).{6,}$/;

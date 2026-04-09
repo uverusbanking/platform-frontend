@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -69,7 +69,7 @@ const tabTypeList: tabTypes[] = [
 ];
 
 const EBanking = () => {
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   // Set activeTab from searchParams only once on mount
   const [activeTab, setActiveTab] = useState<tabTypes | string>(() => {
     const tabParam = searchParams.get("tab");
