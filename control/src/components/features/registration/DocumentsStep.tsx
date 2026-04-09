@@ -16,6 +16,12 @@ import { Button } from "../../ui/button";
 import apiClient, { apiErrorResponse } from "@/lib/axios";
 import { documentInterface as IDocument } from "@/types/organisationRegistration";
 
+interface Step {
+  id: number;
+  title: string;
+  description: string;
+}
+
 // Extend the interface locally for UI state
 interface documentInterface extends IDocument {
   previewUrl?: string;
@@ -31,7 +37,7 @@ interface DocumentsStepProps {
   handleNext: () => void;
   handleSubmitBtn: () => void;
   currentStep: number;
-  steps: any[];
+  steps: Step[];
 }
 
 const documentTypes: documentInterface[] = [
@@ -318,7 +324,7 @@ export function DocumentsStep({
                           Uploading...
                         </p>
                       </div>
-                    ) : doc.fileUrl || (doc as any).previewUrl ? (
+                    ) : doc.fileUrl || doc.previewUrl ? (
                       <div className="flex flex-col items-center justify-center space-y-3 h-[120px] relative w-full group">
                         {/* Success Badge */}
                         {!doc.isLoading && doc.fileUrl && (
@@ -341,11 +347,11 @@ export function DocumentsStep({
                         )}
 
                         {doc.fileUrl?.endsWith(".pdf") ||
-                        (doc as any).fileType === "application/pdf" ? (
+                        doc.fileType === "application/pdf" ? (
                           <div className="flex flex-col items-center justify-center text-center p-4 w-full h-full bg-red-50/50">
                             <FileText className="h-10 w-10 text-red-500 mb-2" />
                             <p className="text-xs font-medium text-foreground max-w-[90%] truncate px-2">
-                              {(doc as any).fileName || "PDF Document"}
+                              {doc.fileName || "PDF Document"}
                             </p>
                             <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
                               <p className="text-xs font-medium bg-background/80 px-2 py-1 rounded shadow-sm">
@@ -356,9 +362,15 @@ export function DocumentsStep({
                         ) : (
                           <div className="relative w-full h-[120px] rounded-md overflow-hidden bg-muted/20">
                             <img
-                              src={(doc as any).previewUrl || doc.fileUrl}
+                              src={doc.previewUrl || doc.fileUrl}
                               alt={doc.title}
-                              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }}
+                              style={{
+                                position: "absolute",
+                                inset: 0,
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "contain",
+                              }}
                             />
                             <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                               <p className="text-xs font-medium text-white bg-black/60 px-2 py-1 rounded">

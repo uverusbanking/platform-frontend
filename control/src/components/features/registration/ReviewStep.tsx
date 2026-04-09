@@ -19,6 +19,12 @@ import { Button } from "../../ui/button";
 import DisplayRespondsMessage from "../../DisplayResponse";
 import { responseInterface } from "@/lib/resources";
 
+interface Step {
+  id: number;
+  title: string;
+  description: string;
+}
+
 interface ReviewStepProps {
   data: OrganisationData;
 
@@ -26,7 +32,7 @@ interface ReviewStepProps {
   handleNext: () => void;
   handleSubmitBtn: () => void;
   currentStep: number;
-  steps: any[];
+  steps: Step[];
   isSubmitting: boolean;
   apiResponse: responseInterface;
 }
@@ -208,7 +214,13 @@ export function ReviewStep({
                             ]!.fileUrl
                           }
                           alt="Image"
-                          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
                         />
                       </div>
                     </div>
