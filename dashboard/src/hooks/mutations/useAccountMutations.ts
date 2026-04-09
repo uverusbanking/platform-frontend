@@ -1,17 +1,17 @@
 import { IApiResponse, TError } from "@/types/apiResponseType";
-import {
-  updateProfile,
-  changePassword,
-  updateViewMode,
-  IUpdateProfilePayload,
-  IChangePasswordPayload,
-} from "@/services/accountService";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useUserStore } from "@/state/userStore";
 import { IUser } from "@/types/user.types";
 import { QUERY_KEYS } from "@/lib/queryKeys";
-
-export { type IUpdateProfilePayload, type IChangePasswordPayload };
+import {
+  IUpdateProfilePayload,
+  IChangePasswordPayload,
+} from "@/types/userAccount.types";
+import {
+  updateProfile,
+  changePassword,
+  updateViewMode,
+} from "@/hooks/endpoints/useAccount";
 
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();

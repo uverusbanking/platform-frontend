@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { useUserStore } from "@/state/userStore";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { useUpdateViewMode } from "@/hooks/endpoints/useAccountHook";
+import { useUpdateViewMode } from "@/hooks/mutations/useAccountMutations";
 import { toast } from "sonner";
 
 export function DashboardHeader() {

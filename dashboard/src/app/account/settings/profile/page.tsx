@@ -25,11 +25,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import {
-  useUpdateProfile,
-  IUpdateProfilePayload,
-} from "@/hooks/endpoints/useAccountHook";
 import { useUserStore } from "@/state/userStore";
+import { useUpdateProfile } from "@/hooks/mutations/useAccountMutations";
+import { IUpdateProfilePayload } from "@/types/userAccount.types";
 
 export default function ProfileSettingsPage() {
   const { userData } = useUserStore();

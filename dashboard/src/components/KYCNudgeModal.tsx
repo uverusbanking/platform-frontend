@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import { useUserStore } from "@/state/userStore";
 import Link from "next/link";
 import { APP_ROUTES } from "@/lib/routes";
-import { useGetOrganisationDocuments } from "@/hooks/endpoints/useOrganisationHook";
+import { useGetOrganisationDocuments } from "@/hooks/queries/useOrganisationQueries";
 
 const DOCUMENT_TYPES = [
   // "CAC_CERTIFICATE",

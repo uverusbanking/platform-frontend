@@ -54,16 +54,16 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useGetCompanyUsers } from "@/hooks/queries/useCompanyQueries";
 import {
-  useGetCompanyUsers,
   useAddBrandUser,
   useUpdateBrandUser,
   useDeleteBrandUser,
-} from "@/hooks/endpoints/useCompanyHook";
+} from "@/hooks/mutations/useCompanyMutations";
+import { useGetEncryptionPublicKey } from "@/hooks/queries/useAuthQueries";
 import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useGetEncryptionPublicKey } from "@/hooks/endpoints/useAuthHook";
 import { encryptPassword } from "@/utils/encryption";
 import { getApiErrorMessage } from "@/utils/apiClient";
 import { IUser } from "@/types/user.types";

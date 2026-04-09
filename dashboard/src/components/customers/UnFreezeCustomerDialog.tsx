@@ -12,8 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useUnfreezeCustomer } from "@/hooks/endpoints/useCustomerHook";
 import { getApiErrorMessage } from "@/utils/apiClient";
+import { useUnfreezeCustomer } from "@/hooks/mutations/useCustomerMutations";
 
 interface UnFreezeCustomerDialogProps {
   id: string;

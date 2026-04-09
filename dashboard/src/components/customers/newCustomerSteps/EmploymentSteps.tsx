@@ -24,12 +24,13 @@ import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { ICustomerData } from "../AddCustomerDialog";
+
+import { Textarea } from "@/components/ui/textarea";
+import { EmploymentSchema } from "@/lib/schemas/customer/employment.schema";
 import {
   useGetEmploymentStatuses,
   useGetNextOfKinRelationships,
-} from "@/hooks/endpoints/useOptionsHook";
-import { Textarea } from "@/components/ui/textarea";
-import { EmploymentSchema } from "@/lib/schemas/customer/employment.schema";
+} from "@/hooks/queries/useOptionsQueries";
 
 const FormSchema = EmploymentSchema;
 

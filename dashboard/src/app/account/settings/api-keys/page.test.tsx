@@ -5,11 +5,12 @@ import { useUserStore } from "@/state/userStore";
 import {
   useCreateApiKey,
   useDeleteApiKey,
-  useGetApiKeys,
-} from "@/hooks/endpoints/useApiKeysHook";
+} from "@/hooks/mutations/useApiKeysMutations";
+import { useGetApiKeys } from "@/hooks/queries/useApiKeysQueries";
 
 jest.mock("@/state/userStore");
-jest.mock("@/hooks/endpoints/useApiKeysHook");
+jest.mock("@/hooks/queries/useApiKeysQueries");
+jest.mock("@/hooks/mutations/useApiKeysMutations");
 
 function MockWrapper({ children }: PropsWithChildren) {
   return <div>{children}</div>;

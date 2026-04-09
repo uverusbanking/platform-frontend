@@ -1,23 +1,18 @@
+import { useQuery } from "@tanstack/react-query";
 import { IApiResponse, TError } from "@/types/apiResponseType";
+import { QUERY_KEYS } from "@/lib/queryKeys";
 import {
   getLocations,
   getKYCDocumentTypes,
   getEmploymentStatuses,
   getNextOfKinRelationships,
-  ILocation,
+  type ILocation,
+} from "@/hooks/endpoints/useOptions";
+import {
   IKYCDocumentType,
   IEmploymentStatus,
   IKinRelationship,
-} from "@/services/optionsService";
-import { useQuery } from "@tanstack/react-query";
-import { QUERY_KEYS } from "@/lib/queryKeys";
-
-export {
-  type ILocation,
-  type IKYCDocumentType,
-  type IEmploymentStatus,
-  type IKinRelationship,
-};
+} from "@/types/options.types";
 
 export const useGetLocations = (parent_slug?: string) => {
   return useQuery<IApiResponse<ILocation[]>, TError>({

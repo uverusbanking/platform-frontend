@@ -43,7 +43,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useGetCustomerById } from "@/hooks/endpoints/useCustomerHook";
+import { useGetCustomerById } from "@/hooks/queries/useCustomerQueries";
 import BankTransfers from "./BankTransfers";
 
 type tabTypes =

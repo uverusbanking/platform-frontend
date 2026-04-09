@@ -22,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useUserStore } from "@/state/userStore";
-import { useGetApiKeys } from "@/hooks/endpoints/useApiKeysHook";
+import { useGetApiKeys } from "@/hooks/queries/useApiKeysQueries";
 import { ApiKeyEnvironment, IApiKey } from "@/types/apiKeys.types";
 import { CreateApiKeyDialog } from "@/components/settings/api-keys/CreateApiKeyDialog";
 import { RevokeApiKeyDialog } from "@/components/settings/api-keys/RevokeApiKeyDialog";

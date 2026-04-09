@@ -26,7 +26,7 @@ import { Loader2 } from "lucide-react";
 import { ICustomerData } from "../AddCustomerDialog";
 import DisplayRespondsMessage from "@/components/DisplayResponse";
 import { Textarea } from "@/components/ui/textarea";
-import { useGetLocations } from "@/hooks/endpoints/useOptionsHook";
+import { useGetLocations } from "@/hooks/queries/useOptionsQueries";
 import { addressSchema } from "@/lib/schemas/customer/address.schema";
 
 const FormSchema = addressSchema;

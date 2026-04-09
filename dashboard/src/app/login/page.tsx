@@ -16,10 +16,6 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { APP_ROUTES } from "@/lib/routes";
-import {
-  useGetEncryptionPublicKey,
-  useLogin,
-} from "@/hooks/endpoints/useAuthHook";
 import { ILoginPayload } from "@shared/core";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -32,6 +28,8 @@ import { useUserStore } from "@/state/userStore";
 import { BrandIcon } from "@/components/shared/BrandIcon";
 import { BrandConfigService } from "@shared/core";
 import { motion } from "framer-motion";
+import { useGetEncryptionPublicKey } from "@/hooks/queries/useAuthQueries";
+import { useLogin } from "@/hooks/mutations/useAuthMutations";
 
 const FormSchema = z.object({
   email: z.email("Please enter a valid email").nonempty("Email is required"),

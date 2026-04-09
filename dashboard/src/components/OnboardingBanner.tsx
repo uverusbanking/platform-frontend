@@ -5,7 +5,7 @@ import { AlertCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { APP_ROUTES } from "@/lib/routes";
 import { useUserStore } from "@/state/userStore";
-import { useGetOrganisationDocuments } from "@/hooks/endpoints/useOrganisationHook";
+import { useGetOrganisationDocuments } from "@/hooks/queries/useOrganisationQueries";
 
 const DOCUMENT_TYPES = [
   // "CAC_CERTIFICATE",

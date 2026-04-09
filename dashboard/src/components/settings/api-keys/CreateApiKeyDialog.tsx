@@ -25,8 +25,8 @@ import {
 
 import { getApiErrorMessage } from "@/utils/apiClient";
 import { ApiKeyEnvironment } from "@/types/apiKeys.types";
-import { useCreateApiKey } from "@/hooks/endpoints/useApiKeysHook";
 import { createApiKeySchema } from "@/lib/schemas/settings/apikeys/apiKeySchema";
+import { useCreateApiKey } from "@/hooks/mutations/useApiKeysMutations";
 
 interface CreateApiKeyDialogProps {
   open: boolean;

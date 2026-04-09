@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChevronDown } from "lucide-react";
-import { useGetCustomers } from "@/hooks/endpoints/useCustomerHook";
+import { useGetCustomers } from "@/hooks/queries/useCustomerQueries";
 import { ICustomer } from "@/types/customer.types";
 import { currencyDisplay } from "@/utils/resources";
 

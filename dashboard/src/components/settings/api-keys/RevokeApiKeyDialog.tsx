@@ -13,10 +13,10 @@ import {
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { useDeleteApiKey } from "@/hooks/endpoints/useApiKeysHook";
 import { getApiErrorMessage } from "@/utils/apiClient";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { useDeleteApiKey } from "@/hooks/mutations/useApiKeysMutations";
 
 interface RevokeApiKeyDialogProps {
   open: boolean;

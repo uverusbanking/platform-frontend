@@ -24,9 +24,10 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { APP_ROUTES } from "@/lib/routes";
-import { useGetCustomerById } from "@/hooks/endpoints/useCustomerHook";
+import { useGetCustomerById } from "@/hooks/queries/useCustomerQueries";
 import { ICustomer } from "@/types/customer.types";
-import { useGetWallets, IWallet } from "@/hooks/endpoints/useWalletHook";
+import { useGetWallets } from "@/hooks/queries/useWalletQueries";
+import { IWallet } from "@/types/wallet.types";
 import { useUserStore } from "@/state/userStore";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -45,7 +46,7 @@ import { can } from "@/auth/can";
 import { PERMISSIONS } from "@/auth/permissions";
 // import { Tabs } from "@/components/ui/tabs";
 import { useRouter } from "next/navigation";
-import { WalletMetadata } from "@/services";
+import { WalletMetadata } from "@/types/wallet.types";
 
 const containerVariants = {
   hidden: { opacity: 0 },

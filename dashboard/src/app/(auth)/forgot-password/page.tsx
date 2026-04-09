@@ -19,8 +19,8 @@ import {
   useVerifyForgotOTP,
   useResetPassword,
   useResendForgotOTP,
-  useGetEncryptionPublicKey,
-} from "@/hooks/endpoints/useAuthHook";
+} from "@/hooks/mutations/useAuthMutations";
+import { useGetEncryptionPublicKey } from "@/hooks/queries/useAuthQueries";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

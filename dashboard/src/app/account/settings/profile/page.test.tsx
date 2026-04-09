@@ -1,13 +1,13 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ProfileSettingsPage from "./page";
 import { useUserStore } from "@/state/userStore";
-import { useUpdateProfile } from "@/hooks/endpoints/useAccountHook";
+import { useUpdateProfile } from "@/hooks/mutations/useAccountMutations";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 
 // Mock the hooks
 jest.mock("@/state/userStore");
-jest.mock("@/hooks/endpoints/useAccountHook");
+jest.mock("@/hooks/mutations/useAccountMutations");
 
 const queryClient = new QueryClient();
 

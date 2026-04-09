@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from "@testing-library/react";
-import { useGetWallets } from "./useWalletHook";
+import { useGetWallets } from "../queries/useWalletQueries";
 import apiClient from "@/lib/axios";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";

@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, act } from "@testing-library/react";
 import { EmploymentSteps } from "./EmploymentSteps";
+import { ICustomerData } from "../AddCustomerDialog";
 import {
   useGetEmploymentStatuses,
   useGetNextOfKinRelationships,
-} from "@/hooks/endpoints/useOptionsHook";
-import { ICustomerData } from "../AddCustomerDialog";
+} from "@/hooks/queries/useOptionsQueries";
 
-jest.mock("@/hooks/endpoints/useOptionsHook");
+jest.mock("@/hooks/queries/useOptionsQueries");
 
 // Mock UI components
 jest.mock("@/components/ui/select", () => ({

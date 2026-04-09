@@ -4,7 +4,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useUserStore } from "@/state/userStore";
-import { useUpdateProfile } from "@/hooks/endpoints/useAccountHook";
+import { useUpdateProfile } from "@/hooks/mutations/useAccountMutations";
 import { toast } from "sonner";
 import { useEffect } from "react";
 import {

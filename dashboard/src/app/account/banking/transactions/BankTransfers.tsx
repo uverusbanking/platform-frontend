@@ -21,10 +21,10 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { currencyDisplay, defaultApiResponse } from "@/utils/resources";
 import {
-  useGetBanks,
   useInitiateTransfer,
   useVerifyAccount,
-} from "@/hooks/endpoints/useTransferHook";
+} from "@/hooks/mutations/useTransferMutations";
+import { useGetBanks } from "@/hooks/queries/useTransferQueries";
 import { defaultBankList } from "./banks";
 import SearchableVirtualSelect from "./SelectBank";
 import { useUserStore } from "@/state/userStore";
