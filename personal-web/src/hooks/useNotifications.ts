@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { BrandConfigService } from "@/lib/brand-config";
+import { BrandConfigService } from "@shared/core";
 
 export interface Notification {
   id: string;
