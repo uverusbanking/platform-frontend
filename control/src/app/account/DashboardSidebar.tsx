@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, useLocation } from "react-router-dom";
 
 import {
   LayoutDashboard,
@@ -132,7 +131,7 @@ export function DashboardSidebar() {
   const userData = useUserStore((state) => state.userData);
   const collapsed = state === "collapsed";
 
-  const currentPath = usePathname();
+  const { pathname: currentPath } = useLocation();
   const navigationItems = getNavigationItems();
 
   const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>({});
@@ -241,7 +240,7 @@ export function DashboardSidebar() {
                                   size="sm"
                                 >
                                   <Link
-                                    href={subItem.url}
+                                    to={subItem.url}
                                     className={getNavClass(subItem.url)}
                                   >
                                     <span className="relative z-10">
@@ -260,7 +259,7 @@ export function DashboardSidebar() {
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
-                        <Link href={item.url} className={getNavClass(item.url)}>
+                        <Link to={item.url} className={getNavClass(item.url)}>
                           <item.icon className="w-5 h-5 relative z-10" />
                           {!collapsed && (
                             <span className="relative z-10">{item.title}</span>

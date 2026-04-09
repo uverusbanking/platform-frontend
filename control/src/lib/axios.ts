@@ -3,8 +3,8 @@ import { resolveUserPermissions } from "@/auth/resolveUserPermissions";
 import { getDecryptedLocalStorage } from "@/lib/storage";
 import { useUserStore } from "@/state/userStore";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION || "v1";
+const API_URL = import.meta.env.VITE_API_URL;
+const API_VERSION = import.meta.env.VITE_API_VERSION || "v1";
 const API_BASE_URL = `${API_URL}/api/${API_VERSION}`;
 
 type RequestConfigWithRetry = InternalAxiosRequestConfig & {

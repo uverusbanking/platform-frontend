@@ -1,7 +1,8 @@
+// Migrated to Vite — this page is superseded by app/login/page.tsx; route / redirects to /login via App.tsx
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +15,7 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { BrandIcon } from "@/components/layouts/layout/BrandIcon";
 import { useGetEncryptionPublicKey } from "@/hooks/endpoints/useAuth";
 import { useLogin } from "@/hooks/mutations/useAuthMutations";
@@ -33,7 +34,7 @@ export default function Login() {
   const [apiResponse, setApiResponse] = useState(defaultApiResponse);
   const { data: publicKey } = useGetEncryptionPublicKey();
   const { mutateAsync: loginMutation } = useLogin();
-  const router = useRouter();
+  const navigate = useNavigate();
   const isLoggedIn = useUserStore((state) => state.isLoggedIn);
   const _setTempLoginData = useUserStore((state) => state._setTempLoginData);
 
@@ -50,9 +51,9 @@ export default function Login() {
   // Redirect if already logged in
   useEffect(() => {
     if (isLoggedIn) {
-      router.replace("/account/dashboard");
+      navigate("/account/dashboard", { replace: true });
     }
-  }, [isLoggedIn, router]);
+  }, [isLoggedIn, navigate]);
   if (isLoggedIn) return null;
 
   const onSubmit = async (formData: z.infer<typeof FormSchema>) => {
@@ -84,7 +85,7 @@ export default function Login() {
           _setTempLoginData(payload);
 
           reset(); // after submit
-          router.replace(`/verify/${data.data.session_id}`);
+          navigate(`/verify/${data.data.session_id}`, { replace: true });
         },
         onError: (error) => {
           const message =
@@ -184,7 +185,7 @@ export default function Login() {
                     Password
                   </Label>
                   <Link
-                    href="/forgot-password"
+                    to="/forgot-password"
                     className="text-[10px] font-bold text-primary hover:underline uppercase tracking-tight"
                   >
                     Forgot Password?

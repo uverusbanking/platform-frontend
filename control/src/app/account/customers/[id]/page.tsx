@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState } from "react";
 import {
   ArrowLeft,
   Mail,
@@ -26,7 +26,7 @@ import {
   Edit,
   Lock as LockIcon,
 } from "lucide-react";
-import Link from "next/link";
+import { Link, useParams } from "react-router-dom";
 import { useGetWallets } from "@/hooks/endpoints/useWallet";
 import { useUserStore } from "@/state/userStore";
 import { Button } from "@/components/ui/button";
@@ -122,12 +122,8 @@ const analyticsData = [
   { name: "Jun", credits: 250000, debits: 170000, balance: 700000 },
 ];
 
-export default function CustomerDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
+export default function CustomerDetailPage() {
+  const { id = "" } = useParams<{ id: string }>();
   const [showFreezeDialog, setShowFreezeDialog] = useState(false);
   const [showUnfreezeDialog, setShowUnfreezeDialog] = useState(false);
   const { data: customerResponse, isLoading } = useGetCustomerById(id);
@@ -166,7 +162,7 @@ export default function CustomerDetailPage({
       {/* Dynamic Header with Navigation */}
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-4">
-          <Link href="/account/customers">
+          <Link to="/account/customers">
             <Button
               variant="ghost"
               size="icon"
@@ -177,7 +173,7 @@ export default function CustomerDetailPage({
           </Link>
           <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
             <Link
-              href="/account/customers"
+              to="/account/customers"
               className="hover:text-primary transition-colors"
             >
               Customers

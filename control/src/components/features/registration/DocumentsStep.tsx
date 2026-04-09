@@ -15,7 +15,6 @@ import DisplayRespondsMessage from "../../DisplayResponse";
 import { Button } from "../../ui/button";
 import apiClient, { apiErrorResponse } from "@/lib/axios";
 import { documentInterface as IDocument } from "@/types/organisationRegistration";
-import Image from "next/image";
 
 // Extend the interface locally for UI state
 interface documentInterface extends IDocument {
@@ -356,11 +355,10 @@ export function DocumentsStep({
                           </div>
                         ) : (
                           <div className="relative w-full h-[120px] rounded-md overflow-hidden bg-muted/20">
-                            <Image
+                            <img
                               src={(doc as any).previewUrl || doc.fileUrl}
                               alt={doc.title}
-                              fill
-                              className="object-contain"
+                              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }}
                             />
                             <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                               <p className="text-xs font-medium text-white bg-black/60 px-2 py-1 rounded">

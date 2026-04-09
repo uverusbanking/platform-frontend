@@ -1,5 +1,1 @@
-import { redirect } from "next/navigation";
-
-export default function SettingsPage() {
-  redirect("/account/settings/profile");
-}
+// Migrated to Vite — redirect handled in src/App.tsx

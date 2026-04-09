@@ -1,13 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { User, Lock, Code } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface SettingsLayoutProps {
-  children: React.ReactNode;
-}
 
 const settingsNav = [
   {
@@ -30,8 +25,8 @@ const settingsNav = [
   },
 ];
 
-export default function SettingsLayout({ children }: SettingsLayoutProps) {
-  const pathname = usePathname();
+export default function SettingsLayout() {
+  const { pathname } = useLocation();
   const isNavItemActive = (href: string) =>
     pathname === href ||
     (href === "/account/settings/profile" && pathname === "/account/settings");
@@ -58,8 +53,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
                 return (
                   <Link
                     key={item.id}
-                    href={item.href}
-                    prefetch={true}
+                    to={item.href}
                     className={cn(
                       "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 text-left group",
                       isActive
@@ -87,8 +81,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
               return (
                 <Link
                   key={item.id}
-                  href={item.href}
-                  prefetch={true}
+                  to={item.href}
                   className={cn(
                     "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-all",
                     isActive
@@ -104,7 +97,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
           </div>
 
           {/* Content Area */}
-          <div className="min-w-0">{children}</div>
+          <div className="min-w-0"><Outlet /></div>
         </div>
       </div>
     </div>

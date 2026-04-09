@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,10 +11,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { AlertCircle, Home, ArrowLeft, Search } from "lucide-react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 
 export default function NotFound() {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Optional: Log 404 events for analytics
@@ -64,7 +64,7 @@ export default function NotFound() {
           <CardContent className="space-y-4">
             {/* Navigation Buttons */}
             <div className="grid md:grid-cols-2 gap-4">
-              <Link href="/account/dashboard" className="block">
+              <Link to="/account/dashboard" className="block">
                 <Button
                   className="w-full h-14 bg-gradient-primary hover:opacity-90 shadow-fintech font-bold rounded-xl transition-all active:scale-[0.98] group"
                   size="lg"
@@ -75,7 +75,7 @@ export default function NotFound() {
               </Link>
 
               <Button
-                onClick={() => router.back()}
+                onClick={() => navigate(-1)}
                 variant="outline"
                 className="w-full h-14 border-2 border-border/40 hover:border-primary/50 font-bold rounded-xl transition-all active:scale-[0.98] group"
                 size="lg"
@@ -92,7 +92,7 @@ export default function NotFound() {
                 <span className="font-medium">
                   Lost? Try searching from the{" "}
                   <Link
-                    href="/account/dashboard"
+                    to="/account/dashboard"
                     className="text-primary hover:underline font-bold"
                   >
                     dashboard

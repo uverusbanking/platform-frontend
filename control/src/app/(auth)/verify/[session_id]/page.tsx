@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,10 +38,10 @@ const FormSchema = z.object({
   code: codeSchema,
 });
 
-export default function Verify({ params }: { params: { session_id: string } }) {
-  const { session_id } = params;
+export default function Verify() {
+  const { session_id = "" } = useParams<{ session_id: string }>();
   const [apiResponse, setApiResponse] = useState(defaultApiResponse);
-  const router = useRouter();
+  const navigate = useNavigate();
   const _loginUser = useUserStore((state) => state._loginUser);
   const tempLoginData = useUserStore((state) => state.tempLoginData);
   const { mutateAsync: verifyLoginMutation } = useVerifyLogin();
@@ -88,7 +88,7 @@ export default function Verify({ params }: { params: { session_id: string } }) {
           );
 
           reset(); // after submit
-          router.replace("/account/dashboard");
+          navigate("/account/dashboard", { replace: true });
         },
         onError: (error: unknown) => {
           const message = getErrorMessage(error, "Something went wrong");
@@ -116,7 +116,7 @@ export default function Verify({ params }: { params: { session_id: string } }) {
 
     if (!tempLoginData) {
       toast.error("Please login again to request a new code");
-      router.push("/");
+      navigate("/");
       return;
     }
 
@@ -126,7 +126,7 @@ export default function Verify({ params }: { params: { session_id: string } }) {
         toast.success("A new verification code has been sent.");
         // Update URL if session ID changed (though typically it stays same)
         if (data?.data?.session_id && data.data.session_id !== session_id) {
-          router.replace(`/verify/${data.data.session_id}`);
+          navigate(`/verify/${data.data.session_id}`, { replace: true });
         }
       },
       onError: (error: unknown) => {

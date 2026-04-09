@@ -1,7 +1,5 @@
 "use client";
 
-import Image from "next/image";
-
 type BrandIconProps = {
   containerClassName?: string;
   imageClassName?: string;
@@ -15,12 +13,13 @@ export function BrandIcon({
 }: BrandIconProps) {
   return (
     <div className={containerClassName}>
-      <Image
+      <img
         src="/icon.png"
         alt="Uverus icon"
         width={size}
         height={size}
         className={imageClassName}
+        loading="lazy"
       />
     </div>
   );

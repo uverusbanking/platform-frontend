@@ -1,18 +1,18 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { useUserStore } from "@/state/userStore";
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const isLoggedIn = useUserStore((state) => state.isLoggedIn);
 
   useEffect(() => {
     if (!isLoggedIn) {
-      router.replace("/");
+      navigate("/", { replace: true });
     }
-  }, [isLoggedIn, router]);
+  }, [isLoggedIn, navigate]);
 
   // TODO:::
   // While redirecting, render nothing or a loader

@@ -1,7 +1,9 @@
+// Migrated to Vite — this is a legacy stub; real account routing is in src/App.tsx
+// keeping file to avoid import errors but it is no longer a route entry point
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +23,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   // const { login, isLoading, user } = useAuth();
   const isLoading = false;
-  const router = useRouter();
+  const router = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +36,7 @@ export default function Login() {
     try {
       // await login(email, password);
       toast.success("Logged in successfully");
-      router.push("/account/dashboard");
+      router("/account/dashboard");
     } catch (error) {
       toast.error("Invalid credentials");
     }

@@ -1,7 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
-import Image from "next/image";
+import { useState } from "react";
 import {
   ArrowLeft,
   Mail,
@@ -26,7 +25,7 @@ import {
   Key,
   UploadCloud,
 } from "lucide-react";
-import Link from "next/link";
+import { Link, useParams } from "react-router-dom";
 import {
   useGetOrganisationById,
   useGetOrganisationDocuments,
@@ -56,12 +55,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 
-export default function OrganisationDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
+export default function OrganisationDetailPage() {
+  const { id = "" } = useParams<{ id: string }>();
   const { data: organisationResponse, isLoading } = useGetOrganisationById(id);
   const { data: documents, isLoading: isLoadingDocs } =
     useGetOrganisationDocuments(id);
@@ -106,7 +101,7 @@ export default function OrganisationDetailPage({
       {/* Dynamic Header with Navigation */}
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-4">
-          <Link href="/account/organisations">
+          <Link to="/account/organisations">
             <Button
               variant="ghost"
               size="icon"
@@ -117,7 +112,7 @@ export default function OrganisationDetailPage({
           </Link>
           <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
             <Link
-              href="/account/organisations"
+              to="/account/organisations"
               className="hover:text-primary transition-colors"
             >
               Organisations
@@ -675,11 +670,11 @@ function DocumentReviewDialog({
                 <div className="w-full h-full flex items-center justify-center p-12">
                   {document.file_url ? (
                     <div className="relative shadow-2xl rounded-lg overflow-hidden border border-border/40 w-full max-w-2xl h-[70vh]">
-                      <Image
+                      <img
                         src={document.file_url}
                         alt="Document Preview"
-                        fill
-                        className="object-contain bg-background"
+                        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }}
+                        className="bg-background"
                       />
                     </div>
                   ) : (

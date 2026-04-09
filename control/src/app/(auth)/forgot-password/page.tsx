@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -250,7 +249,7 @@ function EmailStep({ onSuccess }: { onSuccess: (email: string) => void }) {
 
             <div className="text-center pt-2">
               <Link
-                href="/"
+                to="/"
                 className="inline-flex items-center text-sm font-bold text-muted-foreground hover:text-primary transition-colors duration-200"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
@@ -426,7 +425,7 @@ function ResetStep({ sessionId }: { sessionId: string }) {
   const { data: encryptionKey } = useGetEncryptionPublicKey();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -457,7 +456,7 @@ function ResetStep({ sessionId }: { sessionId: string }) {
       });
 
       toast.success("Password reset successfully");
-      router.push("/");
+      navigate("/");
     } catch (error: unknown) {
       const message = getErrorMessage(
         error,

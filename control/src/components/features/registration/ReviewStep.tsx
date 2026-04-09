@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { OrganisationData } from "@/app/(auth)/register/page";
 import { Button } from "../../ui/button";
-import Image from "next/image";
 import DisplayRespondsMessage from "../../DisplayResponse";
 import { responseInterface } from "@/lib/resources";
 
@@ -202,15 +201,14 @@ export function ReviewStep({
                       <div
                         style={{ position: "relative", width: 50, height: 50 }}
                       >
-                        <Image
+                        <img
                           src={
                             data.documents[
                               doc.key as keyof typeof data.documents
                             ]!.fileUrl
                           }
                           alt="Image"
-                          fill
-                          className="object-cover"
+                          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
                         />
                       </div>
                     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import {
   Search,
   Filter,
@@ -134,7 +134,7 @@ export default function Customers() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [paymentLinkCustomer, setPaymentLinkCustomer] =
     useState<ICustomer | null>(null);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -405,7 +405,7 @@ export default function Customers() {
                         key={customer.id}
                         className="group border-b border-border/30 hover:bg-muted/40 transition-all cursor-pointer h-20"
                         onClick={() =>
-                          router.push(`/account/customers/${customer.id}`)
+                          navigate(`/account/customers/${customer.id}`)
                         }
                       >
                         <TableCell className="pl-6">
@@ -500,7 +500,7 @@ export default function Customers() {
                               </DropdownMenuLabel>
                               <DropdownMenuItem
                                 onSelect={() =>
-                                  router.push(
+                                  navigate(
                                     `/account/customers/${customer.id}`,
                                   )
                                 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import {
   Building2,
   Search,
@@ -101,7 +101,7 @@ export default function OrganisationsPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [page] = useState(1);
   const limit = 10;
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const { data: organisationData, isLoading } = useGetOrganisations({
     page,
@@ -294,7 +294,7 @@ export default function OrganisationsPage() {
                       key={organisation.id}
                       className="group border-b border-border/30 hover:bg-muted/40 transition-all h-20 cursor-pointer"
                       onClick={() =>
-                        router.push(`/account/organisations/${organisation.id}`)
+                        navigate(`/account/organisations/${organisation.id}`)
                       }
                     >
                       <TableCell className="pl-6">
