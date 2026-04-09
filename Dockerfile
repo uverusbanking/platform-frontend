@@ -31,28 +31,23 @@ RUN pnpm run build:dashboard
 RUN pnpm run build:personal-web
 RUN pnpm run build:corporate-web
 
-# ─── Stage 3: Runner (slim shared runtime base) ─────────────────────────
-FROM node:20-alpine AS runner
-WORKDIR /app
-RUN apk add --no-cache libc6-compat
-# Install Doppler CLI via Alpine package repository
-RUN wget -q -t3 'https://packages.doppler.com/public/cli/rsa.8004D9FF50437357.key' -O /etc/apk/keys/cli@doppler-8004D9FF50437357.rsa.pub && \
+
+# ─── Stage 3: Runner (obsolete, removed) ────────────────────────────────
+
+# ─── Runtime: platform-control (Vite SPA via nginx) ───────────────────────
+FROM nginx:alpine AS platform-control
+# Install Doppler CLI
+RUN apk add --no-cache wget && \
+    wget -q -t3 'https://packages.doppler.com/public/cli/rsa.8004D9FF50437357.key' -O /etc/apk/keys/cli@doppler-8004D9FF50437357.rsa.pub && \
     echo 'https://packages.doppler.com/public/cli/alpine/any-version/main' | tee -a /etc/apk/repositories && \
     apk update && \
     apk add doppler
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-ENV NODE_ENV=production
-
-# ─── Runtime: platform-control ──────────────────────────────────────────
-FROM runner AS platform-control
-COPY --from=builder /app/control/public ./control/public
-COPY --from=builder --chown=nextjs:nodejs /app/control/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/control/.next/static ./control/.next/static
-USER nextjs
+# Copy built static assets from builder
+COPY --from=builder /app/control/dist /usr/share/nginx/html
+# SPA fallback: serve index.html for all routes
+RUN printf 'server {\n  listen 3000;\n  root /usr/share/nginx/html;\n  index index.html;\n  location / {\n    try_files $uri $uri/ /index.html;\n  }\n}\n' > /etc/nginx/conf.d/default.conf
 EXPOSE 3000
-ENV PORT=3000 HOSTNAME="0.0.0.0"
-CMD ["doppler", "run", "--", "node", "control/server.js"]
+CMD ["doppler", "run", "--", "nginx", "-g", "daemon off;"]
 
 # ─── Runtime: platform-dashboard (Vite SPA via nginx) ───────────────────
 FROM nginx:alpine AS platform-dashboard
