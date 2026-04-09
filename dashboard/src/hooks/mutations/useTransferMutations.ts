@@ -1,22 +1,11 @@
+import { useMutation } from "@tanstack/react-query";
 import { IApiResponse, TError } from "@/types/apiResponseType";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { QUERY_KEYS } from "@/lib/queryKeys";
 import {
-  getBanks,
-  IBanks,
-  initiateTransfer,
-  ITransferPayload,
   IVerifyAccountPayload,
   IVerifyAccountResponse,
-  verifyAccount,
-} from "@/services/transferService";
-
-export const useGetBanks = (organisation_id: string) => {
-  return useQuery<IApiResponse<IBanks[]>, TError>({
-    queryKey: [QUERY_KEYS.BANKS],
-    queryFn: () => getBanks(organisation_id),
-  });
-};
+  ITransferPayload,
+} from "@/types/transfer.type";
+import { verifyAccount, initiateTransfer } from "@/hooks/endpoints/useTransfer";
 
 export const useVerifyAccount = () => {
   // const queryClient = useQueryClient();

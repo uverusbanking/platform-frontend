@@ -27,16 +27,16 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import {
-  useGetOrganisationDocuments,
-  useUpdateOrganisationDocuments,
-  IOrganisationDocument,
-  OrganisationDocumentType,
-} from "@/hooks/endpoints/useOrganisationHook";
+import { useGetOrganisationDocuments } from "@/hooks/queries/useOrganisationQueries";
 import { getApiErrorMessage } from "@/utils/apiClient";
-import { uploadFile } from "@/services/fileService";
+import { uploadFile } from "@/hooks/endpoints/useFile";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import {
+  IOrganisationDocument,
+  OrganisationDocumentType,
+} from "@/types/organisation.types";
+import { useUpdateOrganisationDocuments } from "@/hooks/mutations/useOrganisationMutations";
 
 interface DocumentTypeInfo {
   key: OrganisationDocumentType;

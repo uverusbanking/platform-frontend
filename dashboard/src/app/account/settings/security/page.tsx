@@ -15,10 +15,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import {
-  useChangePassword,
-  IChangePasswordPayload,
-} from "@/hooks/endpoints/useAccountHook";
+import { useChangePassword } from "@/hooks/mutations/useAccountMutations";
+import { IChangePasswordPayload } from "@/types/userAccount.types";
 
 export default function SecuritySettingsPage() {
   const { mutate: changePassword, isPending: isChangingPassword } =

@@ -14,7 +14,7 @@ import {
   FileText,
   ShieldCheck,
 } from "lucide-react";
-import { useGetOrganisationStats } from "@/hooks/endpoints/useOrganisationHook";
+import { useGetOrganisationStats } from "@/hooks/queries/useOrganisationQueries";
 import { KPICardSkeleton } from "@/components/dashboard/KPICardSkeleton";
 
 // Sample data for demonstration

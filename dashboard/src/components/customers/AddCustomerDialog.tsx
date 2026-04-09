@@ -12,10 +12,10 @@ import { PreviewSteps } from "./newCustomerSteps/PreviewSteps";
 import { AddressSteps } from "./newCustomerSteps/AddressSteps";
 import { EmploymentSteps } from "./newCustomerSteps/EmploymentSteps";
 import { AccountIdentitySteps } from "./newCustomerSteps/AccountIdentitySteps";
-import { useCreateCustomer } from "@/hooks/endpoints/useCustomerHook";
 import { toast } from "sonner";
 import { useUserStore } from "@/state/userStore";
 import { getApiErrorMessage } from "@/utils/apiClient";
+import { useCreateCustomer } from "@/hooks/mutations/useCustomerMutations";
 
 interface AddCustomerDialogProps {
   open: boolean;

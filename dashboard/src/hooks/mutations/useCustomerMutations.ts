@@ -1,30 +1,23 @@
-import { IApiResponse, TError } from "@/types/apiResponseType";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { IApiResponse } from "@/types/apiResponseType";
 import { IUser } from "@/types/user.types";
+import {
+  ICreateCustomerPayload,
+  IFreezeCustomerPayload,
+} from "@/types/customer.types";
 import {
   createCustomer,
   freezeCustomer,
   unfreezeCustomer,
-  getCustomers,
-  getCustomer,
-  ICreateCustomerPayload,
-  IFreezeCustomerPayload,
-  IGetCustomersParams,
-  IGetCustomersResponse,
-} from "@/services/userService";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+} from "../endpoints/useCustomer";
+import { TError } from "@/types/apiResponseType";
 import { QUERY_KEYS } from "@/lib/queryKeys";
-
-// Types are now imported from services/userService
-
-export {
-  type ICreateCustomerPayload,
-  type IGetCustomersParams,
-  type IGetCustomersResponse,
-};
+import { IRegisterNewCustomerPayload } from "@/types/customer.types";
+import { AxiosError } from "axios";
+import { registerNewCustomer } from "@/hooks/endpoints/useCustomer";
 
 export const useCreateCustomer = () => {
   const queryClient = useQueryClient();
-
   return useMutation<IApiResponse<IUser>, TError, ICreateCustomerPayload>({
     mutationFn: createCustomer,
     onSuccess: () => {
@@ -35,7 +28,6 @@ export const useCreateCustomer = () => {
 
 export const useFreezeCustomer = () => {
   const queryClient = useQueryClient();
-
   return useMutation<
     IApiResponse<unknown>,
     TError,
@@ -53,7 +45,6 @@ export const useFreezeCustomer = () => {
 
 export const useUnfreezeCustomer = () => {
   const queryClient = useQueryClient();
-
   return useMutation<
     IApiResponse<unknown>,
     TError,
@@ -69,18 +60,18 @@ export const useUnfreezeCustomer = () => {
   });
 };
 
-export const useGetCustomers = (params: IGetCustomersParams) => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.CUSTOMERS, params],
-    queryFn: () => getCustomers(params),
-    staleTime: 1000 * 60 * 10, // 10 minutes
-  });
-};
-
-export const useGetCustomerById = (id: string) => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.CUSTOMER, id],
-    queryFn: () => getCustomer(id),
-    enabled: !!id,
+export const useRegisterNewCustomer = () => {
+  const queryClient = useQueryClient();
+  return useMutation<
+    IApiResponse<unknown>,
+    AxiosError<unknown, IApiResponse<unknown>>,
+    IRegisterNewCustomerPayload
+  >({
+    mutationFn: registerNewCustomer,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CUSTOMERS] });
+      // You might want to show a success toast message here
+      // toast.success(data.message || "Profile updated successfully", {description: ""});
+    },
   });
 };

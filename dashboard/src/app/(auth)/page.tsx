@@ -16,10 +16,8 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { APP_ROUTES } from "@/lib/routes";
-import {
-  useGetEncryptionPublicKey,
-  useLogin,
-} from "@/hooks/endpoints/useAuthHook";
+import { useLogin } from "@/hooks/mutations/useAuthMutations";
+import { useGetEncryptionPublicKey } from "@/hooks/queries/useAuthQueries";
 import { ILoginPayload } from "@shared/core";
 import { z } from "zod";
 import { useForm } from "react-hook-form";

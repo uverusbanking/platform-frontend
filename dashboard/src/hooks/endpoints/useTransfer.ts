@@ -1,5 +1,10 @@
 import apiClient from "@/lib/axios";
 import { IApiResponse } from "@/types/apiResponseType";
+import {
+  IVerifyAccountPayload,
+  IVerifyAccountResponse,
+  ITransferPayload,
+} from "@/types/transfer.type";
 
 export type IBanks = {
   bank_name: string;
@@ -16,16 +21,6 @@ export const getBanks = async (
   return response.data;
 };
 
-export type IVerifyAccountPayload = {
-  bank_code: string;
-  account_number: string;
-};
-
-export type IVerifyAccountResponse = {
-  accountNumber: string;
-  accountName: string;
-};
-
 export const verifyAccount = async (
   payload: IVerifyAccountPayload,
 ): Promise<IApiResponse<IVerifyAccountResponse>> => {
@@ -34,17 +29,6 @@ export const verifyAccount = async (
     payload,
   );
   return response.data;
-};
-
-export type ITransferPayload = {
-  customer_id: string;
-  bank_code: string;
-  account_number: string;
-  bank_name: string;
-  amount: number;
-  currency: string;
-  narration: string;
-  meta_data?: { sender_name: string; sender_address: string }[];
 };
 
 export const initiateTransfer = async (

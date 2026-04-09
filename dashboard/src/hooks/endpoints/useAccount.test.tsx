@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import { useUpdateProfile } from "./useAccountHook";
+import { useUpdateProfile } from "../mutations/useAccountMutations";
 import apiClient from "@/lib/axios";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useUserStore } from "@/state/userStore";
@@ -8,6 +8,10 @@ import React from "react";
 // Mock apiClient and useUserStore
 jest.mock("@/lib/axios");
 jest.mock("@/state/userStore");
+jest.mock("../mutations/useAccountMutations", () => ({
+  useUpdateProfile: jest.requireActual("../mutations/useAccountMutations")
+    .useUpdateProfile,
+}));
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -19,12 +19,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
-import {
-  useGetOrganisation,
-  useUpdateOrganisation,
-  IUpdateOrganisationPayload,
-} from "@/hooks/endpoints/useOrganisationHook";
 import { useUserStore } from "@/state/userStore";
+import { useGetOrganisation } from "@/hooks/queries/useOrganisationQueries";
+import { useUpdateOrganisation } from "@/hooks/mutations/useOrganisationMutations";
+import {
+  IOrganisation,
+  IUpdateOrganisationPayload,
+} from "@/types/organisation.types";
 
 export default function OrganisationSettingsPage() {
   const { userData } = useUserStore();

@@ -29,9 +29,8 @@ import DisplayRespondsMessage from "@/components/DisplayResponse";
 import Image from "next/image";
 import { getApiErrorMessage } from "@/utils/apiClient";
 import { useUserStore } from "@/state/userStore";
-import { uploadFile } from "@/services/fileService";
-
-import { useGetKYCDocumentTypes } from "@/hooks/endpoints/useOptionsHook";
+import { uploadFile } from "@/hooks/endpoints/useFile";
+import { useGetKYCDocumentTypes } from "@/hooks/queries/useOptionsQueries";
 import { accountIdentitySchema } from "@/lib/schemas/customer/accountIdentity.schema";
 
 const FormSchema = accountIdentitySchema;

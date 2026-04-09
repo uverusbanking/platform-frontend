@@ -1,13 +1,7 @@
-import { IApiResponse, TError } from "@/types/apiResponseType";
-import {
-  getWallets,
-  IWallet,
-  IGetWalletsParams,
-} from "@/services/walletService";
 import { useQuery } from "@tanstack/react-query";
+import { IGetWalletsParams } from "@/types/wallet.types";
 import { QUERY_KEYS } from "@/lib/queryKeys";
-
-export { type IWallet, type IGetWalletsParams };
+import { getWallets } from "../endpoints/useWallet";
 
 export const useGetWallets = (params: IGetWalletsParams) => {
   return useQuery({

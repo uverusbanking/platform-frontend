@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { useUserStore } from "@/state/userStore";
+import { useGetApiKeys } from "@/hooks/queries/useCompanyQueries";
 import {
-  useGetApiKeys,
   useAddApiKey,
   useDeleteApiKey,
-} from "@/hooks/endpoints/useCompanyHook";
+} from "@/hooks/mutations/useCompanyMutations";
 import { toast } from "sonner";
 import {
   Loader2,

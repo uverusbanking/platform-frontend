@@ -7,11 +7,11 @@ import {
   act,
 } from "@testing-library/react";
 import { AddressSteps } from "./AddressSteps";
-import { useGetLocations } from "@/hooks/endpoints/useOptionsHook";
+import { useGetLocations } from "@/hooks/queries/useOptionsQueries";
 import { ICustomerData } from "../AddCustomerDialog";
 
 // Mock the hook
-jest.mock("@/hooks/endpoints/useOptionsHook");
+jest.mock("@/hooks/queries/useOptionsQueries");
 
 // Mock UI components
 jest.mock("@/components/ui/select", () => ({

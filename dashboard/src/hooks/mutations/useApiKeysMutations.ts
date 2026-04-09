@@ -1,24 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { QUERY_KEYS } from "@/lib/queryKeys";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { IApiResponse, TError } from "@/types/apiResponseType";
 import { IApiKey, ICreateApiKeyPayload } from "@/types/apiKeys.types";
-import {
-  createApiKey,
-  deleteApiKey,
-  getApiKeys,
-} from "@/services/apiKeysService";
-
-export const useGetApiKeys = () => {
-  return useQuery<IApiResponse<IApiKey[]>, TError>({
-    queryKey: [QUERY_KEYS.API_KEYS],
-    queryFn: getApiKeys,
-    staleTime: 1000 * 60 * 30,
-  });
-};
+import { createApiKey, deleteApiKey } from "@/hooks/endpoints/useApiKeys";
+import { QUERY_KEYS } from "@/lib/queryKeys";
 
 export const useCreateApiKey = () => {
   const queryClient = useQueryClient();
-
   return useMutation<IApiResponse<IApiKey>, TError, ICreateApiKeyPayload>({
     mutationFn: createApiKey,
     onSuccess: (response) => {
@@ -31,7 +18,6 @@ export const useCreateApiKey = () => {
 
 export const useDeleteApiKey = () => {
   const queryClient = useQueryClient();
-
   return useMutation<IApiResponse<unknown>, TError, string>({
     mutationFn: deleteApiKey,
     onSuccess: (response) => {

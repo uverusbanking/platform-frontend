@@ -10,21 +10,11 @@ export interface ILocation {
   level: number;
   children?: ILocation[];
 }
-
-export interface IKYCDocumentType {
-  label: string;
-  value: string;
-}
-
-export interface IEmploymentStatus {
-  label: string;
-  value: string;
-}
-
-export interface IKinRelationship {
-  label: string;
-  value: string;
-}
+import {
+  IKYCDocumentType,
+  IEmploymentStatus,
+  IKinRelationship,
+} from "@/types/options.types";
 
 export const getLocations = async (
   parent_slug?: string,

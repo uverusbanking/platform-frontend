@@ -7,18 +7,19 @@ import {
   within,
 } from "@testing-library/react";
 import Staff from "./page";
+import { useGetCompanyUsers } from "@/hooks/queries/useCompanyQueries";
 import {
-  useGetCompanyUsers,
   useAddBrandUser,
   useUpdateBrandUser,
   useDeleteBrandUser,
-} from "@/hooks/endpoints/useCompanyHook";
-import { useGetEncryptionPublicKey } from "@/hooks/endpoints/useAuthHook";
+} from "@/hooks/mutations/useCompanyMutations";
+import { useGetEncryptionPublicKey } from "@/hooks/queries/useAuthQueries";
 import { encryptPassword } from "@/utils/encryption";
 
 // Mock the hooks
-jest.mock("@/hooks/endpoints/useCompanyHook");
-jest.mock("@/hooks/endpoints/useAuthHook");
+jest.mock("@/hooks/queries/useCompanyQueries");
+jest.mock("@/hooks/mutations/useCompanyMutations");
+jest.mock("@/hooks/queries/useAuthQueries");
 jest.mock("@/utils/encryption");
 
 // Mock UI components that are hard to interact with in JSDOM

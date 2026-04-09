@@ -16,7 +16,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { AddCustomerDialog } from "@/components/customers/AddCustomerDialog";
-import { useGetCustomers } from "@/hooks/endpoints/useCustomerHook";
+import { useGetCustomers } from "@/hooks/queries/useCustomerQueries";
 import { ICustomer } from "@/types/customer.types";
 import { CreateCustomerPaymentLinkDialog } from "@/components/customers/CreateCustomerPaymentLinkDialog";
 import { useUserStore } from "@/state/userStore";

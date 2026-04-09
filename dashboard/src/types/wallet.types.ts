@@ -1,5 +1,3 @@
-import apiClient from "@/lib/axios";
-import { IApiResponse } from "@/types/apiResponseType";
 export interface IWallet {
   id: string;
   name: string;
@@ -75,14 +73,8 @@ export interface ProviderMetadata {
   enable_business_name: string;
   SettlementAccountNumber: string;
 }
+
 export interface IGetWalletsParams {
   customer_id?: string;
   environment?: "LIVE" | "SANDBOX";
 }
-
-export const getWallets = async (
-  params: IGetWalletsParams,
-): Promise<IApiResponse<IWallet>> => {
-  const response = await apiClient.get("/wallets/organisation", { params });
-  return response.data;
-};

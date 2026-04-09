@@ -15,7 +15,7 @@ import DisplayRespondsMessage from "../DisplayResponse";
 import { Button } from "../ui/button";
 import { apiErrorResponse, getApiErrorMessage } from "@/utils/apiClient";
 import { documentInterface } from "@/types/companyRegistration";
-import { uploadFile } from "@/services/fileService";
+import { uploadFile } from "@/hooks/endpoints/useFile";
 import Image from "next/image";
 
 interface DocumentsStepProps {

@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, act } from "@testing-library/react";
 import { AccountIdentitySteps } from "./AccountIdentitySteps";
-import { useGetKYCDocumentTypes } from "@/hooks/endpoints/useOptionsHook";
+import { useGetKYCDocumentTypes } from "@/hooks/queries/useOptionsQueries";
 import { ICustomerData } from "../AddCustomerDialog";
 import { useUserStore } from "@/state/userStore";
 
-jest.mock("@/hooks/endpoints/useOptionsHook");
+jest.mock("@/hooks/queries/useOptionsQueries");
 jest.mock("@/state/userStore");
 
 // Mock UI components

@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useFreezeCustomer } from "@/hooks/endpoints/useCustomerHook";
 import { getApiErrorMessage } from "@/utils/apiClient";
+import { useFreezeCustomer } from "@/hooks/mutations/useCustomerMutations";
 
 const categoryOptions = ["REGULATORY", "SECURITY", "USER"] as const;
 const reasonOptions = [

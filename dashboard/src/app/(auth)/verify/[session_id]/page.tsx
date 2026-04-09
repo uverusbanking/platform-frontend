@@ -21,7 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { defaultApiResponse } from "@/utils/resources";
 import DisplayRespondsMessage from "@/components/DisplayResponse";
 import { useUserStore } from "@/state/userStore";
-import { useVerifyLogin, useLogin } from "@/hooks/endpoints/useAuthHook";
+import { useVerifyLogin, useLogin } from "@/hooks/mutations/useAuthMutations";
 import { codeSchema } from "@/lib/schemas/fields/code.schema";
 import { resolveUserPermissions } from "@/auth/resolveUserPermissions";
 import { getApiErrorMessage } from "@/utils/apiClient";

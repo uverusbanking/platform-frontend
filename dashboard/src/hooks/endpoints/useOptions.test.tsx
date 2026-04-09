@@ -4,7 +4,7 @@ import {
   useGetKYCDocumentTypes,
   useGetEmploymentStatuses,
   useGetNextOfKinRelationships,
-} from "./useOptionsHook";
+} from "../queries/useOptionsQueries";
 import apiClient from "@/lib/axios";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
