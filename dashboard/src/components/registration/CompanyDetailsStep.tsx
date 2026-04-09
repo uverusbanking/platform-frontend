@@ -10,7 +10,7 @@ import DisplayRespondsMessage from "../DisplayResponse";
 import { Button } from "../ui/button";
 import { apiErrorResponse } from "@/utils/apiClient";
 import { Loader2 } from "lucide-react";
-import { checkIfCompanyExists } from "@/services/companyService";
+import { checkIfCompanyExists } from "@/hooks/endpoints/useCompany";
 import { companyDetailsSchema } from "@/lib/schemas/registration/companyDetails.schema";
 
 const FormSchema = companyDetailsSchema;
