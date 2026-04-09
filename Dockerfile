@@ -54,15 +54,20 @@ EXPOSE 3000
 ENV PORT=3000 HOSTNAME="0.0.0.0"
 CMD ["doppler", "run", "--", "node", "control/server.js"]
 
-# ─── Runtime: platform-dashboard ────────────────────────────────────────
-FROM runner AS platform-dashboard
-COPY --from=builder /app/dashboard/public ./dashboard/public
-COPY --from=builder --chown=nextjs:nodejs /app/dashboard/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/dashboard/.next/static ./dashboard/.next/static
-USER nextjs
+# ─── Runtime: platform-dashboard (Vite SPA via nginx) ───────────────────
+FROM nginx:alpine AS platform-dashboard
+# Install Doppler CLI
+RUN apk add --no-cache wget && \
+    wget -q -t3 'https://packages.doppler.com/public/cli/rsa.8004D9FF50437357.key' -O /etc/apk/keys/cli@doppler-8004D9FF50437357.rsa.pub && \
+    echo 'https://packages.doppler.com/public/cli/alpine/any-version/main' | tee -a /etc/apk/repositories && \
+    apk update && \
+    apk add doppler
+# Copy built static assets from builder
+COPY --from=builder /app/dashboard/dist /usr/share/nginx/html
+# SPA fallback: serve index.html for all routes
+RUN printf 'server {\n  listen 3000;\n  root /usr/share/nginx/html;\n  index index.html;\n  location / {\n    try_files $uri $uri/ /index.html;\n  }\n}\n' > /etc/nginx/conf.d/default.conf
 EXPOSE 3000
-ENV PORT=3000 HOSTNAME="0.0.0.0"
-CMD ["doppler", "run", "--", "node", "dashboard/server.js"]
+CMD ["doppler", "run", "--", "nginx", "-g", "daemon off;"]
 
 # ─── Runtime: platform-personal-web (Vite SPA via nginx) ────────────────
 FROM nginx:alpine AS platform-personal-web
