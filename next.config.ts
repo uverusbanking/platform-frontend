@@ -1,2 +1,1 @@
-// This file is deprecated. Please use next.config.mjs
-export default {};
+// This file is intentionally empty to resolve conflict with next.config.mjs
