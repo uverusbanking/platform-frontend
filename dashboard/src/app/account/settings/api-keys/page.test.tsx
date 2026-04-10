@@ -12,39 +12,51 @@ vi.mock("@/state/userStore");
 vi.mock("@/hooks/queries/useApiKeysQueries");
 vi.mock("@/hooks/mutations/useApiKeysMutations");
 
-const MockWrapper = require("react").forwardRef(
-  ({ children }: PropsWithChildren, ref: any) => (
+vi.mock("@/components/ui/dialog", () => {
+  const React = require("react");
+  const MockWrapper = React.forwardRef(({ children }: any, ref: any) => (
     <div ref={ref}>{children}</div>
-  ),
-);
+  ));
+  return {
+    Dialog: MockWrapper,
+    DialogContent: MockWrapper,
+    DialogHeader: MockWrapper,
+    DialogTitle: MockWrapper,
+    DialogDescription: MockWrapper,
+    DialogFooter: MockWrapper,
+  };
+});
 
-vi.mock("@/components/ui/dialog", () => ({
-  Dialog: MockWrapper,
-  DialogContent: MockWrapper,
-  DialogHeader: MockWrapper,
-  DialogTitle: MockWrapper,
-  DialogDescription: MockWrapper,
-  DialogFooter: MockWrapper,
-}));
+vi.mock("@/components/ui/alert-dialog", () => {
+  const React = require("react");
+  const MockWrapper = React.forwardRef(({ children }: any, ref: any) => (
+    <div ref={ref}>{children}</div>
+  ));
+  return {
+    AlertDialog: MockWrapper,
+    AlertDialogContent: MockWrapper,
+    AlertDialogHeader: MockWrapper,
+    AlertDialogTitle: MockWrapper,
+    AlertDialogDescription: MockWrapper,
+    AlertDialogFooter: MockWrapper,
+    AlertDialogCancel: MockWrapper,
+    AlertDialogAction: MockWrapper,
+  };
+});
 
-vi.mock("@/components/ui/alert-dialog", () => ({
-  AlertDialog: MockWrapper,
-  AlertDialogContent: MockWrapper,
-  AlertDialogHeader: MockWrapper,
-  AlertDialogTitle: MockWrapper,
-  AlertDialogDescription: MockWrapper,
-  AlertDialogFooter: MockWrapper,
-  AlertDialogCancel: MockWrapper,
-  AlertDialogAction: MockWrapper,
-}));
-
-vi.mock("@/components/ui/select", () => ({
-  Select: MockWrapper,
-  SelectTrigger: MockWrapper,
-  SelectValue: MockWrapper,
-  SelectContent: MockWrapper,
-  SelectItem: MockWrapper,
-}));
+vi.mock("@/components/ui/select", () => {
+  const React = require("react");
+  const MockWrapper = React.forwardRef(({ children }: any, ref: any) => (
+    <div ref={ref}>{children}</div>
+  ));
+  return {
+    Select: MockWrapper,
+    SelectTrigger: MockWrapper,
+    SelectValue: MockWrapper,
+    SelectContent: MockWrapper,
+    SelectItem: MockWrapper,
+  };
+});
 
 describe("API Keys Settings Page", () => {
   const mockedUseUserStore = useUserStore as vi.MockedFunction<

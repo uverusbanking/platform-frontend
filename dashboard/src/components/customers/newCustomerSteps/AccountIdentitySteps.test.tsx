@@ -23,10 +23,8 @@ vi.mock("@/components/ui/select", () => {
         {children}
       </select>
     ),
-    SelectTrigger: React.forwardRef(({ children }: any, ref: any) => (
-      <div ref={ref}>{children}</div>
-    )),
-    SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
+    SelectTrigger: React.forwardRef(() => null),
+    SelectValue: React.forwardRef(() => null),
     SelectContent: ({ children }: any) => <>{children}</>,
     SelectItem: ({ children, value }: any) => (
       <option value={value}>{children}</option>
