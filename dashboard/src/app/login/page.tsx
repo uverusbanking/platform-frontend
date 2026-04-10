@@ -21,7 +21,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { defaultApiResponse } from "@/utils/resources";
-import { encryptPassword } from "@/utils/encryption";
+import { encryptPassword } from "@shared/core";
 import { getApiErrorMessage } from "@/utils/apiClient";
 import DisplayRespondsMessage from "@/components/DisplayResponse";
 import { useUserStore } from "@/state/userStore";

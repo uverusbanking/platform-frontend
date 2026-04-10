@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthService } from "@/services";
 import type { UserDto, AuthResponseDto } from "@/types";
+import { encryptPassword } from "@shared/core";
 
 interface AuthContextType {
   user: UserDto | null;
@@ -70,7 +71,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const signIn = async (email: string, password: string) => {
     try {
-      const response = await AuthService.login({ email, password });
+      const keyResponse = await AuthService.getPublicKey();
+      const encryptionKey = keyResponse.data.public_key;
+      const encryptedPassword = await encryptPassword(password, encryptionKey);
+
+      const response = await AuthService.login({
+        email,
+        encrypted_password: encryptedPassword,
+      });
 
       // Store token and user data
       localStorage.setItem(TOKEN_KEY, response.accessToken);

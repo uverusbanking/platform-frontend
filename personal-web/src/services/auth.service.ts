@@ -12,6 +12,10 @@ import type {
 } from "@/types";
 
 export const AuthService = {
+  getPublicKey: () =>
+    api.get<{ message: string; data: { public_key: string } }>(
+      "/api/v1/auth/public-key",
+    ),
   register: (data: RegisterDto) =>
     api.post<MessageResponseDto>("/api/v1/auth/register", data), // TODO: Verify if registration is public or org-invitation based
 

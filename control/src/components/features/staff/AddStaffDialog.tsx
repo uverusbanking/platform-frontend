@@ -28,7 +28,7 @@ import { Gender } from "@/types/enums";
 import { ROLES } from "@/auth/roles";
 import { useCreatePlatformUser } from "@/hooks/mutations/usePlatformUserMutations";
 import { useGetEncryptionPublicKey } from "@/hooks/endpoints/useAuth";
-import { encryptPassword } from "@/lib/encryption";
+import { encryptPassword } from "@shared/core";
 import { IRole } from "@/types/user.types";
 import { staffSchema } from "@/lib/schemas/staff/staff.schema";
 

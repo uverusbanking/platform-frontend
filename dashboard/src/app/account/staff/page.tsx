@@ -64,7 +64,7 @@ import { useGetEncryptionPublicKey } from "@/hooks/queries/useAuthQueries";
 import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { encryptPassword } from "@/utils/encryption";
+import { encryptPassword } from "@shared/core";
 import { getApiErrorMessage } from "@/utils/apiClient";
 import { IUser } from "@/types/user.types";
 import { Pagination } from "@/components/shared/Pagination";

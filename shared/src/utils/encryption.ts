@@ -1,24 +1,3 @@
-// import { publicEncrypt, constants } from 'crypto';
-
-/** Encrypt with Public Key
-    export const encryptWithPublicKey = (plaintext: string, publicKeyPem: string): string => {
-        if (!plaintext) throw new Error('Plaintext is required');
-        if (!publicKeyPem) throw new Error('Public key PEM is required');
-
-
-        const encrypted = publicEncrypt(
-            {
-                key: publicKeyPem,
-                padding: constants.RSA_PKCS1_OAEP_PADDING,
-                oaepHash: 'sha256',
-            },
-            Buffer.from(plaintext, 'utf8'),
-        );
-
-        return encrypted.toString('base64');
-    }
-*/
-
 /** Encrypt with Public Key */
 // Helper: convert PEM string to ArrayBuffer
 const importRsaPublicKey = async (pem: string): Promise<CryptoKey> => {

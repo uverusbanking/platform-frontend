@@ -14,7 +14,7 @@ import {
   useDeleteBrandUser,
 } from "@/hooks/mutations/useCompanyMutations";
 import { useGetEncryptionPublicKey } from "@/hooks/queries/useAuthQueries";
-import { encryptPassword } from "@/utils/encryption";
+import { encryptPassword } from "@shared/core";
 
 // Mock the hooks
 vi.mock("@/hooks/queries/useCompanyQueries");

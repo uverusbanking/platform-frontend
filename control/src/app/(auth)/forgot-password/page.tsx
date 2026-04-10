@@ -33,7 +33,7 @@ import {
 } from "@/hooks/endpoints/useAuth";
 import { VerifyOtpResponse } from "@shared/core";
 import { useResetPassword } from "@/hooks/mutations/useAuthMutations";
-import { encryptPassword } from "@/lib/encryption";
+import { encryptPassword } from "@shared/core";
 import { emailSchema } from "@/lib/schemas/fields/email.schema";
 import { otpSchema } from "@/lib/schemas/fields/otp.schema";
 import { passwordSchema } from "@/lib/schemas/fields/password.schema";

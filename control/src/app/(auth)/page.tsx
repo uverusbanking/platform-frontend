@@ -23,7 +23,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { defaultApiResponse, passwordRegex } from "@/lib/resources";
-import { encryptPassword } from "@/lib/encryption";
+import { encryptPassword } from "@shared/core";
 import DisplayRespondsMessage from "@/components/DisplayResponse";
 import { useUserStore } from "@/state/userStore";
 import { loginSchema } from "@/lib/schemas/auth/login.schema";

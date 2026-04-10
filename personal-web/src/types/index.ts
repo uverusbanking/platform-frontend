@@ -13,7 +13,8 @@ export interface RegisterDto {
 
 export interface LoginDto {
   email: string;
-  password: string;
+  password?: string;
+  encrypted_password?: string;
 }
 
 export interface UserDto {

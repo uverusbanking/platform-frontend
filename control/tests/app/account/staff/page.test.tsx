@@ -15,7 +15,7 @@ import {
 } from "@/hooks/mutations/usePlatformUserMutations";
 import { useGetRoles } from "@/hooks/queries/usePlatformQueries";
 import { useGetEncryptionPublicKey } from "@/hooks/endpoints/useAuth";
-import { encryptPassword } from "@/lib/encryption";
+import { encryptPassword } from "@shared/core";
 import { UserStatus } from "@/types/user.types";
 import { Gender } from "@/types/enums";
 import { ROLES } from "@/auth/roles";
