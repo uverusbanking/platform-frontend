@@ -38,6 +38,8 @@ class ApiClient {
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
+      "origin-domain":
+        typeof window !== "undefined" ? window.location.host : "",
     };
 
     if (customHeaders) {
@@ -133,6 +135,8 @@ class ApiClient {
 
     const headers: Record<string, string> = {
       ...customHeaders,
+      "origin-domain":
+        typeof window !== "undefined" ? window.location.host : "",
     };
 
     const token = localStorage.getItem("sb-access-token");
