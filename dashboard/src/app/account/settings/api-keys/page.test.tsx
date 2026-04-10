@@ -12,9 +12,11 @@ vi.mock("@/state/userStore");
 vi.mock("@/hooks/queries/useApiKeysQueries");
 vi.mock("@/hooks/mutations/useApiKeysMutations");
 
-function MockWrapper({ children }: PropsWithChildren) {
-  return <div>{children}</div>;
-}
+const MockWrapper = require("react").forwardRef(
+  ({ children }: PropsWithChildren, ref: any) => (
+    <div ref={ref}>{children}</div>
+  ),
+);
 
 vi.mock("@/components/ui/dialog", () => ({
   Dialog: MockWrapper,

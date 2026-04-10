@@ -14,25 +14,30 @@ import { ICustomerData } from "../AddCustomerDialog";
 vi.mock("@/hooks/queries/useOptionsQueries");
 
 // Mock UI components
-vi.mock("@/components/ui/select", () => ({
-  Select: ({ children, onValueChange, value, disabled }: any) => (
-    <select
-      data-testid="mock-select"
-      disabled={disabled}
-      onChange={(e) => onValueChange(e.target.value)}
-      value={value}
-    >
-      <option value="">Select...</option>
-      {children}
-    </select>
-  ),
-  SelectTrigger: () => null,
-  SelectValue: () => null,
-  SelectContent: ({ children }: any) => <>{children}</>,
-  SelectItem: ({ children, value }: any) => (
-    <option value={value}>{children}</option>
-  ),
-}));
+vi.mock("@/components/ui/select", () => {
+  const React = require("react");
+  return {
+    Select: ({ children, onValueChange, value, disabled }: any) => (
+      <select
+        data-testid="mock-select"
+        disabled={disabled}
+        onChange={(e) => onValueChange(e.target.value)}
+        value={value}
+      >
+        <option value="">Select...</option>
+        {children}
+      </select>
+    ),
+    SelectTrigger: React.forwardRef(({ children }: any, ref: any) => (
+      <div ref={ref}>{children}</div>
+    )),
+    SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
+    SelectContent: ({ children }: any) => <>{children}</>,
+    SelectItem: ({ children, value }: any) => (
+      <option value={value}>{children}</option>
+    ),
+  };
+});
 
 const mockCustomerData: ICustomerData = {
   firstName: "John",

@@ -23,36 +23,50 @@ vi.mock("@/hooks/queries/useAuthQueries");
 vi.mock("@/utils/encryption");
 
 // Mock UI components that are hard to interact with in JSDOM
-vi.mock("@/components/ui/select", () => ({
-  Select: ({ children, onValueChange, value }: any) => (
-    <select
-      data-testid="mock-select"
-      onChange={(e) => onValueChange(e.target.value)}
-      value={value}
-    >
-      <option value="">Select...</option>
-      {children}
-    </select>
-  ),
-  SelectTrigger: () => null,
-  SelectValue: () => null,
-  SelectContent: ({ children }: any) => <>{children}</>,
-  SelectItem: ({ children, value }: any) => (
-    <option value={value}>{children}</option>
-  ),
-}));
+vi.mock("@/components/ui/select", () => {
+  const React = require("react");
+  return {
+    Select: ({ children, onValueChange, value }: any) => (
+      <select
+        data-testid="mock-select"
+        onChange={(e) => onValueChange(e.target.value)}
+        value={value}
+      >
+        <option value="">Select...</option>
+        {children}
+      </select>
+    ),
+    SelectTrigger: React.forwardRef(({ children }: any, ref: any) => (
+      <div ref={ref}>{children}</div>
+    )),
+    SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
+    SelectContent: ({ children }: any) => <>{children}</>,
+    SelectItem: ({ children, value }: any) => (
+      <option value={value}>{children}</option>
+    ),
+  };
+});
 
-vi.mock("@/components/ui/dialog", () => ({
-  Dialog: ({ children }: any) => <div className="mock-dialog">{children}</div>,
-  DialogTrigger: ({ children }: any) => <>{children}</>,
-  DialogContent: ({ children }: any) => (
-    <div className="mock-dialog-content">{children}</div>
-  ),
-  DialogHeader: ({ children }: any) => <div>{children}</div>,
-  DialogTitle: ({ children }: any) => <div>{children}</div>,
-  DialogDescription: ({ children }: any) => <div>{children}</div>,
-  DialogFooter: ({ children }: any) => <div>{children}</div>,
-}));
+vi.mock("@/components/ui/dialog", () => {
+  const React = require("react");
+  return {
+    Dialog: ({ children }: any) => (
+      <div className="mock-dialog">{children}</div>
+    ),
+    DialogTrigger: React.forwardRef(({ children }: any, ref: any) => (
+      <div ref={ref}>{children}</div>
+    )),
+    DialogContent: React.forwardRef(({ children }: any, ref: any) => (
+      <div ref={ref} className="mock-dialog-content">
+        {children}
+      </div>
+    )),
+    DialogHeader: ({ children }: any) => <div>{children}</div>,
+    DialogTitle: ({ children }: any) => <div>{children}</div>,
+    DialogDescription: ({ children }: any) => <div>{children}</div>,
+    DialogFooter: ({ children }: any) => <div>{children}</div>,
+  };
+});
 
 const mockStaffData = [
   {
