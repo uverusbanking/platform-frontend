@@ -68,7 +68,18 @@ const Index = () => {
 
     setLoading(true);
 
-    const { error, needsVerification } = await signIn(email, password);
+    const { error, needsVerification, needs2FA } = (await signIn(
+      email,
+      password,
+    )) as any;
+
+    if (needs2FA) {
+      navigate("/auth/verify-otp", {
+        state: { email, fromLogin: true, is2FA: true },
+      });
+      setLoading(false);
+      return;
+    }
 
     if (needsVerification) {
       setPendingCredentials(email, password);
@@ -292,7 +303,6 @@ const Index = () => {
                         <Label htmlFor="password">Password</Label>
                         <Link
                           to="/auth/forgot-password"
-                          size="sm"
                           className="text-xs text-primary hover:underline"
                         >
                           Forgot password?

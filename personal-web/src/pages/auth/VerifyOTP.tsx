@@ -31,6 +31,7 @@ const VerifyOTP = () => {
 
   const email = location.state?.email || pendingEmail;
   const fromLogin = location.state?.fromLogin;
+  const is2FA = location.state?.is2FA;
   const fromRegistration = location.state?.fromRegistration;
   const hasPassword = pendingPassword || false;
 
@@ -82,14 +83,18 @@ const VerifyOTP = () => {
       }
 
       setVerified(true);
-      setSuccess("Email verified successfully! Signing you in...");
+      setSuccess(
+        is2FA
+          ? "Verification successful! Signing you in..."
+          : "Email verified successfully! Signing you in...",
+      );
 
       // Redirect to dashboard after verification
       setTimeout(() => {
         navigate("/account/dashboard");
       }, 1500);
     } else {
-      // Just verify OTP without auto-login
+      // Just verify OTP without auto-login (for forgot password/default)
       const { error } = await verifyOTP(email, otp);
 
       if (error) {
@@ -99,11 +104,11 @@ const VerifyOTP = () => {
       }
 
       setVerified(true);
-      setSuccess("Email verified successfully! Please sign in.");
+      setSuccess("Verification successful!");
 
-      // Redirect to login after verification
+      // Redirect accordingly
       setTimeout(() => {
-        navigate("/auth/login");
+        navigate(fromLogin ? "/account/dashboard" : "/auth/login");
       }, 1500);
     }
   };
@@ -169,18 +174,20 @@ const VerifyOTP = () => {
               </div>
             </div>
             <CardTitle className="text-xl sm:text-2xl">
-              {verified ? "Email verified!" : "Verify your email"}
+              {verified
+                ? "Verification successful!"
+                : is2FA
+                  ? "Verify your identity"
+                  : "Verify your email"}
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm">
               {verified ? (
-                hasPassword ? (
-                  "Signing you in..."
-                ) : (
-                  "Redirecting to login..."
-                )
+                "Redirecting you securely..."
               ) : (
                 <>
-                  Enter the 6-digit code sent to
+                  {is2FA
+                    ? "Enter the 6-digit security code sent to"
+                    : "Enter the 6-digit code sent to"}
                   <br />
                   <span className="font-medium text-foreground">{email}</span>
                 </>
@@ -234,6 +241,8 @@ const VerifyOTP = () => {
                 >
                   {loading ? (
                     <Loader2 className="animate-spin" />
+                  ) : is2FA ? (
+                    "Verify & Login"
                   ) : (
                     "Verify Email"
                   )}

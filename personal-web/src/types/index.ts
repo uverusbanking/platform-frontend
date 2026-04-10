@@ -28,6 +28,13 @@ export interface UserDto {
 export interface AuthResponseDto {
   accessToken: string;
   user: UserDto;
+  session_id?: string;
+  twoFactorRequired?: boolean;
+}
+
+export interface Verify2FACodeDto {
+  session_id: string;
+  code: string;
 }
 
 export interface SendOtpDto {

@@ -9,6 +9,7 @@ import type {
   ForgotPasswordDto,
   ResetPasswordDto,
   MessageResponseDto,
+  Verify2FACodeDto,
 } from "@/types";
 
 export const AuthService = {
@@ -21,6 +22,12 @@ export const AuthService = {
 
   login: (data: LoginDto) =>
     api.post<AuthResponseDto>("/api/v1/customers/personal/auth/login", data),
+
+  verify2FACode: (data: Verify2FACodeDto) =>
+    api.post<AuthResponseDto>(
+      "/api/v1/customers/personal/auth/verify-code",
+      data,
+    ),
 
   sendOtp: (data: SendOtpDto) =>
     api.post<MessageResponseDto>(

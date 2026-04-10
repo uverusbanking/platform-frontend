@@ -21,11 +21,13 @@ interface AuthContextType {
   ) => Promise<{ error: Error | null }>;
   pendingEmail: string | null;
   pendingPassword: string | null;
+  pendingSessionId: string | null;
   isAdmin: boolean;
   setPendingCredentials: (
     email: string | null,
     password: string | null,
   ) => void;
+  setPendingSessionId: (sessionId: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,6 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(true);
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [pendingPassword, setPendingPassword] = useState<string | null>(null);
+  const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
 
   const setPendingCredentials = (
     email: string | null,
@@ -80,6 +83,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         encrypted_password: encryptedPassword,
       });
 
+      if (response.twoFactorRequired) {
+        setPendingSessionId(response.session_id || null);
+        setPendingCredentials(email, password);
+        return { error: null, needs2FA: true } as any;
+      }
+
       // Store token and user data
       localStorage.setItem(TOKEN_KEY, response.accessToken);
       localStorage.setItem(USER_KEY, JSON.stringify(response.user));
@@ -116,6 +125,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const verifyOTP = async (email: string, otp: string) => {
     try {
+      if (pendingSessionId) {
+        const response = await AuthService.verify2FACode({
+          session_id: pendingSessionId,
+          code: otp,
+        });
+
+        // Store token and user data on successful 2FA
+        localStorage.setItem(TOKEN_KEY, response.accessToken);
+        localStorage.setItem(USER_KEY, JSON.stringify(response.user));
+
+        setAccessToken(response.accessToken);
+        setUser(response.user);
+        setPendingSessionId(null);
+        setPendingCredentials(null, null);
+
+        return { error: null };
+      }
+
+      // Fallback to legacy verifyOtp for registration/forgot-password if needed
       await AuthService.verifyOtp({ email, otp });
       return { error: null };
     } catch (error) {
@@ -180,8 +208,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         verifyAndAuthenticate,
         pendingEmail,
         pendingPassword,
+        pendingSessionId,
         isAdmin: user?.role === "admin",
         setPendingCredentials,
+        setPendingSessionId,
       }}
     >
       {children}
