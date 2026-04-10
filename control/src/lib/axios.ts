@@ -9,6 +9,8 @@ const API_BASE_URL = API_URL
   ? `${API_URL}/api/${API_VERSION}`
   : `/api/${API_VERSION}`;
 
+console.log("[CONTROL] API URL:", API_BASE_URL);
+
 type RequestConfigWithRetry = InternalAxiosRequestConfig & {
   _retry?: boolean;
 };

@@ -1,8 +1,9 @@
 const API_URL = import.meta.env.VITE_API_URL || "";
 const API_VERSION = import.meta.env.VITE_API_VERSION || "v1";
-const API_BASE_URL = API_URL
-  ? `${API_URL}/api/${API_VERSION}`
-  : `http://localhost:4110/api/${API_VERSION}`;
+// Note: personal-web services hardcode /api/v1/, so base URL should not include it.
+const API_BASE_URL = API_URL || "http://localhost:4110";
+
+console.log("[PERSONAL-WEB] API URL:", API_BASE_URL);
 
 interface ApiOptions {
   query?: Record<string, any>;
