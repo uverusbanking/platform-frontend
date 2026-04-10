@@ -20,11 +20,10 @@ COPY . .
 # ─── Stage 2: Builder (build all apps) ──────────────────────────────────
 FROM base AS builder
 
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-
-ARG VITE_API_BASE_URL
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ARG VITE_API_URL
+ARG VITE_API_VERSION=v1
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_API_VERSION=$VITE_API_VERSION
 
 RUN cd control && pnpm run build
 RUN pnpm run build:dashboard
