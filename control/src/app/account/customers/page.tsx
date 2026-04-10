@@ -17,7 +17,6 @@ import {
   AlertCircle,
   ShieldCheck,
 } from "lucide-react";
-import { AddCustomerDialog } from "@/components/features/customers/AddCustomerDialog";
 
 import { ICustomer } from "@/types/customer.types";
 import { CreateCustomerPaymentLinkDialog } from "@/components/features/customers/CreateCustomerPaymentLinkDialog";
@@ -102,7 +101,7 @@ function CustomerSkeleton() {
   );
 }
 
-function EmptyCustomers({ onAdd }: { onAdd: () => void }) {
+function EmptyCustomers() {
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center space-y-6">
       <div className="relative">
@@ -118,10 +117,6 @@ function EmptyCustomers({ onAdd }: { onAdd: () => void }) {
         <p className="text-sm text-muted-foreground leading-relaxed">
           It looks like no customers have been added yet.
         </p>
-        <Button onClick={onAdd}>
-          <Plus className="w-4 h-4 mr-2" />
-          Enroll First Customer
-        </Button>
       </div>
     </div>
   );
@@ -131,7 +126,6 @@ export default function Customers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
   // const [selectedBranch, setSelectedBranch] = useState("all");
-  const [showAddDialog, setShowAddDialog] = useState(false);
   const [paymentLinkCustomer, setPaymentLinkCustomer] =
     useState<ICustomer | null>(null);
   const navigate = useNavigate();
@@ -254,13 +248,6 @@ export default function Customers() {
               <Download className="w-4 h-4 mr-2" />
               Export Data
             </Button> */}
-            <Button
-              className="flex-1 md:flex-none font-bold rounded-xl px-6 cursor-pointer"
-              onClick={() => setShowAddDialog(true)}
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Enroll Customer
-            </Button>
           </div>
         </div>
         {/* KPI Cards */}
@@ -396,7 +383,7 @@ export default function Customers() {
                         colSpan={8}
                         className="h-auto border-none hover:bg-transparent"
                       >
-                        <EmptyCustomers onAdd={() => setShowAddDialog(true)} />
+                        <EmptyCustomers />
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -500,9 +487,7 @@ export default function Customers() {
                               </DropdownMenuLabel>
                               <DropdownMenuItem
                                 onSelect={() =>
-                                  navigate(
-                                    `/account/customers/${customer.id}`,
-                                  )
+                                  navigate(`/account/customers/${customer.id}`)
                                 }
                                 className="rounded-lg h-10 cursor-pointer gap-2"
                               >
@@ -588,10 +573,6 @@ export default function Customers() {
           )}
         </Card>
       </div>
-
-      {/* Dialogs */}
-      <AddCustomerDialog open={showAddDialog} onOpenChange={setShowAddDialog} />
-
       {paymentLinkCustomer && (
         <CreateCustomerPaymentLinkDialog
           open={!!paymentLinkCustomer}
