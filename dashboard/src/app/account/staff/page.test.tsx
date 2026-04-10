@@ -20,7 +20,13 @@ import { encryptPassword } from "@shared/core";
 vi.mock("@/hooks/queries/useCompanyQueries");
 vi.mock("@/hooks/mutations/useCompanyMutations");
 vi.mock("@/hooks/queries/useAuthQueries");
-vi.mock("@/utils/encryption");
+vi.mock("@shared/core", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@shared/core")>();
+  return {
+    ...actual,
+    encryptPassword: vi.fn(),
+  };
+});
 
 // Mock UI components that are hard to interact with in JSDOM
 vi.mock("@/components/ui/select", () => {

@@ -28,7 +28,13 @@ vi.mock("@/hooks/endpoints/useAuth");
 vi.mock("@/state/userStore", () => ({
   useUserStore: vi.fn(),
 }));
-vi.mock("@/lib/encryption");
+vi.mock("@shared/core", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@shared/core")>();
+  return {
+    ...actual,
+    encryptPassword: vi.fn(),
+  };
+});
 
 import { useUserStore } from "@/state/userStore";
 
