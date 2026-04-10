@@ -1,10 +1,8 @@
 import { IApiResponse } from "@/types/apiResponse.type";
-import { IUser } from "@/types/user.types";
 import { ICustomer } from "@/types/customer.types";
 import apiClient from "@/lib/axios";
 import {
   IFreezeCustomerPayload,
-  ICreateCustomerPayload,
   IGetCustomersParams,
   ICustomerStats,
 } from "@/types/customer.types";
@@ -35,14 +33,6 @@ export const getCustomerStats = async (): Promise<
   IApiResponse<ICustomerStats>
 > => {
   const response = await apiClient.get("/customers/platform/stats");
-  return response.data;
-};
-
-///
-export const createCustomer = async (
-  payload: ICreateCustomerPayload,
-): Promise<IApiResponse<IUser>> => {
-  const response = await apiClient.post("/customers", payload);
   return response.data;
 };
 
