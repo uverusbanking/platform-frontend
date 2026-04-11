@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useUserProfile } from "@/hooks/queries/useUser";
+import { useWallet } from "@/hooks/useWallet";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -51,6 +52,9 @@ const Dashboard = () => {
     page: 1,
     limit: 10,
   });
+
+  const { wallet, isLoadingWallet, virtualAccount, isLoadingVirtualAccount } =
+    useWallet();
 
   // Safely extract transactions array
   const transactions = transactionsResponse?.data || [];
@@ -89,7 +93,8 @@ const Dashboard = () => {
   }, [user, authLoading, navigate]);
 
   const copyAccountNumber = () => {
-    const accountNumber = profile?.accountNumber;
+    const accountNumber =
+      virtualAccount?.account_number || profile?.accountNumber;
     if (accountNumber) {
       navigator.clipboard.writeText(accountNumber);
       toast.success("Account number copied!");
@@ -172,27 +177,18 @@ const Dashboard = () => {
                   {showBalance ? <Eye size={18} /> : <EyeOff size={18} />}
                 </button>
               </div>
-              {isLoading ? (
+              {isLoadingWallet ? (
                 <Skeleton className="h-8 sm:h-10 w-48 bg-white/20" />
-              ) : profileError ? (
-                <div className="mb-3 sm:mb-4">
-                  <p className="text-xl sm:text-2xl font-bold text-white/70">
-                    ₦****.**
-                  </p>
-                  <p className="text-xs text-warning mt-1">
-                    {"Unable to fetch balance"}
-                  </p>
-                </div>
               ) : (
                 <p className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
                   {showBalance
-                    ? formatCurrency(parseFloat(profile?.balance || "0"))
+                    ? formatCurrency(parseFloat(wallet?.balance || "0"))
                     : "₦****.**"}
                 </p>
               )}
 
               {/* Virtual Account Info - Prioritize platform data */}
-              {isLoading ? (
+              {isLoadingVirtualAccount ? (
                 <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-white/10">
                   <div className="flex-1 space-y-2">
                     <Skeleton className="h-3 w-24 bg-white/20" />
@@ -201,14 +197,18 @@ const Dashboard = () => {
                   <Skeleton className="h-8 w-8 rounded-lg bg-white/20" />
                 </div>
               ) : (
-                profile && (
+                (virtualAccount || profile?.accountNumber) && (
                   <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-white/15">
                     <div className="flex-1 min-w-0">
                       <p className="text-white/60 text-[10px] sm:text-xs mb-0.5 sm:mb-1">
-                        {profile?.bankName}
+                        {virtualAccount?.bank_name || profile?.bankName}
                       </p>
                       <p className="font-mono font-semibold text-sm sm:text-base truncate">
-                        {formatAccountNumber(profile?.accountNumber || "")}
+                        {formatAccountNumber(
+                          virtualAccount?.account_number ||
+                            profile?.accountNumber ||
+                            "",
+                        )}
                       </p>
                     </div>
                     <button

@@ -13,6 +13,8 @@ import {
   Clock,
   XCircle,
   RotateCcw,
+  Share2,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -32,6 +34,42 @@ const TransactionDetail = () => {
     if (transactionData?.reference) {
       navigator.clipboard.writeText(transactionData.reference);
       toast.success("Reference copied!");
+    }
+  };
+
+  const shareReceipt = async () => {
+    if (!transactionData) return;
+
+    const receiptText = `
+Transaction Receipt
+-------------------
+Amount: ${formatCurrency(amount)}
+Status: ${mappedStatus.toUpperCase()}
+Date: ${formatDateTime(transactionData.createdAt)}
+Type: ${type.toUpperCase()}
+Recipient: ${counterpartyName}
+Bank: ${counterpartyBank}
+Reference: ${transactionData.reference}
+Description: ${narration}
+-------------------
+Generated from Personal Banking
+    `.trim();
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Transaction Receipt",
+          text: receiptText,
+        });
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          copyReference();
+          toast.success("Receipt details copied to clipboard!");
+        }
+      }
+    } else {
+      navigator.clipboard.writeText(receiptText);
+      toast.success("Receipt details copied to clipboard!");
     }
   };
 
@@ -264,6 +302,10 @@ const TransactionDetail = () => {
 
         {/* Actions */}
         <div className="space-y-3">
+          <Button variant="gradient" className="w-full" onClick={shareReceipt}>
+            <Share2 size={18} className="mr-2" />
+            Share Receipt
+          </Button>
           <Button
             variant="outline"
             className="w-full"

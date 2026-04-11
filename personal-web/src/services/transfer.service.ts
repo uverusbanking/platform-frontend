@@ -7,27 +7,29 @@ import type {
   TransferResponseDto,
   TransactionResponseDto,
   BankListInterface,
+  TransactionsResponseDto,
+  SingleTransactionResponseDto,
 } from "@/types";
 
 export const TransferService = {
-  getBanks: () => api.get<BankListInterface>("/api/v1/payment/banks"),
+  getBanks: () => api.get<BankListInterface>("/api/v1/transfers/banks"),
 
   resolveAccount: (data: ResolveAccountDto) =>
     api.post<ResolveAccountResponseDto>(
-      "/api/v1/payment/validate-bank-account",
+      "/api/v1/transfers/resolve-account",
       data,
     ),
 
   initiateTransfer: (data: InitiateTransferDto) =>
-    api.post<TransferResponseDto>("/api/v1/payment/transfer", data),
+    api.post<TransferResponseDto>("/api/v1/transfers/initiate", data),
 
   getTransactions: (page: number = 1, limit: number = 20) =>
-    api.get<TransactionResponseDto[]>("/api/v1/payment/transactions", {
+    api.get<TransactionsResponseDto>("/api/v1/transactions", {
       query: { page, limit },
     }),
 
   getTransactionDetails: (transactionId: string) =>
-    api.get<TransactionResponseDto>(
-      `/api/v1/payment/transactions/${transactionId}`,
+    api.get<SingleTransactionResponseDto>(
+      `/api/v1/transactions/${transactionId}`,
     ),
 };

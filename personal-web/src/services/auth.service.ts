@@ -18,7 +18,10 @@ export const AuthService = {
       "/api/v1/auth/public-key",
     ),
   register: (data: RegisterDto) =>
-    api.post<MessageResponseDto>("/api/v1/auth/register", data), // TODO: Verify if registration is public or org-invitation based
+    api.post<MessageResponseDto>(
+      "/api/v1/customers/personal/auth/register",
+      data,
+    ),
 
   login: (data: LoginDto) =>
     api.post<AuthResponseDto>("/api/v1/customers/personal/auth/login", data),

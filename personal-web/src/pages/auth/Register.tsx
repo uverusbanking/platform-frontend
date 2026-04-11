@@ -26,6 +26,7 @@ import {
 import { z } from "zod";
 import { useValidateBvn } from "@/hooks/mutations/useKycMutations";
 import { useRegister } from "@/hooks/mutations/useAuthMutations";
+import { toast } from "sonner";
 
 // Step 1: BVN Validation Schema
 const bvnSchema = z.object({
@@ -101,19 +102,11 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
-  // Email sent state
-  const [emailSent, setEmailSent] = useState(false);
+  const { mutateAsync: validateBvnMutateAsync, isPending: isValidatingBvn } =
+    useValidateBvn();
 
-  const {
-    mutateAsync: validateBvnMutateAsync,
-    isPending: isValidatingBvn,
-  } = useValidateBvn();
-
-  const {
-    mutateAsync: registerMutateAsync,
-    isPending: isRegistering,
-  } = useRegister();
-
+  const { mutateAsync: registerMutateAsync, isPending: isRegistering } =
+    useRegister();
 
   // Step 1: Validate BVN
   const handleBVNValidation = async (e: React.FormEvent) => {
@@ -141,7 +134,8 @@ const Register = () => {
         {
           onError: (err: any) => {
             // Extract the actual error message from the backend response
-            const errorMessage = err.message || err?.errors?.[0] || "An unexpected error occurred";
+            const errorMessage =
+              err.message || err?.errors?.[0] || "An unexpected error occurred";
             setError(errorMessage);
           },
           onSuccess: (data) => {
@@ -155,10 +149,9 @@ const Register = () => {
           },
           onSettled: () => {
             setLoading(false);
-          }
-        }
+          },
+        },
       );
-
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred");
     }
@@ -172,7 +165,13 @@ const Register = () => {
     setError(null);
 
     try {
-      accountSchema.parse({ email, gender, password, confirmPassword, termsAccepted });
+      accountSchema.parse({
+        email,
+        gender,
+        password,
+        confirmPassword,
+        termsAccepted,
+      });
     } catch (err) {
       if (err instanceof z.ZodError) {
         setError(err.errors[0].message);
@@ -193,26 +192,30 @@ const Register = () => {
         {
           email,
           password,
-          phone: step1Data.phone_number,
-          dateOfBirth: step1Data.date_of_birth,
+          phone_number: step1Data.phone_number,
+          date_of_birth: step1Data.date_of_birth,
           gender,
-          bvn: step1Data.bvn
+          first_name: bvnData.firstName,
+          last_name: bvnData.lastName,
+          bvn: step1Data.bvn,
         },
         {
           onError: (err: any) => {
-            const errorMessage = err.message || err?.errors?.[0] || "An unexpected error occurred";
+            const errorMessage =
+              err.message || err?.errors?.[0] || "An unexpected error occurred";
             setError(errorMessage);
           },
           onSuccess: () => {
-            // Registration successful, now prompt user to verify email
-            setEmailSent(true);
-            // Store credentials for auto-login after verification
+            // Registration successful. Since backend activates users immediately,
+            // we redirect to login with pending credentials.
+            toast.success("Account created successfully!");
             setPendingCredentials(email, password);
+            navigate("/auth/login", { state: { email, registered: true } });
           },
           onSettled: () => {
             setLoading(false);
-          }
-        }
+          },
+        },
       );
     } catch (err: any) {
       const errorMessage = err.message || "An unexpected error occurred";
@@ -225,81 +228,6 @@ const Register = () => {
   const handleContinueToVerify = () => {
     navigate("/auth/verify-otp", { state: { email, fromRegistration: true } });
   };
-
-  // Email sent confirmation screen
-  if (emailSent) {
-    return (
-      <div className="min-h-screen bg-gradient-hero flex flex-col">
-        <header className="p-4 safe-top">
-          <button
-            onClick={() => {
-              setEmailSent(false);
-              setError(null);
-            }}
-            className="flex items-center gap-2 text-white/80 hover:text-white transition-colors p-2 -ml-2 rounded-lg touch-manipulation active:bg-white/10"
-          >
-            <ArrowLeft size={20} />
-            <span className="font-medium text-sm sm:text-base">Back</span>
-          </button>
-        </header>
-
-        <div className="flex-1 flex items-center justify-center p-4 pb-8 sm:pb-12">
-          <Card className="w-full max-w-md shadow-xl border-0">
-            <CardHeader className="text-center pb-2 px-4 sm:px-6">
-              <div className="mx-auto mb-3 sm:mb-4">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-success/10 flex items-center justify-center">
-                  <Mail className="text-success" size={28} />
-                </div>
-              </div>
-              <CardTitle className="text-xl sm:text-2xl">
-                Check your email
-              </CardTitle>
-              <CardDescription className="text-xs sm:text-sm mt-2">
-                We've sent a verification code to
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-4 sm:px-6 text-center">
-              <p className="font-medium text-foreground mb-4 break-all">
-                {email}
-              </p>
-
-              <div className="bg-muted/50 rounded-lg p-4 mb-6 text-left">
-                <div className="flex items-start gap-3">
-                  <CheckCircle
-                    className="text-success mt-0.5 flex-shrink-0"
-                    size={18}
-                  />
-                  <div className="text-sm text-muted-foreground">
-                    <p className="font-medium text-foreground mb-1">
-                      Please check your inbox
-                    </p>
-                    <p>
-                      Enter the 6-digit code from the email to verify your
-                      account. Don't forget to check your spam folder if you
-                      don't see it.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <Button
-                onClick={handleContinueToVerify}
-                className="w-full h-11 sm:h-10"
-                variant="gradient"
-              >
-                Enter Verification Code
-              </Button>
-
-              <p className="text-xs text-muted-foreground mt-4">
-                Didn't receive the email? You can request a new code on the next
-                screen.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
 
   // Step 1: BVN Validation
   if (step === 1) {
@@ -315,7 +243,9 @@ const Register = () => {
                     className="flex items-center gap-2 text-primary/80 hover:text-primary transition-colors p-2 -ml-2 rounded-lg touch-manipulation active:bg-primary/10"
                   >
                     <ArrowLeft size={20} />
-                    <span className="font-medium text-sm sm:text-base">Back</span>
+                    <span className="font-medium text-sm sm:text-base">
+                      Back
+                    </span>
                   </button>
                 </div>
 
@@ -628,7 +558,9 @@ const Register = () => {
                 <Checkbox
                   id="terms"
                   checked={termsAccepted}
-                  onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    setTermsAccepted(checked as boolean)
+                  }
                 />
                 <div className="grid gap-1.5 leading-none">
                   <label
@@ -640,7 +572,10 @@ const Register = () => {
                       Terms of Service
                     </Link>{" "}
                     and{" "}
-                    <Link to="/privacy" className="text-primary hover:underline">
+                    <Link
+                      to="/privacy"
+                      className="text-primary hover:underline"
+                    >
                       Privacy Policy
                     </Link>
                   </label>

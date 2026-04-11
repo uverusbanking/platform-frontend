@@ -57,17 +57,12 @@ const Profile = () => {
         id: data.id,
         user_id: data.id,
         email: data.email,
-        full_name: `${data.firstName} ${data.lastName}`,
-        phone: null, // Phone is not in UserResponseDto based on types.ts check, or I missed it? Wait, UserResponseDto has phone? types.ts line 66-67... NO phone in UserResponseDto in types.ts?
-        // Let me re-check types.ts
-        // UserResponseDto: id, email, firstName, lastName, bvn, isKycVerified, bankCode... NO phone.
-        // UpdateProfileDto HAS phone.
-        // I will assume phone is not available or map it if it's there in the actual API response.
-        // For now I'll set it to null or empty string.
+        full_name: `${data.first_name} ${data.last_name}`,
+        phone: data.phone_number || "",
         avatar_url: null,
       });
-      setFullName(`${data.firstName} ${data.lastName}`);
-      setPhone(""); // Phone not returned by getProfile apparently?
+      setFullName(`${data.first_name} ${data.last_name}`);
+      setPhone(data.phone_number || "");
     } catch (err) {
       console.error("Error fetching profile:", err);
     } finally {
@@ -87,9 +82,9 @@ const Profile = () => {
       const lastName = names.slice(1).join(" ");
 
       await UserService.updateProfile({
-        firstName,
-        lastName,
-        phone,
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: phone,
       });
 
       toast.success("Profile updated!");

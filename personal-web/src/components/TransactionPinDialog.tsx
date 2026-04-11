@@ -56,7 +56,7 @@ export function SetupPinDialog({
     setLoading(true);
     try {
       const result = await setPinMutation({ pin });
-      if (result.status === true || result.status === undefined) {
+      if (result.status === "success" || result.status === undefined) {
         onSuccess?.();
         onOpenChange(false);
         setStep("create");
@@ -162,7 +162,7 @@ export function VerifyPinDialog({
       setLoading(true);
       try {
         const result = await verifyPinMutation({ pin: value });
-        if (result.status === true) {
+        if (result.status === "success") {
           onSuccess();
           onOpenChange(false);
           setPinValue("");

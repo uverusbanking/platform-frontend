@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,15 +43,17 @@ const loginSchema = z.object({
 
 const Index = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn, setPendingCredentials } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [verificationRequired, setVerificationRequired] = useState(false);
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState((location.state as any)?.email || "");
   const [password, setPassword] = useState("");
   const brand = BrandConfigService.getConfigSync("personal");
+  const isRegistered = (location.state as any)?.registered;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -283,6 +285,23 @@ const Index = () => {
                     </div>
                   )}
 
+                  {isRegistered && (
+                    <div className="mb-6 p-4 rounded-xl bg-success/10 border border-success/20 flex items-start gap-3">
+                      <CheckCircle
+                        className="text-success shrink-0"
+                        size={20}
+                      />
+                      <div className="text-sm">
+                        <p className="font-semibold text-success mb-1">
+                          Registration Successful!
+                        </p>
+                        <p className="text-success/80">
+                          Welcome to {brand.brandName}. Please sign in with your
+                          password to access your dashboard.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>

@@ -6,12 +6,10 @@ import type {
 
 export const TransactionService = {
   getTransactions: ({ page, limit }: { page: number; limit: number }) =>
-    api.get<TransactionsResponseDto>("/api/v1/transactions/organisation", {
+    api.get<TransactionsResponseDto>("/api/v1/transactions", {
       query: { page, limit },
     }),
 
   getTransactionDetails: (id: string) =>
-    api.get<SingleTransactionResponseDto>(`/api/v1/transactions/organisation`, {
-      query: { transactionId: id },
-    }),
+    api.get<SingleTransactionResponseDto>(`/api/v1/transactions/${id}`),
 };

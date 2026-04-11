@@ -5,9 +5,11 @@
 export interface RegisterDto {
   email: string;
   password: string;
-  phone: string;
-  dateOfBirth: string;
+  phone_number: string;
+  date_of_birth: string;
   gender: string;
+  first_name: string;
+  last_name: string;
   bvn: string;
 }
 
@@ -71,26 +73,32 @@ export interface MessageResponseDto {
 export interface UserResponseDto {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
+  phone_number?: string;
   bvn?: string;
-  isKycVerified: boolean;
-  bankCode?: string;
-  bankName?: string;
-  accountNumber?: string;
-  accountName?: string;
+  is_kyc_verified?: boolean;
+  kyc_level: number;
+  bank_code?: string;
+  bank_name?: string;
+  account_number?: string;
+  account_name?: string;
   balance?: string;
-  holdBalance?: string;
-  customerId?: string;
+  status?: string;
+  // Support for legacy camelCase mappings
+  firstName?: string;
+  lastName?: string;
+  accountNumber?: string;
+  bankName?: string;
 }
 
 export interface UpdateProfileDto {
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
+  first_name?: string;
+  last_name?: string;
+  phone_number?: string;
   address?: string;
   gender?: string;
-  dateOfBirth?: string;
+  date_of_birth?: string;
 }
 
 export interface KycStatusResponseDto {
@@ -151,8 +159,11 @@ export interface VirtualAccountResponseDto {
 // ============================================================================
 
 export interface PinResponseDto {
-  status?: boolean;
-  message: string;
+  status: string;
+  message?: string;
+  data?: {
+    pin_set: boolean;
+  };
 }
 
 export interface VerifyPinDto {
@@ -164,13 +175,13 @@ export interface SetPinDto {
 }
 
 export interface ChangePinDto {
-  oldPin: string;
-  newPin: string;
+  old_pin: string;
+  new_pin: string;
 }
 
 export interface ResetPinDto {
   otp: string;
-  newPin: string;
+  new_pin: string;
 }
 
 // ============================================================================

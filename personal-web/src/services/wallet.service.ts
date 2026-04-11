@@ -4,11 +4,23 @@ import type {
   VirtualAccountResponseDto,
 } from "@/types";
 
+export interface WalletDto {
+  id: string;
+  customer_id: string;
+  balance: string;
+  name: string;
+  account_number: string;
+  bank_name: string;
+  account_name: string;
+  status: string;
+  currency: string;
+}
+
 export const WalletService = {
-  getBalance: () => api.get<WalletBalanceResponseDto>("/api/v1/wallets"),
+  getWallet: () => api.get<WalletDto>("/api/v1/wallets/me"),
 
   getVirtualAccount: () =>
-    api.get<VirtualAccountResponseDto>("/api/v1/wallets/virtual-account"),
-
-  createWallet: () => api.post<void>("/api/v1/wallets"),
+    api.get<{ status: string; data: VirtualAccountResponseDto | null }>(
+      "/api/v1/wallets/virtual-account",
+    ),
 };

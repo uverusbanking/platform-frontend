@@ -6,16 +6,19 @@ import { AppLayout } from "@/components/AppLayout";
 import { Copy, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { useUserProfile } from "@/hooks/queries/useUser";
+import { useWallet } from "@/hooks/useWallet";
 import { BrandConfigService } from "@shared/core";
 
 const Receive = () => {
   const {
     data: profile,
-    isLoading,
+    isLoading: isProfileLoading,
     error: profileError,
-  } = useUserProfile({
-    refetchInterval: 5000, // Poll every 5 seconds to simulate socket
-  });
+  } = useUserProfile();
+
+  const { virtualAccount, isLoadingVirtualAccount } = useWallet();
+
+  const isLoading = isProfileLoading || isLoadingVirtualAccount;
   const brandConfig = BrandConfigService.getConfigSync("personal");
 
   const copyToClipboard = (text: string, label: string) => {
@@ -26,7 +29,7 @@ const Receive = () => {
   const shareDetails = async () => {
     if (!profile) return;
 
-    const text = `Bank: ${profile.bankName}\nAccount Number: ${profile.accountNumber}\nAccount Name: ${profile.accountName || brandConfig.brandName + " User"}`;
+    const text = `Bank: ${virtualAccount?.bank_name || profile?.bankName}\nAccount Number: ${virtualAccount?.account_number || profile?.accountNumber}\nAccount Name: ${virtualAccount?.account_name || profile?.accountName || brandConfig.brandName + " User"}`;
 
     if (navigator.share) {
       try {
@@ -59,10 +62,14 @@ const Receive = () => {
               </div>
               <div className="min-w-0">
                 <p className="text-white/70 text-xs sm:text-sm">
-                  {profile?.bankName || brandConfig.brandName}
+                  {virtualAccount?.bank_name ||
+                    profile?.bankName ||
+                    brandConfig.brandName}
                 </p>
                 <p className="font-semibold text-sm sm:text-base truncate">
-                  {profile?.accountName || "Loading..."}
+                  {virtualAccount?.account_name ||
+                    profile?.accountName ||
+                    "Loading..."}
                 </p>
               </div>
             </div>
@@ -76,12 +83,18 @@ const Receive = () => {
                 </p>
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-xl sm:text-2xl font-mono font-bold tracking-wider truncate">
-                    {formatAccountNumber(profile?.accountNumber || "")}
+                    {formatAccountNumber(
+                      virtualAccount?.account_number ||
+                        profile?.accountNumber ||
+                        "",
+                    )}
                   </p>
                   <button
                     onClick={() =>
                       copyToClipboard(
-                        profile?.accountNumber || "",
+                        virtualAccount?.account_number ||
+                          profile?.accountNumber ||
+                          "",
                         "Account number",
                       )
                     }

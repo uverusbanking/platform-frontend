@@ -6,36 +6,46 @@ import { SetupPinDialog } from "../TransactionPinDialog";
 import { usePinStatus } from "@/hooks/queries/useSecurity";
 
 export function TransactionPinBanner() {
-    const [setupOpen, setSetupOpen] = useState(false);
-    const { data: pinStatus, isPending: pinStatusLoading, refetch } = usePinStatus()
+  const [setupOpen, setSetupOpen] = useState(false);
+  const {
+    data: pinStatus,
+    isPending: pinStatusLoading,
+    refetch,
+  } = usePinStatus();
 
-    if (pinStatus?.status || pinStatusLoading) {
-        return null;
-    }
+  if (pinStatus?.data?.pin_set || pinStatusLoading) {
+    return null;
+  }
 
-    return (
-        <>
-            <Alert variant="destructive" className="mb-6 border-red-200 bg-red-50 text-red-900 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200">
-                <LockKeyhole className="h-4 w-4" />
-                <AlertTitle>Transaction PIN Required</AlertTitle>
-                <AlertDescription className="mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <p>You need to set up a transaction PIN to send money and perform other secure actions.</p>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="whitespace-nowrap bg-white text-red-900 border-red-200 hover:bg-red-50 dark:bg-transparent dark:text-red-200 dark:border-red-800 dark:hover:bg-red-900/40"
-                        onClick={() => setSetupOpen(true)}
-                    >
-                        Set Up PIN
-                    </Button>
-                </AlertDescription>
-            </Alert>
+  return (
+    <>
+      <Alert
+        variant="destructive"
+        className="mb-6 border-red-200 bg-red-50 text-red-900 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200"
+      >
+        <LockKeyhole className="h-4 w-4" />
+        <AlertTitle>Transaction PIN Required</AlertTitle>
+        <AlertDescription className="mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <p>
+            You need to set up a transaction PIN to send money and perform other
+            secure actions.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="whitespace-nowrap bg-white text-red-900 border-red-200 hover:bg-red-50 dark:bg-transparent dark:text-red-200 dark:border-red-800 dark:hover:bg-red-900/40"
+            onClick={() => setSetupOpen(true)}
+          >
+            Set Up PIN
+          </Button>
+        </AlertDescription>
+      </Alert>
 
-            <SetupPinDialog
-                open={setupOpen}
-                onOpenChange={setSetupOpen}
-                onSuccess={refetch}
-            />
-        </>
-    );
+      <SetupPinDialog
+        open={setupOpen}
+        onOpenChange={setSetupOpen}
+        onSuccess={refetch}
+      />
+    </>
+  );
 }

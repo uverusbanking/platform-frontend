@@ -36,6 +36,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { cn } from "@/lib/utils";
 import { EnterPinDialog } from "@/components/TransactionPinDialog";
 import { useUserProfile } from "@/hooks/queries/useUser";
+import { useWallet } from "@/hooks/useWallet";
 import { usePinStatus } from "@/hooks/queries/useSecurity";
 import {
   useInitiateTransfer,
@@ -140,14 +141,15 @@ const Send = () => {
     refetch,
   } = usePinStatus();
   const [verifyOpen, setVerifyOpen] = useState(false);
-  const { data: profile, isLoading, error: profileError } = useUserProfile();
+  const { data: profile } = useUserProfile();
+  const { wallet, isLoadingWallet } = useWallet();
   const brand = BrandConfigService.getConfigSync("personal");
 
   // Calculate available balance safely with memoization
   const availableBalance = useMemo(() => {
-    const balance = parseFloat(profile?.balance || "0");
+    const balance = parseFloat(wallet?.balance || profile?.balance || "0");
     return isNaN(balance) ? 0 : balance;
-  }, [profile?.balance]);
+  }, [wallet?.balance, profile?.balance]);
 
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<"form" | "confirm" | "success">("form");
@@ -298,7 +300,7 @@ const Send = () => {
   };
 
   const handleConfirm = () => {
-    if (!pinStatus?.status) {
+    if (!pinStatus?.data?.pin_set) {
       const errorMessage =
         "Please set up a transaction PIN in your dashboard settings to continue";
       addError(errorMessage);
