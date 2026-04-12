@@ -51,7 +51,7 @@ import UssdPage from "@/app/account/ussd/page";
 import WhatsappPage from "@/app/account/whatsapp/page";
 import SettingsProfilePage from "@/app/account/settings/profile/page";
 import SettingsSecurityPage from "@/app/account/settings/security/page";
-import SettingsDevelopersPage from "@/app/account/settings/developers/page";
+import SettingsDevelopersPage from "@/app/account/settings/developers_disabled/page";
 
 // 404
 import NotFound from "@/app/not-found";
@@ -62,12 +62,10 @@ function RootLayout() {
   useEffect(() => {
     const initPersistence = async () => {
       try {
-        const { persistQueryClient } = await import(
-          "@tanstack/react-query-persist-client"
-        );
-        const { createSyncStoragePersister } = await import(
-          "@tanstack/query-sync-storage-persister"
-        );
+        const { persistQueryClient } =
+          await import("@tanstack/react-query-persist-client");
+        const { createSyncStoragePersister } =
+          await import("@tanstack/query-sync-storage-persister");
         const localStoragePersister = createSyncStoragePersister({
           storage: window.localStorage,
         });
@@ -167,10 +165,7 @@ export default function App() {
                       path="loans/applications"
                       element={<LoanApplicationsPage />}
                     />
-                    <Route
-                      path="loans/active"
-                      element={<ActiveLoansPage />}
-                    />
+                    <Route path="loans/active" element={<ActiveLoansPage />} />
                     <Route
                       path="loans/products"
                       element={<LoanProductsPage />}
@@ -200,10 +195,7 @@ export default function App() {
                           <Navigate to="/account/settings/profile" replace />
                         }
                       />
-                      <Route
-                        path="profile"
-                        element={<SettingsProfilePage />}
-                      />
+                      <Route path="profile" element={<SettingsProfilePage />} />
                       <Route
                         path="security"
                         element={<SettingsSecurityPage />}
