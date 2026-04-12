@@ -8,7 +8,17 @@ import type {
   ResendOtpDto,
   ForgotPasswordDto,
   ResetPasswordDto,
+  ValidateBvnDto,
 } from "@/types";
+
+export const usePublicValidateBvn = () => {
+  return useMutation({
+    mutationFn: async (data: ValidateBvnDto) => {
+      const response = await AuthService.validateBvn(data);
+      return response.data;
+    },
+  });
+};
 
 export const useRegister = () => {
   return useMutation({
@@ -20,10 +30,13 @@ export const useLogin = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: LoginDto) => AuthService.login(data),
+    mutationFn: async (data: LoginDto) => {
+      const response = await AuthService.login(data);
+      return response.data;
+    },
     onSuccess: (data) => {
       // Store token in localStorage
-      localStorage.setItem("sb-access-token", data.accessToken);
+      localStorage.setItem("sb-access-token", data.access_token);
       // Invalidate user queries to refetch with new token
       queryClient.invalidateQueries({ queryKey: ["user"] });
     },

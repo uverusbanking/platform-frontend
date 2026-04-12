@@ -24,8 +24,10 @@ import {
   Shield,
 } from "lucide-react";
 import { z } from "zod";
-import { useValidateBvn } from "@/hooks/mutations/useKycMutations";
-import { useRegister } from "@/hooks/mutations/useAuthMutations";
+import {
+  usePublicValidateBvn,
+  useRegister,
+} from "@/hooks/mutations/useAuthMutations";
 import { toast } from "sonner";
 
 // Step 1: BVN Validation Schema
@@ -103,7 +105,7 @@ const Register = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   const { mutateAsync: validateBvnMutateAsync, isPending: isValidatingBvn } =
-    useValidateBvn();
+    usePublicValidateBvn();
 
   const { mutateAsync: registerMutateAsync, isPending: isRegistering } =
     useRegister();

@@ -236,10 +236,10 @@ const Send = () => {
     removeError("Account");
 
     resolveAccount(
-      { bankCode, accountNumber },
+      { bank_code: bankCode, account_number: accountNumber },
       {
         onSuccess: (data) => {
-          setAccountName(data.accountName);
+          setAccountName(data.account_name);
           removeError("Account");
           toast.success("Account verified");
         },
@@ -324,17 +324,20 @@ const Send = () => {
         const bankName =
           banks.find((b) => b.bank_code === bankCode)?.bank_name || "";
 
-        const result = await TransferService.initiateTransfer({
+        const response = await TransferService.initiateTransfer({
           amount: amountNum,
-          bankCode: bankCode,
-          bankName: bankName,
-          accountNumber: accountNumber,
-          accountName: accountName,
+          bank_code: bankCode,
+          bank_name: bankName,
+          account_number: accountNumber,
+          account_name: accountName,
           narrative: narration || `Transfer to ${accountName}`,
           pin: pin,
         });
 
-        if (result.status === "success" || result.status === "successful") {
+        // Unwrapping raw ApiResponse result
+        const result = response.data;
+
+        if (response.status === "success" || response.status === "successful") {
           // Store transaction details for success page
           setTransactionDetails(result);
 
@@ -342,7 +345,7 @@ const Send = () => {
           setVerifyOpen(false);
           toast.success("Transfer successful!");
         } else {
-          const errorMessage = result.message || "Transfer failed";
+          const errorMessage = response.message || "Transfer failed";
           addError(`Transfer failed: ${errorMessage}`);
           toast.error(errorMessage);
         }

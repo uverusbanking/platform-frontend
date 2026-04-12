@@ -4,7 +4,10 @@ import { UserService } from "@/services";
 export const useUserProfile = (options?: { refetchInterval?: number }) => {
   return useQuery({
     queryKey: ["user", "profile"],
-    queryFn: UserService.getProfile,
+    queryFn: async () => {
+      const response = await UserService.getProfile();
+      return response.data;
+    },
     ...options,
   });
 };
@@ -12,6 +15,9 @@ export const useUserProfile = (options?: { refetchInterval?: number }) => {
 export const useKycStatus = () => {
   return useQuery({
     queryKey: ["user", "kyc-status"],
-    queryFn: UserService.getKycStatus,
+    queryFn: async () => {
+      const response = await UserService.getKycStatus();
+      return response.data;
+    },
   });
 };

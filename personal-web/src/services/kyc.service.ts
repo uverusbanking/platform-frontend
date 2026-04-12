@@ -5,20 +5,22 @@ import type {
   SubmitKycDto,
   SubmitKycResponseDto,
   DocumentUploadResponseDto,
+  ApiResponse,
 } from "@/types";
 
 export const KycService = {
   validateBvn: (data: ValidateBvnDto) =>
-    api.get<ValidateBvnResponseDto>("/api/v1/kyc/bvn/full", {
-      body: JSON.stringify(data),
-    } as any),
+    api.post<ApiResponse<ValidateBvnResponseDto>>(
+      "/api/v1/kyc/bvn/validate",
+      data,
+    ),
 
   submitKyc: (data: SubmitKycDto) =>
-    api.post<SubmitKycResponseDto>("/api/v1/kyc/submit", data),
+    api.post<ApiResponse<SubmitKycResponseDto>>("/api/v1/kyc/submit", data),
 
   uploadDocument: (file: File) =>
-    api.uploadFile<DocumentUploadResponseDto>(
-      "/api/v1/kyc/documents/utility-bill",
+    api.uploadFile<ApiResponse<DocumentUploadResponseDto>>(
+      "/api/v1/kyc/documents",
       file,
     ),
 };

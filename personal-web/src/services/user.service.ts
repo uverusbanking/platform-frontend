@@ -7,11 +7,10 @@ import type {
 } from "@/types";
 
 export const UserService = {
-  getProfile: () =>
-    api.get<ApiResponse<UserResponseDto>>("/api/v1/customers/personal/auth/me"),
+  getProfile: () => api.get<ApiResponse<UserResponseDto>>("/api/v1/users/me"),
 
   updateProfile: (data: UpdateProfileDto) =>
-    api.patch<ApiResponse<UserResponseDto>>("/api/v1/account/profile", data),
+    api.patch<ApiResponse<UserResponseDto>>("/api/v1/users/me", data),
 
   getKycStatus: () =>
     api.get<ApiResponse<KycStatusResponseDto>>("/api/v1/users/kyc/status"),

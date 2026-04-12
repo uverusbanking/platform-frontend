@@ -10,6 +10,8 @@ import type {
   ResetPasswordDto,
   MessageResponseDto,
   Verify2FACodeDto,
+  ValidateBvnDto,
+  ValidateBvnResponseDto,
   ApiResponse,
 } from "@/types";
 
@@ -18,6 +20,13 @@ export const AuthService = {
     api.get<{ message: string; data: { public_key: string } }>(
       "/api/v1/auth/public-key",
     ),
+
+  validateBvn: (data: ValidateBvnDto) =>
+    api.post<ApiResponse<ValidateBvnResponseDto>>(
+      "/api/v1/customers/personal/auth/validate-bvn",
+      data,
+    ),
+
   register: (data: RegisterDto) =>
     api.post<ApiResponse<MessageResponseDto>>(
       "/api/v1/customers/personal/auth/register",

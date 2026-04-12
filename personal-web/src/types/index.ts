@@ -220,23 +220,23 @@ export interface BankListInterface {
 }
 
 export interface ResolveAccountDto {
-  bankCode: string;
-  accountNumber: string;
+  bank_code: string;
+  account_number: string;
 }
 
 export interface ResolveAccountResponseDto {
-  accountNumber: string;
-  accountName: string;
+  account_number: string;
+  account_name: string;
 }
 
 export interface InitiateTransferDto {
-  bankCode: string;
-  accountNumber: string;
-  accountName: string;
+  bank_code: string;
+  account_number: string;
+  account_name: string;
   amount: number;
   narrative?: string;
   pin: string;
-  bankName: string;
+  bank_name: string;
 }
 
 export interface TransferResponseDto {
