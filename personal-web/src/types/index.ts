@@ -1,4 +1,15 @@
 // ============================================================================
+// Global API Types
+// ============================================================================
+
+export interface ApiResponse<T> {
+  status: string;
+  message: string;
+  data: T;
+  errors: any[];
+}
+
+// ============================================================================
 // Auth Module Types
 // ============================================================================
 
@@ -28,10 +39,15 @@ export interface UserDto {
 }
 
 export interface AuthResponseDto {
-  accessToken: string;
-  user: UserDto;
-  session_id?: string;
-  twoFactorRequired?: boolean;
+  access_token: string;
+  refresh_token: string;
+  session_id: string;
+  two_factor_required?: boolean;
+  user: {
+    id: string;
+    email: string;
+    organisation_id: string;
+  };
 }
 
 export interface Verify2FACodeDto {

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { AuthService } from "@/services";
-import type { UserDto, AuthResponseDto } from "@/types";
+import { AuthService, UserService } from "@/services";
+import type { UserDto, AuthResponseDto, ApiResponse } from "@/types";
 import { encryptPassword } from "@shared/core";
 
 interface AuthContextType {
@@ -83,20 +83,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         encrypted_password: encryptedPassword,
       });
 
-      if (response.twoFactorRequired) {
-        setPendingSessionId(response.session_id || null);
+      const result = response.data;
+
+      // Store token and user data if available immediately
+      if (result.access_token) {
+        setAccessToken(result.access_token);
+        localStorage.setItem(TOKEN_KEY, result.access_token);
+
+        // Fetch full profile since login payload is minimal
+        try {
+          const profileResponse = await UserService.getProfile();
+          const profileData = profileResponse.data;
+
+          const userData: UserDto = {
+            id: profileData.id,
+            email: profileData.email,
+            firstName: profileData.first_name || profileData.firstName || "",
+            lastName: profileData.last_name || profileData.lastName || "",
+            role: profileData.status === "ACTIVE" ? "user" : "pending",
+          };
+
+          setUser(userData);
+          localStorage.setItem(USER_KEY, JSON.stringify(userData));
+        } catch (profileError) {
+          console.error(
+            "Failed to fetch user profile after login:",
+            profileError,
+          );
+          // Fallback with basic info if profile fetch fails
+          const basicUser: UserDto = {
+            id: result.user.id,
+            email: result.user.email,
+            firstName: "",
+            lastName: "",
+          };
+          setUser(basicUser);
+          localStorage.setItem(USER_KEY, JSON.stringify(basicUser));
+        }
+
+        return { error: null };
+      }
+
+      // Fallback for 2FA if backend still requires it
+      if (result.two_factor_required) {
+        setPendingSessionId(result.session_id || null);
         setPendingCredentials(email, password);
         return { error: null, needs2FA: true } as any;
       }
 
-      // Store token and user data
-      localStorage.setItem(TOKEN_KEY, response.accessToken);
-      localStorage.setItem(USER_KEY, JSON.stringify(response.user));
-
-      setAccessToken(response.accessToken);
-      setUser(response.user);
-
-      return { error: null };
+      return { error: new Error("Authentication failed: No token received") };
     } catch (error: any) {
       // Check if error indicates unverified account
       const errorMessage = error.message || "";
@@ -131,12 +166,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           code: otp,
         });
 
-        // Store token and user data on successful 2FA
-        localStorage.setItem(TOKEN_KEY, response.accessToken);
-        localStorage.setItem(USER_KEY, JSON.stringify(response.user));
+        const result = response.data;
 
-        setAccessToken(response.accessToken);
-        setUser(response.user);
+        // Store token and user data on successful 2FA
+        setAccessToken(result.access_token);
+        localStorage.setItem(TOKEN_KEY, result.access_token);
+
+        // Fetch full profile
+        try {
+          const profileResponse = await UserService.getProfile();
+          const profileData = profileResponse.data;
+
+          const userData: UserDto = {
+            id: profileData.id,
+            email: profileData.email,
+            firstName: profileData.first_name || profileData.firstName || "",
+            lastName: profileData.last_name || profileData.lastName || "",
+          };
+
+          setUser(userData);
+          localStorage.setItem(USER_KEY, JSON.stringify(userData));
+        } catch (error) {
+          console.error("Failed to fetch profile in 2FA:", error);
+        }
+
         setPendingSessionId(null);
         setPendingCredentials(null, null);
 

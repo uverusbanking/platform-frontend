@@ -3,14 +3,16 @@ import type {
   UserResponseDto,
   UpdateProfileDto,
   KycStatusResponseDto,
+  ApiResponse,
 } from "@/types";
 
 export const UserService = {
   getProfile: () =>
-    api.get<UserResponseDto>("/api/v1/customers/personal/auth/me"),
+    api.get<ApiResponse<UserResponseDto>>("/api/v1/customers/personal/auth/me"),
 
   updateProfile: (data: UpdateProfileDto) =>
-    api.patch<UserResponseDto>("/api/v1/account/profile", data),
+    api.patch<ApiResponse<UserResponseDto>>("/api/v1/account/profile", data),
 
-  getKycStatus: () => api.get<KycStatusResponseDto>("/api/v1/users/kyc/status"),
+  getKycStatus: () =>
+    api.get<ApiResponse<KycStatusResponseDto>>("/api/v1/users/kyc/status"),
 };

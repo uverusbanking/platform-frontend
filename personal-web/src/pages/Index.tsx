@@ -70,18 +70,7 @@ const Index = () => {
 
     setLoading(true);
 
-    const { error, needsVerification, needs2FA } = (await signIn(
-      email,
-      password,
-    )) as any;
-
-    if (needs2FA) {
-      navigate("/auth/verify-otp", {
-        state: { email, fromLogin: true, is2FA: true },
-      });
-      setLoading(false);
-      return;
-    }
+    const { error, needsVerification } = (await signIn(email, password)) as any;
 
     if (needsVerification) {
       setPendingCredentials(email, password);
