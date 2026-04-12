@@ -9,7 +9,7 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 relative overflow-hidden",
+          "border border-success/20 bg-success/5 text-success hover:bg-success/10 relative overflow-hidden",
         secondary:
           "border-transparent bg-secondary text-primary-foreground hover:text-secondary-foreground hover:bg-secondary/80",
         destructive:
@@ -33,8 +33,8 @@ function Badge({ className, variant, children, ...props }: BadgeProps) {
     <div className={cn(badgeVariants({ variant }), className)} {...props}>
       {variant === "default" && (
         <span className="mr-1.5 flex h-2 w-2 relative">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
         </span>
       )}
       {children}

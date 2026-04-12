@@ -19,7 +19,7 @@ export const getPlatformUsers = async (
   }
 
   const response = await apiClient.get<IApiResponse<IGetPlatformUsersResponse>>(
-    "/platform-user",
+    "/platform-users",
     { params: apiParams },
   );
   return response;
@@ -29,7 +29,7 @@ export const getPlatformUser = async (
   id: string,
 ): Promise<IApiResponse<IUser>> => {
   const response = await apiClient.get<IApiResponse<IUser>>(
-    `/platform-user/${id}`,
+    `/platform-users/${id}`,
   );
   return response.data;
 };
@@ -38,7 +38,7 @@ export const createPlatformUser = async (
   payload: ICreatePlatformUserPayload,
 ): Promise<IApiResponse<IUser>> => {
   const response = await apiClient.post<IApiResponse<IUser>>(
-    "/platform-user/",
+    "/platform-users/",
     payload,
   );
   return response.data;
@@ -49,7 +49,7 @@ export const updatePlatformUser = async (
 ): Promise<IApiResponse<IUser>> => {
   const { userId, ...data } = payload;
   const response = await apiClient.patch<IApiResponse<IUser>>(
-    `/platform-user/${userId}`,
+    `/platform-users/${userId}`,
     data,
   );
   return response.data;
@@ -59,7 +59,7 @@ export const deletePlatformUser = async (
   id: string,
 ): Promise<IApiResponse<{ message: string }>> => {
   const response = await apiClient.delete<IApiResponse<{ message: string }>>(
-    `/platform-user/${id}`,
+    `/platform-users/${id}`,
   );
   return response.data;
 };

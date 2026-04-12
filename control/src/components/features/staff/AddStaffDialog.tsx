@@ -209,9 +209,9 @@ export function AddStaffDialog({
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent>
-                      {roles.map((role) => (
-                        <SelectItem key={role.value} value={role.value}>
-                          {role.name}
+                      {Object.values(ROLES).map((role) => (
+                        <SelectItem key={role} value={role}>
+                          {role.replace("PLATFORM_", "").replace(/_/g, " ")}
                         </SelectItem>
                       ))}
                     </SelectContent>
