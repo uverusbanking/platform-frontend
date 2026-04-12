@@ -17,12 +17,12 @@ const settingsNav = [
     href: "/account/settings/security",
     icon: Lock,
   },
-  {
-    id: "developers",
-    label: "Developers",
-    href: "/account/settings/developers",
-    icon: Code,
-  },
+  // {
+  //   id: "developers",
+  //   label: "Developers",
+  //   href: "/account/settings/developers", // rename developers_disabled back to developers
+  //   icon: Code,
+  // },
 ];
 
 export default function SettingsLayout() {
@@ -97,7 +97,9 @@ export default function SettingsLayout() {
           </div>
 
           {/* Content Area */}
-          <div className="min-w-0"><Outlet /></div>
+          <div className="min-w-0">
+            <Outlet />
+          </div>
         </div>
       </div>
     </div>
