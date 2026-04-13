@@ -3,17 +3,14 @@ import { Button } from "@/components/ui/button";
 import { LockKeyhole } from "lucide-react";
 import { useState } from "react";
 import { SetupPinDialog } from "../TransactionPinDialog";
-import { usePinStatus } from "@/hooks/queries/useSecurity";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function TransactionPinBanner() {
   const [setupOpen, setSetupOpen] = useState(false);
-  const {
-    data: pinStatus,
-    isPending: pinStatusLoading,
-    refetch,
-  } = usePinStatus();
+  const { user, loading: authLoading, refreshProfile } = useAuth();
 
-  if (pinStatus?.data?.pin_set || pinStatusLoading) {
+  // If PIN is already set, or we're still loading the user profile, don't show the banner
+  if (user?.pin_set || authLoading) {
     return null;
   }
 
@@ -44,7 +41,7 @@ export function TransactionPinBanner() {
       <SetupPinDialog
         open={setupOpen}
         onOpenChange={setSetupOpen}
-        onSuccess={refetch}
+        onSuccess={refreshProfile}
       />
     </>
   );

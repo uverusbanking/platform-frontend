@@ -36,6 +36,7 @@ export interface UserDto {
   firstName: string;
   lastName: string;
   role?: string;
+  pin_set?: boolean;
 }
 
 export interface AuthResponseDto {
@@ -106,6 +107,7 @@ export interface UserResponseDto {
   account_name?: string;
   balance?: string;
   status?: string;
+  pin_set?: boolean;
   // Support for legacy camelCase mappings
   firstName?: string;
   lastName?: string;

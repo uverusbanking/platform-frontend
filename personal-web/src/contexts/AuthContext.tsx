@@ -24,6 +24,7 @@ interface AuthContextType {
     password: string,
     isRegistration?: boolean,
   ) => Promise<{ error: Error | null }>;
+  refreshProfile: () => Promise<void>;
   pendingEmail: string | null;
   pendingPassword: string | null;
   pendingSessionId: string | null;
@@ -106,6 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             firstName: profileData.first_name || profileData.firstName || "",
             lastName: profileData.last_name || profileData.lastName || "",
             role: profileData.status === "ACTIVE" ? "user" : "pending",
+            pin_set: profileData.pin_set,
           };
 
           setUser(userData);
@@ -191,6 +193,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             email: profileData.email,
             firstName: profileData.first_name || profileData.firstName || "",
             lastName: profileData.last_name || profileData.lastName || "",
+            pin_set: profileData.pin_set,
           };
 
           setUser(userData);
@@ -268,9 +271,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const signOut = async () => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
-    setUser(null);
     setAccessToken(null);
     setPendingCredentials(null, null);
+  };
+
+  const refreshProfile = async () => {
+    try {
+      const response = await UserService.getProfile();
+      const profileData = response.data;
+
+      const userData: UserDto = {
+        id: profileData.id,
+        email: profileData.email,
+        firstName: profileData.first_name || profileData.firstName || "",
+        lastName: profileData.last_name || profileData.lastName || "",
+        role: profileData.status === "ACTIVE" ? "user" : "pending",
+        pin_set: profileData.pin_set,
+      };
+
+      setUser(userData);
+      localStorage.setItem(USER_KEY, JSON.stringify(userData));
+    } catch (error) {
+      console.error("Failed to refresh profile:", error);
+    }
   };
 
   return (
@@ -284,6 +307,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         verifyOTP,
         resendOTP,
         verifyAndAuthenticate,
+        refreshProfile,
         pendingEmail,
         pendingPassword,
         pendingSessionId,
