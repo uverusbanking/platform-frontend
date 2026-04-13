@@ -197,11 +197,11 @@ const Dashboard = () => {
                   <Skeleton className="h-8 w-8 rounded-lg bg-white/20" />
                 </div>
               ) : (
-                (virtualAccount || profile?.accountNumber) && (
+                (virtualAccount?.account_number || profile?.accountNumber) && (
                   <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-white/15">
                     <div className="flex-1 min-w-0">
                       <p className="text-white/60 text-[10px] sm:text-xs mb-0.5 sm:mb-1">
-                        {virtualAccount?.bank_name || profile?.bankName}
+                        {virtualAccount?.bank_name || profile?.bankName || "Virtual Account"}
                       </p>
                       <p className="font-mono font-semibold text-sm sm:text-base truncate">
                         {formatAccountNumber(

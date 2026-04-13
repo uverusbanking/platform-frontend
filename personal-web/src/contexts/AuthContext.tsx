@@ -108,6 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             lastName: profileData.last_name || profileData.lastName || "",
             role: profileData.status === "ACTIVE" ? "user" : "pending",
             pin_set: profileData.pin_set,
+            customerId: profileData.id,
           };
 
           setUser(userData);
@@ -194,6 +195,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             firstName: profileData.first_name || profileData.firstName || "",
             lastName: profileData.last_name || profileData.lastName || "",
             pin_set: profileData.pin_set,
+            customerId: profileData.id,
           };
 
           setUser(userData);
@@ -287,6 +289,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         lastName: profileData.last_name || profileData.lastName || "",
         role: profileData.status === "ACTIVE" ? "user" : "pending",
         pin_set: profileData.pin_set,
+        customerId: profileData.id,
       };
 
       setUser(userData);

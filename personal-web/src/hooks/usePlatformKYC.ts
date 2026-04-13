@@ -54,24 +54,15 @@ export const usePlatformKYC = () => {
   const [allTiers, setAllTiers] = useState<TierLimits[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch Customer Profile
+  // Sync Customer ID from Auth Context
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-      try {
-        const data = await UserService.getProfile();
-        if (data.customerId) {
-          setCustomerId(data.customerId);
-        }
-        setMiddleName("");
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    fetchProfile();
+    if (user?.customerId) {
+      setCustomerId(user.customerId);
+      setLoading(false);
+    } else if (user && !user.customerId) {
+      // If user is loaded but no customerId, stop loading
+      setLoading(false);
+    }
   }, [user]);
 
   // Fetch Static Tier Limits - Mocked
