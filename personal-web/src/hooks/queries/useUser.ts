@@ -6,7 +6,12 @@ export const useUserProfile = (options?: { refetchInterval?: number }) => {
     queryKey: ["user", "profile"],
     queryFn: async () => {
       const response = await UserService.getProfile();
-      return response.data;
+      const data = response.data;
+      return {
+        ...data,
+        firstName: data.first_name || data.firstName,
+        lastName: data.last_name || data.lastName,
+      };
     },
     ...options,
   });

@@ -87,4 +87,10 @@ export const AuthService = {
       "/api/v1/customers/personal/auth/reset-password",
       data,
     ),
+  
+  refreshToken: (data: { session_id: string }) =>
+    api.post<AuthResponseDto>(
+      "/api/v1/customers/personal/auth/refresh-token",
+      data,
+    ),
 };

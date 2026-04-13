@@ -40,6 +40,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const TOKEN_KEY = "sb-access-token";
 const USER_KEY = "sb-user-data";
+const SESSION_ID_KEY = "sb-session-id";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -78,6 +79,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setLoading(false);
   }, []);
 
+  // Proactive token refresh
+  useEffect(() => {
+    if (!accessToken || !user) return;
+
+    const refreshInterval = setInterval(async () => {
+      const sessionId = localStorage.getItem(SESSION_ID_KEY);
+      if (!sessionId) return;
+
+      try {
+        const response = await AuthService.refreshToken({ session_id: sessionId });
+        if (response.access_token) {
+          setAccessToken(response.access_token);
+          localStorage.setItem(TOKEN_KEY, response.access_token);
+          if (response.session_id) {
+            localStorage.setItem(SESSION_ID_KEY, response.session_id);
+          }
+        }
+      } catch (error) {
+        console.error("Proactive refresh failed:", error);
+      }
+    }, 4 * 60 * 1000); // Every 4 minutes
+
+    return () => clearInterval(refreshInterval);
+  }, [accessToken, user]);
+
   const signIn = async (email: string, password: string) => {
     try {
       const keyResponse = await AuthService.getPublicKey();
@@ -106,13 +132,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             email: profileData.email,
             firstName: profileData.first_name || profileData.firstName || "",
             lastName: profileData.last_name || profileData.lastName || "",
-            role: profileData.status === "ACTIVE" ? "user" : "pending",
+            role: profileData.user_status === "ACTIVE" ? "user" : "pending",
             pin_set: profileData.pin_set,
             customerId: profileData.id,
           };
 
           setUser(userData);
           localStorage.setItem(USER_KEY, JSON.stringify(userData));
+          if (result.session_id) {
+            localStorage.setItem(SESSION_ID_KEY, result.session_id);
+          }
         } catch (profileError) {
           console.error(
             "Failed to fetch user profile after login:",
@@ -194,12 +223,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             email: profileData.email,
             firstName: profileData.first_name || profileData.firstName || "",
             lastName: profileData.last_name || profileData.lastName || "",
+            role: profileData.user_status === "ACTIVE" ? "user" : "pending",
             pin_set: profileData.pin_set,
             customerId: profileData.id,
           };
 
           setUser(userData);
           localStorage.setItem(USER_KEY, JSON.stringify(userData));
+          if (result.session_id) {
+            localStorage.setItem(SESSION_ID_KEY, result.session_id);
+          }
         } catch (error) {
           console.error("Failed to fetch profile in 2FA:", error);
         }

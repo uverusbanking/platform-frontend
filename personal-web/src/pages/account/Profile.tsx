@@ -25,8 +25,9 @@ interface Profile {
   id: string;
   user_id: string;
   email: string;
-  full_name: string | null;
-  phone: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  phone_number: string | null;
   avatar_url: string | null;
 }
 
@@ -52,16 +53,19 @@ const Profile = () => {
     if (!user) return;
 
     try {
-      const data = await UserService.getProfile();
+      const response = await UserService.getProfile();
+      const data = response.data;
+      
       setProfile({
         id: data.id,
         user_id: data.id,
         email: data.email,
-        full_name: `${data.first_name} ${data.last_name}`,
-        phone: data.phone_number || "",
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone_number: data.phone_number || "",
         avatar_url: null,
       });
-      setFullName(`${data.first_name} ${data.last_name}`);
+      setFullName(`${data.first_name || ""} ${data.last_name || ""}`.trim());
       setPhone(data.phone_number || "");
     } catch (err) {
       console.error("Error fetching profile:", err);
@@ -105,13 +109,8 @@ const Profile = () => {
   };
 
   const getInitials = () => {
-    if (profile?.full_name) {
-      return profile.full_name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2);
+    if (profile?.first_name || profile?.last_name) {
+      return `${(profile.first_name || "")[0] || ""}${(profile.last_name || "")[0] || ""}`.toUpperCase();
     }
     return user?.email?.slice(0, 2).toUpperCase() || "U";
   };
@@ -141,7 +140,7 @@ const Profile = () => {
               </AvatarFallback>
             </Avatar>
             <h2 className="text-lg sm:text-xl font-semibold text-white">
-              {profile?.full_name || "User"}
+              {profile?.first_name ? `${profile.first_name} ${profile.last_name || ""}` : "User"}
             </h2>
             <p className="text-white/70 text-sm sm:text-base">{user?.email}</p>
             {isAdmin && (
@@ -219,7 +218,7 @@ const Profile = () => {
                       Full Name
                     </p>
                     <p className="font-medium text-sm sm:text-base truncate">
-                      {profile?.full_name || "Not set"}
+                      {profile?.first_name ? `${profile.first_name} ${profile.last_name || ""}` : "Not set"}
                     </p>
                   </div>
                 </div>
@@ -241,7 +240,7 @@ const Profile = () => {
                       Phone
                     </p>
                     <p className="font-medium text-sm sm:text-base">
-                      {profile?.phone || "Not set"}
+                      {profile?.phone_number || "Not set"}
                     </p>
                   </div>
                 </div>

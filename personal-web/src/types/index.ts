@@ -107,6 +107,7 @@ export interface UserResponseDto {
   account_number?: string;
   account_name?: string;
   balance?: string;
+  user_status?: string;
   status?: string;
   pin_set?: boolean;
   customer_id?: string;

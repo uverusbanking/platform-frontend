@@ -56,6 +56,39 @@ class ApiClient {
       headers,
     });
 
+    if (response.status === 401 && !url.includes("refresh-token")) {
+      const sessionId = localStorage.getItem("sb-session-id");
+      if (sessionId) {
+        try {
+          const refreshResponse = await fetch(`${this.baseURL}/api/v1/customers/personal/auth/refresh-token`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "origin-domain": typeof window !== "undefined" ? window.location.host : "",
+            },
+            body: JSON.stringify({ session_id: sessionId }),
+          });
+
+          if (refreshResponse.ok) {
+            const refreshData = await refreshResponse.json();
+            const newToken = refreshData.data?.access_token || refreshData.access_token;
+            if (newToken) {
+              localStorage.setItem("sb-access-token", newToken);
+              if (refreshData.data?.session_id || refreshData.session_id) {
+                localStorage.setItem("sb-session-id", refreshData.data?.session_id || refreshData.session_id);
+              }
+              // Retry with new token
+              const retryHeaders = { ...headers, "Authorization": `Bearer ${newToken}` };
+              const retryResponse = await fetch(url, { ...fetchOptions, headers: retryHeaders });
+              if (retryResponse.ok) return retryResponse.json();
+            }
+          }
+        } catch (e) {
+          console.error("Auto-refresh failed", e);
+        }
+      }
+    }
+
     if (!response.ok) {
       const error = await response
         .json()
