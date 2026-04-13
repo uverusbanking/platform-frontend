@@ -12,6 +12,7 @@ import type {
   Verify2FACodeDto,
   ValidateBvnDto,
   ValidateBvnResponseDto,
+  CompleteRegistrationDto,
   ApiResponse,
 } from "@/types";
 
@@ -37,6 +38,18 @@ export const AuthService = {
     api.post<ApiResponse<AuthResponseDto>>(
       "/api/v1/customers/personal/auth/login",
       data,
+    ),
+
+  completeRegistration: (
+    data: CompleteRegistrationDto,
+    idempotencyKey?: string,
+  ) =>
+    api.post<ApiResponse<MessageResponseDto>>(
+      "/api/v1/customers/personal/auth/complete-registration",
+      data,
+      {
+        headers: idempotencyKey ? { "idempotency-key": idempotencyKey } : {},
+      },
     ),
 
   verify2FACode: (data: Verify2FACodeDto) =>

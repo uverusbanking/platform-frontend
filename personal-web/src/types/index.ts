@@ -64,6 +64,11 @@ export interface VerifyOtpDto {
   otp: string;
 }
 
+export interface CompleteRegistrationDto {
+  email: string;
+  code: string;
+}
+
 export interface ResendOtpDto {
   email: string;
 }

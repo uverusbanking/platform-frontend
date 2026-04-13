@@ -12,12 +12,17 @@ interface AuthContextType {
     password: string,
   ) => Promise<{ error: Error | null; needsVerification?: boolean }>;
   signOut: () => Promise<void>;
-  verifyOTP: (email: string, otp: string) => Promise<{ error: Error | null }>;
+  verifyOTP: (
+    email: string,
+    otp: string,
+    isRegistration?: boolean,
+  ) => Promise<{ error: Error | null }>;
   resendOTP: (email: string) => Promise<{ error: Error | null }>;
   verifyAndAuthenticate: (
     email: string,
     otp: string,
     password: string,
+    isRegistration?: boolean,
   ) => Promise<{ error: Error | null }>;
   pendingEmail: string | null;
   pendingPassword: string | null;
@@ -158,7 +163,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const verifyOTP = async (email: string, otp: string) => {
+  const verifyOTP = async (
+    email: string,
+    otp: string,
+    isRegistration?: boolean,
+  ) => {
     try {
       if (pendingSessionId) {
         const response = await AuthService.verify2FACode({
@@ -196,8 +205,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return { error: null };
       }
 
-      // Fallback to legacy verifyOtp for registration/forgot-password if needed
-      await AuthService.verifyOtp({ email, otp });
+      if (isRegistration) {
+        // Generate a random idempotency key for registration completion
+        const idempotencyKey =
+          crypto.randomUUID?.() || Math.random().toString(36).substring(2);
+        await AuthService.completeRegistration(
+          { email, code: otp },
+          idempotencyKey,
+        );
+      } else {
+        // Fallback to legacy verifyOtp for forgot-password
+        await AuthService.verifyOtp({ email, otp });
+      }
+
       return { error: null };
     } catch (error) {
       return { error: error as Error };
@@ -208,10 +228,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     email: string,
     otp: string,
     password: string,
+    isRegistration?: boolean,
   ) => {
     try {
       // First verify OTP
-      const { error: verifyError } = await verifyOTP(email, otp);
+      const { error: verifyError } = await verifyOTP(
+        email,
+        otp,
+        isRegistration,
+      );
       if (verifyError) {
         return { error: verifyError };
       }

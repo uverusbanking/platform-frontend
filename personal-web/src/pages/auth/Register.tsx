@@ -208,11 +208,14 @@ const Register = () => {
             setError(errorMessage);
           },
           onSuccess: () => {
-            // Registration successful. Since backend activates users immediately,
-            // we redirect to login with pending credentials.
-            toast.success("Account created successfully!");
+            // Registration successful. Backend sends OTP for verification.
+            toast.success(
+              "Account created successfully! Please verify your email.",
+            );
             setPendingCredentials(email, password);
-            navigate("/auth/login", { state: { email, registered: true } });
+            navigate("/auth/verify-otp", {
+              state: { email, fromRegistration: true },
+            });
           },
           onSettled: () => {
             setLoading(false);

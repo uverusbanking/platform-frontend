@@ -74,6 +74,7 @@ const VerifyOTP = () => {
         email,
         otp,
         pendingPassword,
+        fromRegistration,
       );
 
       if (error) {
@@ -95,7 +96,7 @@ const VerifyOTP = () => {
       }, 1500);
     } else {
       // Just verify OTP without auto-login (for forgot password/default)
-      const { error } = await verifyOTP(email, otp);
+      const { error } = await verifyOTP(email, otp, fromRegistration);
 
       if (error) {
         setError(error.message);
