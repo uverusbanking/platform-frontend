@@ -48,6 +48,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { KPICard } from "@/components/features/dashboard/KPICard";
 import { KPICardSkeleton } from "@/components/features/dashboard/KPICardSkeleton";
+import { StatusBadge } from "@/components/StatusBadge";
 
 function OrganisationSkeleton() {
   return (
@@ -114,35 +115,6 @@ export default function OrganisationsPage() {
     useGetOrganisationStatistics();
 
   const organisations = organisationData?.data || [];
-
-  const getStatusBadge = (status: string) => {
-    switch (status?.toUpperCase()) {
-      case "ACTIVE":
-        return (
-          <Badge className="bg-success/10 hover:bg-success/20 text-success border-success/20 font-medium">
-            Active
-          </Badge>
-        );
-      case "PENDING":
-        return (
-          <Badge className="bg-warning/10 hover:bg-warning/20 text-warning border-warning/20 font-medium">
-            Pending
-          </Badge>
-        );
-      case "SUSPENDED":
-        return (
-          <Badge className="bg-error/10 hover:bg-error/20 text-error border-error/20 font-medium">
-            Suspended
-          </Badge>
-        );
-      default:
-        return (
-          <Badge variant="secondary" className="font-medium">
-            {status || "Unknown"}
-          </Badge>
-        );
-    }
-  };
 
   return (
     <div className="space-y-8 animate-fade-in pb-12">
@@ -330,7 +302,7 @@ export default function OrganisationsPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {getStatusBadge(organisation.status)}
+                        {StatusBadge({ status: organisation.status })}
                       </TableCell>
                       <TableCell className="text-muted-foreground font-medium text-xs">
                         {new Date(organisation.created_at).toLocaleDateString()}

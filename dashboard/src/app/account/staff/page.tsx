@@ -71,6 +71,7 @@ import { Pagination } from "@/components/shared/Pagination";
 import { staffSchema } from "@/lib/schemas/staff/staff.schema";
 import { Gender } from "@/types/enums";
 import { staffRoles } from "@/auth/roles";
+import { StatusBadge } from "@/components/StatusBadge";
 
 const StaffFormSchema = staffSchema;
 
@@ -603,20 +604,15 @@ export default function Staff() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline" className="capitalize">
-                              {staff.role.replace("_", " ").toLowerCase()}
-                            </Badge>
+                            <StatusBadge
+                              status={staff.role
+                                .replace("_", " ")
+                                .toLowerCase()}
+                              variant="outline"
+                            />
                           </TableCell>
                           <TableCell>
-                            <Badge
-                              variant={
-                                staff.status.toLowerCase() === "active"
-                                  ? "default"
-                                  : "secondary"
-                              }
-                            >
-                              {staff.status.toLowerCase()}
-                            </Badge>
+                            <StatusBadge status={staff.status.toLowerCase()} />
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
