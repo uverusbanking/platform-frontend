@@ -36,11 +36,13 @@ describe("useOptionsHook", () => {
       data: { status: "success", data: mockLocations },
     });
 
-    const { result } = renderHook(() => useGetLocations("ng"), { wrapper });
+    const { result } = renderHook(() => useGetLocations({ parent_id: "ng" }), {
+      wrapper,
+    });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(apiClient.get).toHaveBeenCalledWith("/options/locations", {
-      params: { parent_slug: "ng" },
+    expect(apiClient.get).toHaveBeenCalledWith("/locations", {
+      params: { parent_id: "ng" },
     });
     expect(result.current.data?.data).toEqual(mockLocations);
   });
