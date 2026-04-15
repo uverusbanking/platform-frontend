@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/StatusBadge";
 import { Loader2, Eye, Edit, Trash2 } from "lucide-react";
 import { IUser, UserStatus } from "@/types/user.types";
 
@@ -93,23 +93,16 @@ export function StaffTable({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="capitalize">
-                      {staff.role
+                    <StatusBadge
+                      status={staff.role
                         .replace("PLATFORM_", "")
                         .replace("_", " ")
                         .toLowerCase()}
-                    </Badge>
+                      variant="outline"
+                    />
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant={
-                        staff.status === UserStatus.ACTIVE
-                          ? "default"
-                          : "secondary"
-                      }
-                    >
-                      {staff.status.toLowerCase()}
-                    </Badge>
+                    <StatusBadge status={staff.status.toLowerCase()} />
                   </TableCell>
                   <TableCell>
                     {new Date(staff.created_at).toLocaleDateString("en-CA")}

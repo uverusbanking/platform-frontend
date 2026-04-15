@@ -143,8 +143,8 @@ describe("Staff Page", () => {
 
     expect(screen.getByText("NugaPay Staff")).toBeInTheDocument();
     expect(screen.getByText("sundaywht@gmail.com")).toBeInTheDocument();
-    expect(screen.getByText("brand admin")).toBeInTheDocument();
-    expect(screen.getByText("active")).toBeInTheDocument();
+    expect(screen.getByText(/brand admin/i)).toBeInTheDocument();
+    expect(screen.getByText(/active/i)).toBeInTheDocument();
   });
 
   it("opens add staff dialog and submits correctly", async () => {

@@ -157,8 +157,8 @@ describe("Staff Page", () => {
     expect(screen.getByText("NugaPay Staff")).toBeInTheDocument();
     expect(screen.getByText("sundaywht@gmail.com")).toBeInTheDocument();
     // Verify badge text which is transformed in component
-    expect(screen.getByText("admin")).toBeInTheDocument();
-    expect(screen.getByText("active")).toBeInTheDocument();
+    expect(screen.getAllByText(/admin/i)[0]).toBeInTheDocument();
+    expect(screen.getAllByText(/active/i)[0]).toBeInTheDocument();
   });
 
   it("opens add staff dialog and submits correctly", async () => {
