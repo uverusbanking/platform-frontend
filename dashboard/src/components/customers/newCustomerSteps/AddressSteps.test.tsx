@@ -75,15 +75,15 @@ describe("AddressSteps Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useGetLocations as vi.Mock).mockReturnValue({
+    (useGetLocations as vi.Mock).mockImplementation(() => ({
       data: { data: [] },
       isLoading: false,
-    });
+    }));
   });
 
   it("renders correctly and loads countries", async () => {
-    (useGetLocations as vi.Mock).mockImplementation((parentSlug) => {
-      if (parentSlug === undefined)
+    (useGetLocations as vi.Mock).mockImplementation((payload) => {
+      if (!payload?.parent_id && payload?.type === "COUNTRY")
         return {
           data: { data: [{ name: "Nigeria", slug: "nigeria", id: "1" }] },
           isLoading: false,
@@ -106,8 +106,8 @@ describe("AddressSteps Component", () => {
   });
 
   it("resets state and city when country changes", async () => {
-    (useGetLocations as vi.Mock).mockImplementation((parentSlug) => {
-      if (!parentSlug)
+    (useGetLocations as vi.Mock).mockImplementation((payload) => {
+      if (!payload?.parent_id && payload?.type === "COUNTRY")
         return {
           data: {
             data: [
@@ -146,18 +146,18 @@ describe("AddressSteps Component", () => {
   });
 
   it("calls nextStep with form data on submit", async () => {
-    (useGetLocations as vi.Mock).mockImplementation((parentSlug) => {
-      if (!parentSlug)
+    (useGetLocations as vi.Mock).mockImplementation((payload) => {
+      if (!payload?.parent_id && payload?.type === "COUNTRY")
         return {
           data: { data: [{ name: "Nigeria", slug: "nigeria", id: "1" }] },
           isLoading: false,
         };
-      if (parentSlug === "nigeria")
+      if (payload?.parent_id === "nigeria" && payload?.type === "STATE")
         return {
           data: { data: [{ name: "Lagos", slug: "lagos", id: "11" }] },
           isLoading: false,
         };
-      if (parentSlug === "lagos")
+      if (payload?.parent_id === "lagos" && payload?.type === "LGA")
         return {
           data: { data: [{ name: "Ikeja", slug: "ikeja", id: "111" }] },
           isLoading: false,
