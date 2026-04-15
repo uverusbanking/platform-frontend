@@ -13,11 +13,12 @@ import {
   IKinRelationship,
 } from "@/types/option.types";
 import { QUERY_KEYS } from "@/lib/queryKeys";
+import { IGetLocationPayload } from "@shared/core";
 
-export const useGetLocations = (parent_slug?: string) => {
+export const useGetLocations = (payload: IGetLocationPayload) => {
   return useQuery<IApiResponse<ILocation[]>, TError>({
-    queryKey: [QUERY_KEYS.OPTIONS.LOCATIONS, parent_slug],
-    queryFn: () => getLocations(parent_slug),
+    queryKey: [QUERY_KEYS.OPTIONS.LOCATIONS, payload.parent_id, payload.type],
+    queryFn: () => getLocations(payload.parent_id, payload.type),
     staleTime: 1000 * 60 * 60, // 1 hour
   });
 };

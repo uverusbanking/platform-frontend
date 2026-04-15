@@ -9,6 +9,8 @@ export const QUERY_KEYS = {
   WALLET: "wallet",
   TRANSACTIONS: "transactions",
 
+  LOCATIONS: "locations",
+
   // New keys
   WALLETS: "wallets",
   COMPANY_USERS: "company-users",
