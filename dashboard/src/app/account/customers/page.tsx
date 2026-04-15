@@ -50,6 +50,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/shared/Pagination";
+import { StatusBadge } from "@/components/StatusBadge";
 
 function CustomerSkeleton() {
   return (
@@ -156,35 +157,6 @@ export default function Customers() {
       ? { status: selectedStatus }
       : {}),
   });
-
-  const getStatusBadge = (status: string) => {
-    switch (status?.toUpperCase()) {
-      case "ACTIVE":
-        return (
-          <Badge className="bg-success/10 text-success border-success/20 hover:bg-success/20 transition-colors font-medium">
-            Active
-          </Badge>
-        );
-      case "PENDING":
-        return (
-          <Badge className="bg-warning/10 text-warning border-warning/20 hover:bg-warning/20 transition-colors font-medium">
-            Pending
-          </Badge>
-        );
-      case "BLOCKED":
-        return (
-          <Badge className="bg-error/10 text-error border-error/20 hover:bg-error/20 transition-colors font-medium">
-            Blocked
-          </Badge>
-        );
-      default:
-        return (
-          <Badge variant="secondary" className="font-medium">
-            {status || "Unknown"}
-          </Badge>
-        );
-    }
-  };
 
   const customers = Array.isArray(customerData?.data)
     ? customerData.data
@@ -459,7 +431,9 @@ export default function Customers() {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>{getStatusBadge(customer.status)}</TableCell>
+                        <TableCell>
+                          {StatusBadge({ status: customer.status })}
+                        </TableCell>
                         <TableCell className="text-muted-foreground font-medium text-xs whitespace-nowrap">
                           {new Date(customer.created_at).toLocaleDateString(
                             "en-US",

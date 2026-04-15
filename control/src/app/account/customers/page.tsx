@@ -56,6 +56,7 @@ import {
 } from "@/hooks/queries/useCustomerQueries";
 import { KPICard } from "@/components/features/dashboard/KPICard";
 import { KPICardSkeleton } from "@/components/features/dashboard/KPICardSkeleton";
+import { StatusBadge } from "@/components/StatusBadge";
 
 function CustomerSkeleton() {
   return (
@@ -159,35 +160,6 @@ export default function Customers() {
         totalActiveCustomers: "NIL",
         totalPendingCustomers: "NIL",
       };
-
-  const getStatusBadge = (status: string) => {
-    switch (status?.toUpperCase()) {
-      case "ACTIVE":
-        return (
-          <Badge className="bg-success/10 text-success border-success/20 hover:bg-success/20 transition-colors font-medium">
-            Active
-          </Badge>
-        );
-      case "PENDING":
-        return (
-          <Badge className="bg-warning/10 text-warning border-warning/20 hover:bg-warning/20 transition-colors font-medium">
-            Pending
-          </Badge>
-        );
-      case "BLOCKED":
-        return (
-          <Badge className="bg-error/10 text-error border-error/20 hover:bg-error/20 transition-colors font-medium">
-            Blocked
-          </Badge>
-        );
-      default:
-        return (
-          <Badge variant="secondary" className="font-medium">
-            {status || "Unknown"}
-          </Badge>
-        );
-    }
-  };
 
   const customers = customerData?.data ?? [];
 
@@ -453,7 +425,9 @@ export default function Customers() {
                             ₦0.00
                           </span>
                         </TableCell>
-                        <TableCell>{getStatusBadge(customer.status)}</TableCell>
+                        <TableCell>
+                          {StatusBadge({ status: customer.status })}
+                        </TableCell>
                         <TableCell className="text-muted-foreground font-medium text-xs whitespace-nowrap">
                           {new Date(customer.created_at).toLocaleDateString(
                             "en-US",
