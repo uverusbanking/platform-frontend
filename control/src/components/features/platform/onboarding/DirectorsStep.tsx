@@ -36,7 +36,7 @@ export function DirectorsStep() {
               city: "",
               state: "",
               zipCode: "",
-              country: "nigeria",
+              country: "",
               ownershipPercentage: 0,
               isBeneficialOwner: false,
             })

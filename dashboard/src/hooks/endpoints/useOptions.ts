@@ -17,10 +17,11 @@ import {
 } from "@/types/options.types";
 
 export const getLocations = async (
-  parent_slug?: string,
+  parent_id?: string,
+  type?: string,
 ): Promise<IApiResponse<ILocation[]>> => {
-  const params = parent_slug ? { parent_slug } : {};
-  const response = await apiClient.get("/options/locations", { params });
+  const params = parent_id ? { parent_id, type } : { type };
+  const response = await apiClient.get("/locations", { params });
   return response.data;
 };
 

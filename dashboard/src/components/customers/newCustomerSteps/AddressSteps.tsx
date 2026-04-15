@@ -61,12 +61,17 @@ export function AddressSteps({ data, nextStep, prevStep }: Props) {
   const selectedCountry = watch("country");
   const selectedState = watch("state");
 
-  const { data: countriesRes, isLoading: isLoadingCountries } =
-    useGetLocations();
-  const { data: statesRes, isLoading: isLoadingStates } =
-    useGetLocations(selectedCountry);
-  const { data: lgasRes, isLoading: isLoadingLGAs } =
-    useGetLocations(selectedState);
+  const { data: countriesRes, isLoading: isLoadingCountries } = useGetLocations(
+    { type: "COUNTRY" },
+  );
+  const { data: statesRes, isLoading: isLoadingStates } = useGetLocations({
+    parent_id: selectedCountry,
+    type: "STATE",
+  });
+  const { data: lgasRes, isLoading: isLoadingLGAs } = useGetLocations({
+    parent_id: selectedState,
+    type: "LGA",
+  });
 
   const countries = countriesRes?.data || [];
   const states = statesRes?.data || [];

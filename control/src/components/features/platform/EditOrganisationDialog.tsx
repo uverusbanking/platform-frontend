@@ -91,11 +91,15 @@ export function EditOrganisationDialog({
   const watchedState = form.watch("state");
 
   const { data: countriesResponse, isLoading: isLoadingCountries } =
-    useGetLocations();
-  const { data: statesResponse, isLoading: isLoadingStates } =
-    useGetLocations(watchedCountry);
-  const { data: citiesResponse, isLoading: isLoadingCities } =
-    useGetLocations(watchedState);
+    useGetLocations({ type: "COUNTRY" });
+  const { data: statesResponse, isLoading: isLoadingStates } = useGetLocations({
+    parent_id: watchedCountry,
+    type: "STATE",
+  });
+  const { data: citiesResponse, isLoading: isLoadingCities } = useGetLocations({
+    parent_id: watchedState,
+    type: "LGA",
+  });
 
   const countries = countriesResponse?.data || [];
   const states = statesResponse?.data || [];
@@ -395,7 +399,7 @@ export function EditOrganisationDialog({
                           {countries.map((country: ILocation) => (
                             <SelectItem
                               key={country.id}
-                              value={country.slug}
+                              value={country.id}
                               className="rounded-lg"
                             >
                               {country.name}
@@ -441,7 +445,7 @@ export function EditOrganisationDialog({
                           {states.map((state: ILocation) => (
                             <SelectItem
                               key={state.id}
-                              value={state.slug}
+                              value={state.id}
                               className="rounded-lg"
                             >
                               {state.name}

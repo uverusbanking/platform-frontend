@@ -50,11 +50,15 @@ export function DirectorCard({
   const watchedDocType = watch(`directors.${index}.idType`);
 
   const { data: countriesResponse, isLoading: isLoadingCountries } =
-    useGetLocations();
-  const { data: statesResponse, isLoading: isLoadingStates } =
-    useGetLocations(watchedCountry);
-  const { data: citiesResponse, isLoading: isLoadingCities } =
-    useGetLocations(watchedState);
+    useGetLocations({ type: "COUNTRY" });
+  const { data: statesResponse, isLoading: isLoadingStates } = useGetLocations({
+    parent_id: watchedCountry,
+    type: "STATE",
+  });
+  const { data: citiesResponse, isLoading: isLoadingCities } = useGetLocations({
+    parent_id: watchedState,
+    type: "LGA",
+  });
   const { data: kycDocTypesResponse, isLoading: isLoadingDocTypes } =
     useGetKYCDocumentTypes();
 
@@ -251,7 +255,7 @@ export function DirectorCard({
                     </FormControl>
                     <SelectContent>
                       {countries.map((country: ILocation) => (
-                        <SelectItem key={country.id} value={country.slug}>
+                        <SelectItem key={country.id} value={country.id}>
                           {country.name}
                         </SelectItem>
                       ))}
@@ -291,7 +295,7 @@ export function DirectorCard({
                     </FormControl>
                     <SelectContent>
                       {states.map((state: ILocation) => (
-                        <SelectItem key={state.id} value={state.slug}>
+                        <SelectItem key={state.id} value={state.id}>
                           {state.name}
                         </SelectItem>
                       ))}
