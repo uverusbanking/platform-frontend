@@ -6,73 +6,66 @@
 
 @layer base {
   :root {
-    /* Platform brand colors */
-    --background: 0 0% 100%;
-    --foreground: 240 10% 10%;
+    /* ── Surfaces ─────────────────────────────────────────────────────── */
+    --background: 240 242 243; /* #F0F2F3 — page background        */
+    --surface: 232 234 235; /* #E8EAEB — card/section containers */
+    --surface-high: 221 224 226; /* #DDE0E2 — elevated/pressed        */
+    --surface-highest: 255 255 255; /* #FFFFFF — modals, floating cards  */
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 10%;
+    /* ── Brand (runtime-injectable) ──────────────────────────────────── */
+    --brand-primary: 0 82 255; /* #0052FF */
+    --brand-secondary: 88 86 214; /* #5856D6 */
+    --on-brand-primary: 255 255 255;
+    --on-brand-secondary: 255 255 255;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 10%;
+    /* ── Text ────────────────────────────────────────────────────────── */
+    --foreground: 25 28 29; /* #191C1D — primary body text       */
+    --foreground-strong: 11 11 11; /* #0B0B0B — high-contrast headings  */
+    --foreground-subtle: 176 176 176; /* #B0B0B0 — captions, hints         */
 
-    /* Primary: Uverus Purple */
-    --primary: 263 70% 50%;
-    --primary-foreground: 0 0% 100%;
+    /* ── Feedback ────────────────────────────────────────────────────── */
+    --error: 255 59 48; /* #FF3B30 */
+    --on-error: 255 255 255;
+    --success: 52 199 89; /* #34C759 */
+    --on-success: 255 255 255;
+    --warning: 255 149 0; /* #FF9500 */
+    --on-warning: 255 255 255;
 
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 10% 10%;
-
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
-
-    /* Accent: Lighter purple */
-    --accent: 263 70% 96%;
-    --accent-foreground: 263 70% 50%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    /* Success green */
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
-
-    /* Warning orange */
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
-
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 263 70% 50%;
-
+    /* ── Structure ───────────────────────────────────────────────────── */
+    --border: 221 224 226; /* #DDE0E2 — matches surface-high    */
+    --input: 221 224 226;
+    --ring: 0 82 255; /* matches brand-primary             */
     --radius: 0.75rem;
 
-    /* Custom brand tokens */
-    --brand-purple: 263 70% 50%;
-    --brand-purple-light: 263 70% 60%;
-    --brand-purple-dark: 263 70% 40%;
-    --brand-indigo: 245 58% 51%;
-    --brand-violet: 270 67% 58%;
+    /* ── Sidebar ─────────────────────────────────────────────────────── */
+    --sidebar-background: 240 242 243;
+    --sidebar-foreground: 25 28 29;
+    --sidebar-primary: 0 82 255;
+    --sidebar-primary-foreground: 255 255 255;
+    --sidebar-accent: 232 234 235;
+    --sidebar-accent-foreground: 25 28 29;
+    --sidebar-border: 221 224 226;
+    --sidebar-ring: 0 82 255;
 
-    /* Gradients */
+    /* ── Gradients ───────────────────────────────────────────────────── */
     --gradient-primary: linear-gradient(
       135deg,
-      hsl(263 70% 50%) 0%,
-      hsl(245 58% 51%) 100%
+      rgb(var(--brand-primary)) 0%,
+      rgb(var(--brand-secondary)) 100%
     );
     --gradient-card: linear-gradient(
       180deg,
-      hsl(263 70% 50% / 0.05) 0%,
+      rgb(var(--brand-primary) / 0.05) 0%,
       transparent 100%
     );
     --gradient-hero: linear-gradient(
       135deg,
-      hsl(263 70% 50%) 0%,
-      hsl(270 67% 58%) 50%,
-      hsl(245 58% 51%) 100%
+      rgb(var(--brand-primary)) 0%,
+      rgb(var(--brand-secondary)) 50%,
+      rgb(var(--brand-primary)) 100%
     );
 
-    /* Shadows */
+    /* ── Shadows ─────────────────────────────────────────────────────── */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md:
       0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
@@ -80,52 +73,7 @@
       0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
     --shadow-xl:
       0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.05);
-    --shadow-glow: 0 0 40px -10px hsl(263 70% 50% / 0.4);
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 263 70% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 263 70% 96%;
-    --sidebar-accent-foreground: 263 70% 50%;
-    --sidebar-border: 240 6% 90%;
-    --sidebar-ring: 263 70% 50%;
-  }
-
-  .dark {
-    --background: 240 10% 6%;
-    --foreground: 0 0% 98%;
-
-    --card: 240 10% 9%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 240 10% 9%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 263 70% 60%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 240 5% 15%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 240 5% 15%;
-    --muted-foreground: 240 5% 65%;
-
-    --accent: 263 70% 20%;
-    --accent-foreground: 263 70% 80%;
-
-    --destructive: 0 62% 50%;
-    --destructive-foreground: 0 0% 100%;
-
-    --success: 142 76% 42%;
-    --success-foreground: 0 0% 100%;
-
-    --warning: 38 92% 55%;
-    --warning-foreground: 0 0% 0%;
-
-    --border: 240 5% 18%;
-    --input: 240 5% 18%;
-    --ring: 263 70% 60%;
+    --shadow-glow: 0 0 40px -10px rgb(var(--brand-primary) / 0.4);
   }
 }
 
@@ -325,7 +273,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    hsl(var(--muted)) 50%,
+    rgb(var(--surface)) 50%,
     transparent
   );
   background-size: 200% 100%;

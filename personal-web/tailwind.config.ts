@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 export default {
-  darkMode: ["class"],
+  darkMode: false,
   content: [
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
@@ -22,63 +22,80 @@ export default {
         sans: ["Inter", "DM Sans", "system-ui", "sans-serif"],
       },
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        // ── Unified tokens — use these in new code ─────────────────────
+        "brand-primary": {
+          DEFAULT: "rgb(var(--brand-primary) / <alpha-value>)",
+          foreground: "rgb(var(--on-brand-primary) / <alpha-value>)",
+        },
+        "brand-secondary": {
+          DEFAULT: "rgb(var(--brand-secondary) / <alpha-value>)",
+          foreground: "rgb(var(--on-brand-secondary) / <alpha-value>)",
+        },
+        surface: {
+          DEFAULT: "rgb(var(--surface) / <alpha-value>)",
+          high: "rgb(var(--surface-high) / <alpha-value>)",
+          highest: "rgb(var(--surface-highest) / <alpha-value>)",
+        },
+        "foreground-subtle": "rgb(var(--foreground-subtle) / <alpha-value>)",
+        "foreground-strong": "rgb(var(--foreground-strong) / <alpha-value>)",
+        error: {
+          DEFAULT: "rgb(var(--error) / <alpha-value>)",
+          foreground: "rgb(var(--on-error) / <alpha-value>)",
+        },
+
+        // ── Shadcn/ui compat — kept so existing components don't break ─
+        border: "rgb(var(--border) / <alpha-value>)",
+        input: "rgb(var(--input) / <alpha-value>)",
+        ring: "rgb(var(--ring) / <alpha-value>)",
+        background: "rgb(var(--background) / <alpha-value>)",
+        foreground: "rgb(var(--foreground) / <alpha-value>)",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "rgb(var(--brand-primary) / <alpha-value>)",
+          foreground: "rgb(var(--on-brand-primary) / <alpha-value>)",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "rgb(var(--surface) / <alpha-value>)",
+          foreground: "rgb(var(--foreground) / <alpha-value>)",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "rgb(var(--error) / <alpha-value>)",
+          foreground: "rgb(var(--on-error) / <alpha-value>)",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: "rgb(var(--surface) / <alpha-value>)",
+          foreground: "rgb(var(--foreground-subtle) / <alpha-value>)",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "rgb(var(--brand-secondary) / <alpha-value>)",
+          foreground: "rgb(var(--on-brand-secondary) / <alpha-value>)",
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+          DEFAULT: "rgb(var(--surface-highest) / <alpha-value>)",
+          foreground: "rgb(var(--foreground) / <alpha-value>)",
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+          DEFAULT: "rgb(var(--surface-highest) / <alpha-value>)",
+          foreground: "rgb(var(--foreground) / <alpha-value>)",
         },
         success: {
-          DEFAULT: "hsl(var(--success))",
-          foreground: "hsl(var(--success-foreground))",
+          DEFAULT: "rgb(var(--success) / <alpha-value>)",
+          foreground: "rgb(var(--on-success) / <alpha-value>)",
         },
         warning: {
-          DEFAULT: "hsl(var(--warning))",
-          foreground: "hsl(var(--warning-foreground))",
-        },
-        brand: {
-          purple: "hsl(var(--brand-purple))",
-          "purple-light": "hsl(var(--brand-purple-light))",
-          "purple-dark": "hsl(var(--brand-purple-dark))",
-          indigo: "hsl(var(--brand-indigo))",
-          violet: "hsl(var(--brand-violet))",
+          DEFAULT: "rgb(var(--warning) / <alpha-value>)",
+          foreground: "rgb(var(--on-warning) / <alpha-value>)",
         },
         sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
+          DEFAULT: "rgb(var(--sidebar-background) / <alpha-value>)",
+          foreground: "rgb(var(--sidebar-foreground) / <alpha-value>)",
+          primary: "rgb(var(--sidebar-primary) / <alpha-value>)",
+          "primary-foreground":
+            "rgb(var(--sidebar-primary-foreground) / <alpha-value>)",
+          accent: "rgb(var(--sidebar-accent) / <alpha-value>)",
+          "accent-foreground":
+            "rgb(var(--sidebar-accent-foreground) / <alpha-value>)",
+          border: "rgb(var(--sidebar-border) / <alpha-value>)",
+          ring: "rgb(var(--sidebar-ring) / <alpha-value>)",
         },
       },
       borderRadius: {
