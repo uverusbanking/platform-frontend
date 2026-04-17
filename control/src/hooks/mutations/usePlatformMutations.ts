@@ -4,6 +4,8 @@ import {
   checkOrganisationExists,
   updateOrganisation,
   updateOrganisationDocuments,
+  updateBrandSettings,
+  updateConfiguredDomains,
 } from "@/hooks/endpoints/useOrganisation";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 
@@ -53,6 +55,14 @@ export const useUpdateOrganisation = () => {
       });
     },
   });
+};
+
+export const useUpdateBrandSettings = () => {
+  return useMutation({ mutationFn: updateBrandSettings });
+};
+
+export const useUpdateConfiguredDomains = () => {
+  return useMutation({ mutationFn: updateConfiguredDomains });
 };
 
 export const useUpdateOrganisationDocuments = () => {

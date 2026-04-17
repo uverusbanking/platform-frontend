@@ -8,6 +8,53 @@ import { emailSchema } from "../fields/email.schema";
 import { phoneNumberSchema } from "../fields/phoneNumber.schema";
 import { documentSchema } from "./organizationDocument.schema";
 
+const optionalUrl = z
+  .string()
+  .trim()
+  .refine((v) => v === "" || z.string().url().safeParse(v).success, {
+    message: "Must be a valid URL",
+  })
+  .optional();
+
+const hexColor = z
+  .string()
+  .trim()
+  .refine((v) => v === "" || /^#[0-9A-Fa-f]{6}$/.test(v), {
+    message: "Must be a valid hex colour (e.g. #0052FF)",
+  })
+  .optional();
+
+const brandConfigSchema = z.object({
+  brandName: z.string().trim().optional(),
+  shortBrandName: z.string().trim().optional(),
+  brandLogoUrl: optionalUrl,
+  primaryColor: hexColor,
+  secondaryColor: hexColor,
+  supportEmail: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || z.string().email().safeParse(v).success, {
+      message: "Must be a valid email",
+    })
+    .optional(),
+  supportPhone: z.string().trim().optional(),
+  websiteUrl: optionalUrl,
+  privacyUrl: optionalUrl,
+  termsUrl: optionalUrl,
+  seo: z
+    .object({
+      title: z.string().trim().optional(),
+      description: z.string().trim().optional(),
+      author: z.string().trim().optional(),
+    })
+    .optional(),
+});
+
+const configuredDomainSchema = z.object({
+  name: z.string().trim().min(1, "Environment name is required"),
+  url: z.string().trim().url("Must be a valid URL"),
+});
+
 export const OrganisationOnboardSchema = z.object({
   organisationName: requiredStringSchema("Organisation Name"),
   streetAddress: requiredStringSchema("Street Address"),
@@ -29,4 +76,10 @@ export const OrganisationOnboardSchema = z.object({
     proofOfAddress: documentSchema,
     uboDeclaration: documentSchema,
   }),
+  config: z
+    .object({
+      brand: brandConfigSchema.optional(),
+      domains: z.array(configuredDomainSchema).optional(),
+    })
+    .optional(),
 });

@@ -225,3 +225,38 @@ export interface IUpdateOrganisationDocumentsPayload {
     uboDeclaration?: { id: string; fileUrl: string; documentType: string };
   };
 }
+
+export interface IBrandSeo {
+  title: string;
+  description: string;
+  author: string;
+}
+
+export interface IBrandConfig {
+  brandName?: string;
+  shortBrandName?: string;
+  brandLogoUrl?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  supportEmail?: string;
+  supportPhone?: string;
+  websiteUrl?: string;
+  privacyUrl?: string;
+  termsUrl?: string;
+  seo?: IBrandSeo;
+}
+
+export interface IConfiguredDomain {
+  name: string;
+  url: string;
+}
+
+export interface IUpdateBrandSettingsPayload {
+  id: string;
+  brand: IBrandConfig;
+}
+
+export interface IUpdateConfiguredDomainsPayload {
+  id: string;
+  configured_domains: IConfiguredDomain[];
+}

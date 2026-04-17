@@ -14,6 +14,7 @@ import {
   FileText,
   ShieldCheck,
   Loader2,
+  Settings2,
 } from "lucide-react";
 import {
   Dialog,
@@ -27,7 +28,10 @@ import { Badge } from "@/components/ui/badge";
 import {
   useRegisterOrganisation,
   useCheckOrganisationExists,
+  useUpdateBrandSettings,
+  useUpdateConfiguredDomains,
 } from "@/hooks/mutations/usePlatformMutations";
+import { IBrandConfig } from "@/types/organisation.types";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsFetching } from "@tanstack/react-query";
@@ -37,6 +41,7 @@ import { AxiosError } from "axios";
 import { BusinessInfoStep } from "./onboarding/BusinessInfoStep";
 import { DirectorsStep } from "./onboarding/DirectorsStep";
 import { OrganisationDocumentsStep } from "./onboarding/OrganisationDocumentsStep";
+import { BrandConfigStep } from "./onboarding/BrandConfigStep";
 import { ReviewStep } from "./onboarding/ReviewStep";
 import { FieldErrors, Path } from "react-hook-form";
 import { OrganisationOnboardSchema } from "@/lib/schemas/platform/organisationOnboard.schema";
@@ -55,6 +60,8 @@ export function OnboardOrganisationDialog({
   const [isVerifyingOrg, setIsVerifyingOrg] = useState(false);
   const registerMutation = useRegisterOrganisation();
   const checkOrgMutation = useCheckOrganisationExists();
+  const brandSettingsMutation = useUpdateBrandSettings();
+  const configuredDomainsMutation = useUpdateConfiguredDomains();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -98,13 +105,55 @@ export function OnboardOrganisationDialog({
         proofOfAddress: { id: "", fileUrl: "", documentType: "proofOfAddress" },
         uboDeclaration: { id: "", fileUrl: "", documentType: "uboDeclaration" },
       },
+      config: {
+        brand: {
+          brandName: "",
+          shortBrandName: "",
+          brandLogoUrl: "",
+          primaryColor: "",
+          secondaryColor: "",
+          supportEmail: "",
+          supportPhone: "",
+          websiteUrl: "",
+          privacyUrl: "",
+          termsUrl: "",
+          seo: { title: "", description: "", author: "" },
+        },
+        domains: [],
+      },
     },
   });
 
   const onSubmit = async (values: FormValues) => {
-    console.log("Submitting values:", values);
     try {
-      await registerMutation.mutateAsync(values);
+      const org = await registerMutation.mutateAsync(values);
+      const orgId = org.data?.id;
+
+      if (orgId) {
+        const brand = values.config?.brand;
+        const domains = values.config?.domains;
+
+        const hasBrandData =
+          brand &&
+          Object.values(brand).some((v) =>
+            typeof v === "string" ? v.trim() !== "" : !!v,
+          );
+
+        if (hasBrandData) {
+          await brandSettingsMutation.mutateAsync({
+            id: orgId,
+            brand: brand as IBrandConfig,
+          });
+        }
+
+        if (domains && domains.length > 0) {
+          await configuredDomainsMutation.mutateAsync({
+            id: orgId,
+            configured_domains: domains,
+          });
+        }
+      }
+
       toast.success("Organisation onboarded successfully!");
       setOpen(false);
       form.reset();
@@ -138,6 +187,8 @@ export function OnboardOrganisationDialog({
       fieldsToValidate = ["directors"];
     } else if (step === 3) {
       fieldsToValidate = ["documents"];
+    } else if (step === 4) {
+      fieldsToValidate = ["config"];
     }
 
     const isValid = await form.trigger(fieldsToValidate);
@@ -178,6 +229,7 @@ export function OnboardOrganisationDialog({
     { title: "Business Info", icon: Building2 },
     { title: "Directors", icon: Users },
     { title: "Documents", icon: FileText },
+    { title: "Config", icon: Settings2 },
     { title: "Review", icon: ShieldCheck },
   ];
 
@@ -344,6 +396,18 @@ export function OnboardOrganisationDialog({
                         exit={{ opacity: 0, x: -20 }}
                         className="space-y-6"
                       >
+                        <BrandConfigStep />
+                      </motion.div>
+                    )}
+
+                    {step === 5 && (
+                      <motion.div
+                        key="step5"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className="space-y-6"
+                      >
                         <ReviewStep />
                       </motion.div>
                     )}
@@ -373,7 +437,7 @@ export function OnboardOrganisationDialog({
                   </div>
 
                   <div className="flex gap-3">
-                    {step < 4 ? (
+                    {step < 5 ? (
                       <Button
                         type="button"
                         className="bg-primary hover:bg-primary/90 text-white rounded-xl h-12 font-bold px-8 shadow-lg shadow-primary/20"
