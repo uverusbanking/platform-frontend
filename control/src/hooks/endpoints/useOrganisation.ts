@@ -23,9 +23,98 @@ import {
 import {
   ICheckOrganisationPayload,
   IRegisterOrganisationPayload,
+  IRegisterOrganisationDirector,
   IUpdateOrganisationDocumentsPayload,
   IUpdateOrganisationPayload,
 } from "@/types/organisation.types";
+
+// --- API payload transformers (camelCase → snake_case) ---
+
+function toSnakeDoc(doc: {
+  id: string;
+  fileUrl?: string;
+  documentType: string;
+}) {
+  return { id: doc.id, fileUrl: doc.fileUrl, documentType: doc.documentType };
+}
+
+function toSnakeDirector(d: IRegisterOrganisationDirector) {
+  return {
+    first_name: d.firstName,
+    last_name: d.lastName,
+    middle_name: d.middleName,
+    bvn: d.bvn,
+    nin: d.nin,
+    id_type: d.idType,
+    id_document: toSnakeDoc(d.idDocument),
+    street_address: d.streetAddress,
+    city: d.city,
+    state: d.state,
+    zip_code: d.zipCode,
+    country: d.country,
+    ownership_percentage: d.ownershipPercentage,
+    is_beneficial_owner: d.isBeneficialOwner,
+  };
+}
+
+function toRegisterPayload(p: IRegisterOrganisationPayload) {
+  return {
+    organisation_name: p.organisationName,
+    street_address: p.streetAddress,
+    city: p.city,
+    state: p.state,
+    zip_code: p.zipCode,
+    country: p.country,
+    tin: p.tin,
+    cac_number: p.cacNumber,
+    business_email: p.businessEmail,
+    business_phone: p.businessPhone,
+    directors: p.directors.map(toSnakeDirector),
+    documents: {
+      cac_certificate: toSnakeDoc(p.documents.cacCertificate),
+      memorandum: toSnakeDoc(p.documents.memorandum),
+      board_resolution: toSnakeDoc(p.documents.boardResolution),
+      proof_of_address: toSnakeDoc(p.documents.proofOfAddress),
+      ubo_declaration: toSnakeDoc(p.documents.uboDeclaration),
+    },
+  };
+}
+
+function toUpdatePayload(p: IUpdateOrganisationPayload) {
+  return {
+    ...(p.organisationName !== undefined && {
+      organisation_name: p.organisationName,
+    }),
+    ...(p.streetAddress !== undefined && { street_address: p.streetAddress }),
+    ...(p.city !== undefined && { city: p.city }),
+    ...(p.state !== undefined && { state: p.state }),
+    ...(p.zipCode !== undefined && { zip_code: p.zipCode }),
+    ...(p.country !== undefined && { country: p.country }),
+    ...(p.tin !== undefined && { tin: p.tin }),
+    ...(p.cacNumber !== undefined && { cac_number: p.cacNumber }),
+    ...(p.businessEmail !== undefined && { business_email: p.businessEmail }),
+    ...(p.businessPhone !== undefined && { business_phone: p.businessPhone }),
+    ...(p.status !== undefined && { status: p.status }),
+    ...(p.provision_sandbox_token !== undefined && {
+      provision_sandbox_token: p.provision_sandbox_token,
+    }),
+    ...(p.live_organisation_id !== undefined && {
+      live_organisation_id: p.live_organisation_id,
+    }),
+  };
+}
+
+function toUpdateDocumentsPayload(p: IUpdateOrganisationDocumentsPayload) {
+  const docs = p.documents;
+  const entries = [
+    docs.cacCertificate,
+    docs.memorandum,
+    docs.boardResolution,
+    docs.proofOfAddress,
+    docs.uboDeclaration,
+  ].filter((d): d is NonNullable<typeof d> => !!d);
+  return { documents: entries.map(toSnakeDoc) };
+}
 
 export const getOrganisations = async (
   params: IGetOrganisationsParams,
@@ -173,7 +262,7 @@ export const registerOrganisation = async (
 ): Promise<IApiResponse<IOrganisation>> => {
   const response = await apiClient.post(
     "/organisations/platform/register",
-    payload,
+    toRegisterPayload(payload),
   );
   return response.data;
 };
@@ -183,7 +272,11 @@ export const checkOrganisationExists = async (
 ): Promise<IApiResponse<boolean>> => {
   const response = await apiClient.post(
     "/organisation/check-if-organisation-exists",
-    payload,
+    {
+      cac_registration_number: payload.cacRegistrationNumber,
+      tin: payload.tin,
+      business_email: payload.businessEmail,
+    },
   );
   return response.data;
 };
@@ -192,7 +285,10 @@ export const updateOrganisation = async (
   payload: IUpdateOrganisationPayload & { id: string },
 ): Promise<IApiResponse<IOrganisation>> => {
   const { id, ...data } = payload;
-  const response = await apiClient.patch(`/organisations/platform/${id}`, data);
+  const response = await apiClient.patch(
+    `/organisations/platform/${id}`,
+    toUpdatePayload(data),
+  );
   return response.data;
 };
 
@@ -202,7 +298,7 @@ export const updateOrganisationDocuments = async (
   const { id, ...data } = payload;
   const response = await apiClient.patch(
     `/organisations/platform/${id}/documents`,
-    data,
+    toUpdateDocumentsPayload(data),
   );
   return response.data;
 };
