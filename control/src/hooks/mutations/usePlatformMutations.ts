@@ -15,9 +15,8 @@ export const useRegisterOrganisation = () => {
   return useMutation({
     mutationFn: registerOrganisation,
     onSuccess: () => {
-      // Invalidate all related queries for automatic reload
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.PLATFORM.ORGANISATIONS],
+        queryKey: [QUERY_KEYS.ORGANISATION.GET_ALL],
       });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PLATFORM.STATS] });
       queryClient.invalidateQueries({
