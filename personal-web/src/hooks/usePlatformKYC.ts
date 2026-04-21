@@ -83,13 +83,20 @@ export const usePlatformKYC = () => {
       setLoading(false);
       return;
     }
+
+    // Skip if PLATFORM_API_BASE_URL not configured — avoids hitting Vite dev
+    // server and getting an HTML 404 response that breaks JSON.parse
+    if (!PLATFORM_API_BASE_URL) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch(
         `${PLATFORM_API_BASE_URL}/payment/${customerId}/tier`,
         {
           headers: {
             accept: "*/*",
-            // x-api-key removed as per requirements (handled by allowedHosts/DEVOPS)
           },
         },
       );

@@ -10,6 +10,12 @@ export interface ApiResponse<T> {
 }
 
 // ============================================================================
+// Socket Types
+// ============================================================================
+
+export type { BalanceUpdatedPayload } from "@/lib/balanceSocket";
+
+// ============================================================================
 // Auth Module Types
 // ============================================================================
 
@@ -281,7 +287,7 @@ export interface TransactionDetailsResponseDto {
   currency: string;
   status: string;
   description: string;
-  createdAt: string;
+  date: string;
   recipient?: TransactionRecipientDto;
 }
 

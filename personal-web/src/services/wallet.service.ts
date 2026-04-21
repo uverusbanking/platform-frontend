@@ -1,5 +1,6 @@
 import { api } from "@/lib/api";
 import type {
+  ApiResponse,
   WalletBalanceResponseDto,
   VirtualAccountResponseDto,
 } from "@/types";
@@ -17,7 +18,7 @@ export interface WalletDto {
 }
 
 export const WalletService = {
-  getWallet: () => api.get<WalletDto>("/api/v1/wallets/me"),
+  getWallet: () => api.get<ApiResponse<WalletDto>>("/api/v1/wallets/me"),
 
   getVirtualAccount: () =>
     api.get<{ status: string; data: VirtualAccountResponseDto | null }>(

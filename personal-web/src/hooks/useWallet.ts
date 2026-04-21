@@ -5,7 +5,6 @@ export const useWallet = () => {
   const walletQuery = useQuery({
     queryKey: ["wallet"],
     queryFn: () => WalletService.getWallet(),
-    refetchInterval: 30000, // Refetch every 30 seconds
   });
 
   const virtualAccountQuery = useQuery({
@@ -14,7 +13,7 @@ export const useWallet = () => {
   });
 
   return {
-    wallet: walletQuery.data,
+    wallet: walletQuery.data?.data,
     isLoadingWallet: walletQuery.isLoading,
     walletError: walletQuery.error,
     refetchWallet: walletQuery.refetch,
