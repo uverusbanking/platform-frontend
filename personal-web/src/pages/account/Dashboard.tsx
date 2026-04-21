@@ -35,6 +35,7 @@ import {
 import { toast } from "sonner";
 import { useUserProfile } from "@/hooks/queries/useUser";
 import { useWallet } from "@/hooks/useWallet";
+import { useBalanceSocket } from "@/hooks/useBalanceSocket";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -55,6 +56,9 @@ const Dashboard = () => {
 
   const { wallet, isLoadingWallet, virtualAccount, isLoadingVirtualAccount } =
     useWallet();
+
+  // Real-time balance updates via WebSocket
+  const { socketBalance, balanceFlash } = useBalanceSocket({ showToast: true });
 
   // Safely extract transactions array
   const transactions = transactionsResponse?.data || [];
@@ -180,9 +184,18 @@ const Dashboard = () => {
               {isLoadingWallet ? (
                 <Skeleton className="h-8 sm:h-10 w-48 bg-white/20" />
               ) : (
-                <p className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
+                <p
+                  className={[
+                    "text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 transition-all duration-500",
+                    balanceFlash
+                      ? "text-emerald-300 drop-shadow-[0_0_12px_rgba(52,211,153,0.8)]"
+                      : "text-white",
+                  ].join(" ")}
+                >
                   {showBalance
-                    ? formatCurrency(parseFloat(wallet?.balance || "0"))
+                    ? formatCurrency(
+                        parseFloat(socketBalance ?? wallet?.balance ?? "0"),
+                      )
                     : "₦****.**"}
                 </p>
               )}
@@ -201,7 +214,9 @@ const Dashboard = () => {
                   <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-white/15">
                     <div className="flex-1 min-w-0">
                       <p className="text-white/60 text-[10px] sm:text-xs mb-0.5 sm:mb-1">
-                        {virtualAccount?.bank_name || profile?.bankName || "Virtual Account"}
+                        {virtualAccount?.bank_name ||
+                          profile?.bankName ||
+                          "Virtual Account"}
                       </p>
                       <p className="font-mono font-semibold text-sm sm:text-base truncate">
                         {formatAccountNumber(

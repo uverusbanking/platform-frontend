@@ -14,8 +14,8 @@ import {
   ArrowDownLeft,
   Search,
   History,
-  ChevronRight
-} from 'lucide-react';
+  ChevronRight,
+} from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -28,9 +28,9 @@ import {
 
 const Transactions = () => {
   const navigate = useNavigate();
-  const [filter, setFilter] = useState<'all' | 'CREDIT' | 'DEBIT'>('all');
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [filter, setFilter] = useState<"all" | "CREDIT" | "DEBIT">("all");
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
 
   // Debounce search to avoid API calls on every keystroke
@@ -50,7 +50,7 @@ const Transactions = () => {
     error: fetchError,
   } = useTransactions({
     page,
-    limit: 20
+    limit: 20,
   });
 
   // Extract data from the correct response structure
@@ -60,24 +60,34 @@ const Transactions = () => {
     page: pagination?.page || 1,
     pages: pagination?.total_pages || 0,
     limit: pagination?.per_page || 20,
-    total: pagination?.total || 0
+    total: pagination?.total || 0,
   };
 
   // Filter transactions based on selected filter
-  const filteredTransactions = filter === 'all'
-    ? transactions
-    : transactions.filter(tx => {
-      const ledgerEntry = tx.ledger_entries?.[0];
-      return ledgerEntry?.type === filter;
-    });
+  const filteredTransactions =
+    filter === "all"
+      ? transactions
+      : transactions.filter((tx) => {
+          const ledgerEntry = tx.ledger_entries?.[0];
+          const type = (ledgerEntry?.type || tx.type || "").toUpperCase();
+          return (
+            type === filter ||
+            (filter === "CREDIT" && type === "WALLET_FUNDING")
+          );
+        });
 
   // Search through transactions
   const searchedTransactions = debouncedSearch
-    ? filteredTransactions.filter(tx =>
-      tx.reference?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      tx.description?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      tx.metadata?.narration?.toLowerCase().includes(debouncedSearch.toLowerCase())
-    )
+    ? filteredTransactions.filter(
+        (tx) =>
+          tx.reference?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+          tx.description
+            ?.toLowerCase()
+            .includes(debouncedSearch.toLowerCase()) ||
+          tx.metadata?.narration
+            ?.toLowerCase()
+            .includes(debouncedSearch.toLowerCase()),
+      )
     : filteredTransactions;
 
   // Pagination functions
@@ -201,8 +211,8 @@ const Transactions = () => {
               <p className="text-sm text-muted-foreground">
                 {search
                   ? "Try a different search term"
-                  : filter !== 'all'
-                    ? `No ${filter === 'CREDIT' ? 'received' : 'sent'} transactions found`
+                  : filter !== "all"
+                    ? `No ${filter === "CREDIT" ? "received" : "sent"} transactions found`
                     : "Your transactions will appear here"}
               </p>
             </CardContent>
@@ -218,56 +228,100 @@ const Transactions = () => {
                   <CardContent className="p-0 divide-y divide-border">
                     {txs.map((tx) => {
                       // Get the first ledger entry to determine transaction type and amount
-                      const ledgerEntry = tx.ledger_entries[0];
-                      const rawType = typeof ledgerEntry?.type === 'string' ? ledgerEntry.type.toLowerCase() : undefined;
-                      const txType: 'credit' | 'debit' = rawType === 'credit' ? 'credit' : 'debit';
-                      const amount = parseFloat(ledgerEntry?.amount || '0');
+                      const ledgerEntry = tx.ledger_entries?.[0];
+                      const rawType = (
+                        ledgerEntry?.type ||
+                        tx.type ||
+                        ""
+                      ).toLowerCase();
+                      const txType: "credit" | "debit" =
+                        rawType === "credit" || rawType === "wallet_funding"
+                          ? "credit"
+                          : "debit";
+                      const amount = parseFloat(
+                        ledgerEntry?.amount || tx.amount || "0",
+                      );
 
                       return (
                         <button
                           key={tx.id}
                           className="w-full flex items-center gap-3 p-3 sm:p-4 hover:bg-muted/50 active:bg-muted transition-colors text-left touch-manipulation"
-                          onClick={() => navigate(`/account/transactions/${tx.id}`)}
+                          onClick={() =>
+                            navigate(`/account/transactions/${tx.id}`)
+                          }
                         >
-                          <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 ${txType === 'credit' ? 'bg-success/10' : 'bg-destructive/10'
-                            }`}>
-                            {txType === 'credit' ? (
-                              <ArrowDownLeft size={16} className="text-success sm:hidden" />
+                          <div
+                            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 ${
+                              txType === "credit"
+                                ? "bg-success/10"
+                                : "bg-destructive/10"
+                            }`}
+                          >
+                            {txType === "credit" ? (
+                              <ArrowDownLeft
+                                size={16}
+                                className="text-success sm:hidden"
+                              />
                             ) : (
-                              <ArrowUpRight size={16} className="text-destructive sm:hidden" />
+                              <ArrowUpRight
+                                size={16}
+                                className="text-destructive sm:hidden"
+                              />
                             )}
-                            {txType === 'credit' ? (
-                              <ArrowDownLeft size={18} className="text-success hidden sm:block" />
+                            {txType === "credit" ? (
+                              <ArrowDownLeft
+                                size={18}
+                                className="text-success hidden sm:block"
+                              />
                             ) : (
-                              <ArrowUpRight size={18} className="text-destructive hidden sm:block" />
+                              <ArrowUpRight
+                                size={18}
+                                className="text-destructive hidden sm:block"
+                              />
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm sm:text-base truncate">
-                              {tx.description || tx.metadata?.narration || 'Transaction'}
+                              {tx.description ||
+                                tx.metadata?.narration ||
+                                "Transaction"}
                             </p>
                             <p className="text-xs sm:text-sm text-muted-foreground">
                               {tx.reference}
                             </p>
                           </div>
                           <div className="text-right shrink-0">
-                            <p className={`font-semibold text-sm sm:text-base ${txType === 'credit' ? 'text-success' : 'text-foreground'
-                              }`}>
-                              {txType === 'credit' ? '+' : '-'}{formatCurrency(amount)}
+                            <p
+                              className={`font-semibold text-sm sm:text-base ${
+                                txType === "credit"
+                                  ? "text-success"
+                                  : "text-foreground"
+                              }`}
+                            >
+                              {txType === "credit" ? "+" : "-"}
+                              {formatCurrency(amount)}
                             </p>
-                            <p className={`text-[10px] sm:text-xs capitalize 
-                              ${{
-                                'completed': 'text-success',
-                                'success': 'text-success',
-                                'successful': 'text-success',
-                                'pending': 'text-warning',
-                                'failed': 'text-destructive',
-                                'reversed': 'text-destructive'
-                              }[tx.status?.toLowerCase() || ''] || 'text-muted-foreground'}`}>
-                              {tx.status || 'Pending'}
+                            <p
+                              className={`text-[10px] sm:text-xs capitalize 
+                              ${
+                                {
+                                  completed: "text-success",
+                                  success: "text-success",
+                                  successful: "text-success",
+                                  pending: "text-warning",
+                                  failed: "text-destructive",
+                                  reversed: "text-destructive",
+                                }[tx.status?.toLowerCase() || ""] ||
+                                "text-muted-foreground"
+                              }`}
+                            >
+                              {tx.status || "Pending"}
                             </p>
                           </div>
-                          <ChevronRight size={16} className="text-muted-foreground shrink-0" />
+                          <ChevronRight
+                            size={16}
+                            className="text-muted-foreground shrink-0"
+                          />
                         </button>
                       );
                     })}
@@ -288,11 +342,13 @@ const Transactions = () => {
                           e.preventDefault();
                           if (meta.page > 1) {
                             prevPage();
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            window.scrollTo({ top: 0, behavior: "smooth" });
                           }
                         }}
                         aria-disabled={meta.page <= 1}
-                        className={meta.page <= 1 ? "pointer-events-none opacity-50" : ""}
+                        className={
+                          meta.page <= 1 ? "pointer-events-none opacity-50" : ""
+                        }
                       />
                     </PaginationItem>
 
@@ -305,7 +361,7 @@ const Transactions = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             setPage(1);
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            window.scrollTo({ top: 0, behavior: "smooth" });
                           }}
                         >
                           1
@@ -322,8 +378,8 @@ const Transactions = () => {
 
                     {/* Middle Pages */}
                     {Array.from({ length: 3 }, (_, i) => meta.page - 1 + i)
-                      .filter(p => p > 1 && p < meta.pages)
-                      .map(p => (
+                      .filter((p) => p > 1 && p < meta.pages)
+                      .map((p) => (
                         <PaginationItem key={p}>
                           <PaginationLink
                             href="#"
@@ -331,7 +387,7 @@ const Transactions = () => {
                             onClick={(e) => {
                               e.preventDefault();
                               setPage(p);
-                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                              window.scrollTo({ top: 0, behavior: "smooth" });
                             }}
                           >
                             {p}
@@ -355,7 +411,7 @@ const Transactions = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             setPage(meta.pages);
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            window.scrollTo({ top: 0, behavior: "smooth" });
                           }}
                         >
                           {meta.pages}
@@ -370,17 +426,23 @@ const Transactions = () => {
                           e.preventDefault();
                           if (meta.page < meta.pages) {
                             nextPage();
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            window.scrollTo({ top: 0, behavior: "smooth" });
                           }
                         }}
                         aria-disabled={meta.page >= meta.pages}
-                        className={meta.page >= meta.pages ? "pointer-events-none opacity-50" : ""}
+                        className={
+                          meta.page >= meta.pages
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
                       />
                     </PaginationItem>
                   </PaginationContent>
                 </Pagination>
                 <div className="text-center text-xs text-muted-foreground mt-2">
-                  Showing {(meta.page - 1) * meta.limit + 1} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} transactions
+                  Showing {(meta.page - 1) * meta.limit + 1} to{" "}
+                  {Math.min(meta.page * meta.limit, meta.total)} of {meta.total}{" "}
+                  transactions
                 </div>
               </div>
             )}
