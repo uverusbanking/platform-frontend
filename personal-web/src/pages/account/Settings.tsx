@@ -35,6 +35,7 @@ import {
   AlertTriangle,
   ArrowUpCircle,
   Lock,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { usePinStatus } from "@/hooks/queries/useSecurity";
@@ -43,6 +44,7 @@ import {
   VerifyPinDialog,
 } from "@/components/TransactionPinDialog";
 import { ChangePasswordDialog } from "@/components/settings/ChangePasswordDialog";
+import { DeleteAccountDialog } from "@/components/settings/DeleteAccountDialog";
 import { BrandConfigService } from "@shared/core";
 
 const Settings = () => {
@@ -90,6 +92,7 @@ const Settings = () => {
 
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
   const [setupPinOpen, setSetupPinOpen] = useState(false);
   const [verifyPinOpen, setVerifyPinOpen] = useState(false);
 
@@ -348,6 +351,17 @@ const Settings = () => {
           </SettingsSection>
         )}
 
+        {/* Danger Zone */}
+        <SettingsSection title="Danger Zone">
+          <SettingsButton
+            icon={<Trash2 size={18} />}
+            label="Delete Account"
+            description="Request to close your account permanently"
+            onClick={() => setDeleteAccountOpen(true)}
+            variant="destructive"
+          />
+        </SettingsSection>
+
         {/* Sign Out */}
         <Button
           variant="destructive"
@@ -377,6 +391,11 @@ const Settings = () => {
       <ChangePasswordDialog
         open={changePasswordOpen}
         onOpenChange={setChangePasswordOpen}
+      />
+
+      <DeleteAccountDialog
+        open={deleteAccountOpen}
+        onOpenChange={setDeleteAccountOpen}
       />
 
       <SetupPinDialog
