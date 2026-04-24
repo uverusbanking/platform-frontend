@@ -10,7 +10,6 @@ export const QUERY_KEYS = {
   },
   PLATFORM: {
     ORGANISATIONS: "platform-organisations",
-    STATS: "platform-stats",
     ROLES: "roles",
     USERS: "platform-users",
   },

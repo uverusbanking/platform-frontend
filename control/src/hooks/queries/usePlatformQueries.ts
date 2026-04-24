@@ -1,10 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { TError, IApiResponse } from "@/types/apiResponse.type";
-import {
-  getPlatformStats,
-  getRoles,
-  IPlatformStats,
-} from "@/hooks/endpoints/usePlatform";
+import { TError } from "@/types/apiResponse.type";
+import { getRoles } from "@/hooks/endpoints/usePlatform";
 import { getOrganisations } from "@/hooks/endpoints/useOrganisation";
 import { IRole } from "@/types/user.types";
 import {
@@ -20,14 +16,6 @@ export const useGetOrganisations = (
     queryKey: [QUERY_KEYS.PLATFORM.ORGANISATIONS, params],
     queryFn: () => getOrganisations(params),
     staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-};
-
-export const useGetPlatformStats = () => {
-  return useQuery<IApiResponse<IPlatformStats>, TError>({
-    queryKey: [QUERY_KEYS.PLATFORM.STATS],
-    queryFn: getPlatformStats,
-    staleTime: 1000 * 60 * 10, // 10 minutes
   });
 };
 

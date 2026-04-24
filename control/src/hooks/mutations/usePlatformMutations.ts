@@ -18,7 +18,6 @@ export const useRegisterOrganisation = () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.ORGANISATION.GET_ALL],
       });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PLATFORM.STATS] });
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.ORGANISATION.STATISTICS],
       });
@@ -48,7 +47,6 @@ export const useUpdateOrganisation = () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.ORGANISATION.STATS],
       });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PLATFORM.STATS] });
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.ORGANISATION.STATISTICS],
       });
@@ -80,7 +78,9 @@ export const useUpdateOrganisationDocuments = () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.ORGANISATION.STATS],
       });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PLATFORM.STATS] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.STATISTICS],
+      });
     },
   });
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { KPICard } from "@/components/features/dashboard/KPICard";
-import { useGetPlatformStats } from "@/hooks/queries/usePlatformQueries";
+import { useGetOrganisationStatistics } from "@/hooks/queries/useOrganisationQueries";
 import { KPICardSkeleton } from "@/components/features/dashboard/KPICardSkeleton";
 // import { AnalyticsChart } from "@/components/features/dashboard/AnalyticsChart";
 import {
@@ -33,7 +33,7 @@ import {
 
 export default function Dashboard() {
   const { data: platformStats, isLoading: platformStatsLoading } =
-    useGetPlatformStats();
+    useGetOrganisationStatistics();
 
   const stats = platformStats?.data;
 
