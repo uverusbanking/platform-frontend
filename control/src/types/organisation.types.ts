@@ -25,6 +25,8 @@ export interface IOrganisation {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: any;
   kYCId: string;
+  brand_settings?: IBrandConfig;
+  configured_domains?: IConfiguredDomain[];
 }
 
 export interface IApiKey {

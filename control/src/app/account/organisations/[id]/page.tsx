@@ -24,6 +24,9 @@ import {
   Users,
   Key,
   UploadCloud,
+  Palette,
+  Globe,
+  Link2,
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -352,6 +355,250 @@ export default function OrganisationDetailPage() {
             </Card>
           </div>
 
+          {/* Brand Configuration */}
+          {organisation.brand_settings && (
+            <Card className="border-none shadow-md bg-card/50 backdrop-blur-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                  <Palette className="w-4 h-4" />
+                  Brand Configuration
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4 space-y-6">
+                {/* Identity row */}
+                <div className="grid sm:grid-cols-3 gap-4">
+                  {organisation.brand_settings.brandLogoUrl && (
+                    <div className="sm:col-span-3 flex items-center gap-4 p-3 rounded-xl bg-muted/40 border border-border/30">
+                      <img
+                        src={organisation.brand_settings.brandLogoUrl}
+                        alt="Brand logo"
+                        className="h-10 max-w-[120px] object-contain rounded"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.display =
+                            "none";
+                        }}
+                      />
+                      <div className="text-xs text-muted-foreground font-mono break-all">
+                        {organisation.brand_settings.brandLogoUrl}
+                      </div>
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Brand Name
+                    </span>
+                    <div className="font-semibold text-sm">
+                      {organisation.brand_settings.brandName || "—"}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Short Name
+                    </span>
+                    <div className="font-semibold text-sm">
+                      {organisation.brand_settings.shortBrandName || "—"}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Colours
+                    </span>
+                    <div className="flex items-center gap-2">
+                      {organisation.brand_settings.primaryColor && (
+                        <span
+                          title={`Primary: ${organisation.brand_settings.primaryColor}`}
+                          className="inline-flex items-center gap-1 text-xs font-mono"
+                        >
+                          <span
+                            className="h-5 w-5 rounded border border-border/50 shrink-0"
+                            style={{
+                              background:
+                                organisation.brand_settings.primaryColor,
+                            }}
+                          />
+                          {organisation.brand_settings.primaryColor}
+                        </span>
+                      )}
+                      {organisation.brand_settings.secondaryColor && (
+                        <span
+                          title={`Secondary: ${organisation.brand_settings.secondaryColor}`}
+                          className="inline-flex items-center gap-1 text-xs font-mono"
+                        >
+                          <span
+                            className="h-5 w-5 rounded border border-border/50 shrink-0"
+                            style={{
+                              background:
+                                organisation.brand_settings.secondaryColor,
+                            }}
+                          />
+                          {organisation.brand_settings.secondaryColor}
+                        </span>
+                      )}
+                      {!organisation.brand_settings.primaryColor &&
+                        !organisation.brand_settings.secondaryColor && (
+                          <span className="text-sm font-semibold">—</span>
+                        )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Support & Links row */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Support Email
+                    </span>
+                    <div className="font-semibold text-sm">
+                      {organisation.brand_settings.supportEmail || "—"}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Support Phone
+                    </span>
+                    <div className="font-semibold text-sm">
+                      {organisation.brand_settings.supportPhone || "—"}
+                    </div>
+                  </div>
+                  {organisation.brand_settings.websiteUrl && (
+                    <div className="space-y-1">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        Website
+                      </span>
+                      <a
+                        href={organisation.brand_settings.websiteUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-semibold text-sm text-primary hover:underline flex items-center gap-1"
+                      >
+                        {organisation.brand_settings.websiteUrl}
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  )}
+                  {organisation.brand_settings.privacyUrl && (
+                    <div className="space-y-1">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        Privacy Policy
+                      </span>
+                      <a
+                        href={organisation.brand_settings.privacyUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-semibold text-sm text-primary hover:underline flex items-center gap-1"
+                      >
+                        {organisation.brand_settings.privacyUrl}
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  )}
+                  {organisation.brand_settings.termsUrl && (
+                    <div className="space-y-1 sm:col-span-2">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        Terms of Service
+                      </span>
+                      <a
+                        href={organisation.brand_settings.termsUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-semibold text-sm text-primary hover:underline flex items-center gap-1"
+                      >
+                        {organisation.brand_settings.termsUrl}
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                {/* SEO */}
+                {organisation.brand_settings.seo && (
+                  <div className="border-t border-border/40 pt-4 space-y-3">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      SEO
+                    </span>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          Page Title
+                        </span>
+                        <div className="font-semibold text-sm">
+                          {organisation.brand_settings.seo.title || "—"}
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          Author
+                        </span>
+                        <div className="font-semibold text-sm">
+                          {organisation.brand_settings.seo.author || "—"}
+                        </div>
+                      </div>
+                      {organisation.brand_settings.seo.description && (
+                        <div className="space-y-1 sm:col-span-2">
+                          <span className="text-xs font-medium text-muted-foreground">
+                            Meta Description
+                          </span>
+                          <div className="text-sm text-muted-foreground leading-relaxed">
+                            {organisation.brand_settings.seo.description}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Configured Domains */}
+          {organisation.configured_domains &&
+            organisation.configured_domains.length > 0 && (
+              <Card className="border-none shadow-md bg-card/50 backdrop-blur-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                    <Globe className="w-4 h-4" />
+                    Configured Domains
+                    <Badge
+                      variant="secondary"
+                      className="ml-auto font-bold text-xs"
+                    >
+                      {organisation.configured_domains.length}
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-2 divide-y divide-border/40">
+                  {organisation.configured_domains.map((domain) => (
+                    <div
+                      key={domain.url}
+                      className="flex items-center justify-between py-3 first:pt-2 last:pb-0"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                          <Link2 className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-sm">
+                            {domain.name}
+                          </div>
+                          <div className="text-xs text-muted-foreground font-mono">
+                            {domain.url}
+                          </div>
+                        </div>
+                      </div>
+                      <a
+                        href={domain.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
           {/* Documents Section - Grid of Cards */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -673,7 +920,13 @@ function DocumentReviewDialog({
                       <img
                         src={document.file_url}
                         alt="Document Preview"
-                        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }}
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "contain",
+                        }}
                         className="bg-background"
                       />
                     </div>
