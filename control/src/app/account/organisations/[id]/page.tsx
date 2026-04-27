@@ -33,6 +33,8 @@ import {
   useGetOrganisationById,
   useGetOrganisationDocuments,
   useGetOrganisationStatsById,
+  useGetOrgBrandSettings,
+  useGetOrgConfiguredDomains,
 } from "@/hooks/queries/useOrganisationQueries";
 import { useUpdateOrganisationDocumentStatus } from "@/hooks/mutations/useOrganisationMutations";
 import { Button } from "@/components/ui/button";
@@ -69,7 +71,19 @@ export default function OrganisationDetailPage() {
       startDate: "2023-01-01T00:00:00.000Z",
       endDate: "2023-12-31T23:59:59.999Z",
     });
-  const organisation = organisationResponse?.data;
+  const { data: brandSettingsResponse } = useGetOrgBrandSettings(id);
+  const { data: configuredDomainsResponse } = useGetOrgConfiguredDomains(id);
+  const organisation = organisationResponse?.data
+    ? {
+        ...organisationResponse.data,
+        brand_settings:
+          brandSettingsResponse?.data ??
+          organisationResponse.data.brand_settings,
+        configured_domains:
+          configuredDomainsResponse?.data?.configured_domains ??
+          organisationResponse.data.configured_domains,
+      }
+    : undefined;
   const stats = statsResponse?.data;
   const [selectedDocument, setSelectedDocument] =
     useState<IOrganisationDocument | null>(null);

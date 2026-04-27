@@ -7,6 +7,8 @@ export const QUERY_KEYS = {
     STATS: "organisation-stats",
     STATISTICS: "organisation-statistics",
     API_KEYS: "api-keys",
+    BRAND_SETTINGS: "org-brand-settings",
+    CONFIGURED_DOMAINS: "org-configured-domains",
   },
   PLATFORM: {
     ORGANISATIONS: "platform-organisations",

@@ -1,6 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { TError, IApiResponse } from "@/types/apiResponse.type";
-import { IApiKey } from "@/types/organisation.types";
+import {
+  IApiKey,
+  IBrandConfig,
+  IConfiguredDomain,
+} from "@/types/organisation.types";
 import {
   getOrganisationUsers,
   getApiKeys,
@@ -23,6 +27,8 @@ import {
   getOrganisationById,
   getOrganisationStatsById,
   getOrganisationStatistics,
+  getOrgBrandSettings,
+  getOrgConfiguredDomains,
 } from "@/hooks/endpoints/useOrganisation";
 import {
   IGetOrganisationStatsParams,
@@ -95,5 +101,26 @@ export const useGetOrganisationStatsById = (
     queryFn: () => getOrganisationStatsById(id, params),
     enabled: !!id,
     staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+};
+
+export const useGetOrgBrandSettings = (id: string) => {
+  return useQuery<IApiResponse<IBrandConfig>, TError>({
+    queryKey: [QUERY_KEYS.ORGANISATION.BRAND_SETTINGS, id],
+    queryFn: () => getOrgBrandSettings(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 10,
+  });
+};
+
+export const useGetOrgConfiguredDomains = (id: string) => {
+  return useQuery<
+    IApiResponse<{ configured_domains: IConfiguredDomain[] }>,
+    TError
+  >({
+    queryKey: [QUERY_KEYS.ORGANISATION.CONFIGURED_DOMAINS, id],
+    queryFn: () => getOrgConfiguredDomains(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 10,
   });
 };

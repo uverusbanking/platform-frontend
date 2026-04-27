@@ -98,9 +98,20 @@ export function EditBrandConfigDialog({
           configured_domains: values.domains,
         }),
       ]);
-      await queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.ORGANISATION.GET_BY_ID, organisation.id],
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.ORGANISATION.GET_BY_ID, organisation.id],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.ORGANISATION.BRAND_SETTINGS, organisation.id],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: [
+            QUERY_KEYS.ORGANISATION.CONFIGURED_DOMAINS,
+            organisation.id,
+          ],
+        }),
+      ]);
       toast.success("Brand configuration saved");
       onOpenChange(false);
     } catch {
