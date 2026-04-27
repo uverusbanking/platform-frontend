@@ -13,9 +13,9 @@ import { InactivityModal } from "@/components/ui/InactivityModal";
 import { subscribeToLogoutEvent } from "@/lib/authSync";
 
 // --- Configuration ---
-// Total timeout in milliseconds (5 minutes)
+// Total timeout in milliseconds (30 minutes)
 const INACTIVITY_TIMEOUT_MS =
-  Number(import.meta.env.VITE_INACTIVITY_LIMIT) || 300000;
+  Number(import.meta.env.VITE_INACTIVITY_LIMIT) || 1800000;
 // Warning duration in milliseconds (30 seconds)
 const WARNING_DURATION_MS =
   Number(import.meta.env.VITE_WARNING_DURATION) || 30000;
