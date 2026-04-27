@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { toast } from "sonner";
 import {
@@ -11,7 +11,8 @@ import {
   Trash2,
   Shield,
   Link2,
-  Search,
+  UploadCloud,
+  X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ import {
   useUpdateBrandSettings,
   useUpdateConfiguredDomains,
 } from "@/hooks/mutations/useOrganisationMutations";
+import { uploadFile } from "@/hooks/endpoints/useFile";
 import { IUpdateBrandSettingsPayload } from "@/types/organisation.types";
 
 const inputCls =
@@ -45,12 +47,255 @@ const inputCls =
 const labelCls =
   "text-xs uppercase tracking-wider text-muted-foreground font-semibold";
 
-interface BrandFormValues extends IUpdateBrandSettingsPayload {
-  seo: { title: string; description: string; author: string };
+// Icon: 1024×1024px, no transparency — scales to iOS/Android/PWA icons
+// Logo: min 800×200px (4:1 ratio), transparency OK — used in nav bars / headers
+const IMAGE_SPECS = {
+  icon: {
+    label: "Brand Icon",
+    hint: "Square app icon — 1024×1024px min, PNG/JPG, ≤2 MB. Used as iOS, Android, and web app icon.",
+    minW: 1024,
+    minH: 1024,
+    maxMB: 2,
+    accept: "image/png,image/jpeg",
+    types: "PNG/JPG",
+    aspectHint: "1:1 (square)",
+  },
+  logo: {
+    label: "Brand Logo",
+    hint: "Horizontal logo — min 800×200px, PNG with transparency, ≤2 MB. Used in navigation bars and headers.",
+    minW: 800,
+    minH: 200,
+    maxMB: 2,
+    accept: "image/png",
+    types: "PNG",
+    aspectHint: "4:1 recommended",
+  },
+} as const;
+
+type ImageField = keyof typeof IMAGE_SPECS;
+
+function validateImageFile(
+  file: File,
+  spec: (typeof IMAGE_SPECS)[ImageField],
+): Promise<string | null> {
+  return new Promise((resolve) => {
+    if (file.size > spec.maxMB * 1024 * 1024) {
+      resolve(`File must be ≤${spec.maxMB} MB`);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    const img = new window.Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      if (img.naturalWidth < spec.minW || img.naturalHeight < spec.minH) {
+        resolve(
+          `Image must be at least ${spec.minW}×${spec.minH}px (got ${img.naturalWidth}×${img.naturalHeight}px)`,
+        );
+      } else {
+        resolve(null);
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve("Could not read image dimensions");
+    };
+    img.src = url;
+  });
 }
 
-interface DomainsFormValues {
-  domains: { name: string; url: string }[];
+interface ImageUploadFieldProps {
+  field: ImageField;
+  value: string | undefined;
+  onChange: (url: string) => void;
+  disabled?: boolean;
+}
+
+function ImageUploadField({
+  field,
+  value,
+  onChange,
+  disabled,
+}: ImageUploadFieldProps) {
+  const spec = IMAGE_SPECS[field];
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [staged, setStaged] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [validating, setValidating] = useState(false);
+
+  const handleFileSelect = async (file: File) => {
+    setValidating(true);
+    const error = await validateImageFile(file, spec);
+    setValidating(false);
+    if (error) {
+      toast.error(error);
+      return;
+    }
+    setStaged(file);
+    setPreview(URL.createObjectURL(file));
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleFileSelect(file);
+    e.target.value = "";
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (disabled) return;
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileSelect(file);
+  };
+
+  const handleUpload = async () => {
+    if (!staged) return;
+    setUploading(true);
+    const loading = toast.loading("Uploading image…");
+    try {
+      const res = await uploadFile({
+        file: staged,
+        documentType: field === "icon" ? "BRAND_ICON" : "BRAND_LOGO",
+        userType: "ORGANISATION",
+      });
+      onChange(res.data.file_url);
+      toast.success("Image uploaded", { id: loading });
+      setStaged(null);
+      if (preview) {
+        URL.revokeObjectURL(preview);
+        setPreview(null);
+      }
+    } catch {
+      toast.error("Upload failed", { id: loading });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleClearStaged = () => {
+    setStaged(null);
+    if (preview) {
+      URL.revokeObjectURL(preview);
+      setPreview(null);
+    }
+  };
+
+  const isSquare = field === "icon";
+  const previewSrc = preview ?? value;
+  const busy = uploading || validating;
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-[11px] text-muted-foreground">{spec.hint}</p>
+      <div
+        className={`relative border-2 border-dashed rounded-xl transition-colors ${
+          disabled
+            ? "opacity-60 pointer-events-none"
+            : staged
+              ? "border-amber-400/60 bg-amber-400/5"
+              : value
+                ? "border-success/40 bg-success/5"
+                : "border-border/60 hover:border-primary/40 bg-muted/20"
+        }`}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={handleDrop}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept={spec.accept}
+          className="hidden"
+          onChange={handleInputChange}
+          disabled={disabled}
+        />
+
+        {previewSrc ? (
+          <div className="flex items-center gap-4 p-4">
+            <div
+              className={`overflow-hidden rounded-lg border border-border/40 bg-checkered shrink-0 ${
+                isSquare ? "w-14 h-14" : "w-28 h-10"
+              }`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={previewSrc}
+                alt={spec.label}
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              {staged ? (
+                <p className="text-xs font-medium text-amber-600 truncate">
+                  {staged.name}{" "}
+                  <span className="text-muted-foreground">(pending)</span>
+                </p>
+              ) : (
+                <p className="text-xs font-medium text-success">Uploaded</p>
+              )}
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                {spec.aspectHint}
+              </p>
+            </div>
+            {!disabled && (
+              <div className="flex items-center gap-2 shrink-0">
+                {staged ? (
+                  <>
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={busy}
+                      onClick={handleUpload}
+                      className="bg-orange-600 hover:bg-orange-700 text-white"
+                    >
+                      {uploading ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        "Confirm"
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={handleClearStaged}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => inputRef.current?.click()}
+                  >
+                    Replace
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="w-full flex flex-col items-center gap-2 py-6 px-4 text-center disabled:cursor-not-allowed"
+            onClick={() => inputRef.current?.click()}
+            disabled={busy || disabled}
+          >
+            {busy ? (
+              <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
+            ) : (
+              <UploadCloud className="w-6 h-6 text-muted-foreground" />
+            )}
+            <span className="text-xs text-muted-foreground">
+              {validating ? "Validating…" : `Click or drag ${spec.types} here`}
+            </span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function SectionDivider({ label }: { label: string }) {
@@ -63,6 +308,14 @@ function SectionDivider({ label }: { label: string }) {
       <div className="h-px bg-border/40 flex-1" />
     </div>
   );
+}
+
+interface BrandFormValues extends IUpdateBrandSettingsPayload {
+  seo: { title: string; description: string; author: string };
+}
+
+interface DomainsFormValues {
+  domains: { name: string; url: string }[];
 }
 
 export default function BrandSettingsPage() {
@@ -100,6 +353,7 @@ export default function BrandSettingsPage() {
         brandName: b.brandName ?? "",
         shortBrandName: b.shortBrandName ?? "",
         brandLogoUrl: b.brandLogoUrl ?? "",
+        brandIconUrl: b.brandIconUrl ?? "",
         primaryColor: b.primaryColor ?? "",
         secondaryColor: b.secondaryColor ?? "",
         supportEmail: b.supportEmail ?? "",
@@ -195,6 +449,29 @@ export default function BrandSettingsPage() {
             onSubmit={brandForm.handleSubmit(onSaveBrand)}
             className="space-y-6"
           >
+            <SectionDivider label="Brand Images" />
+
+            <div className="grid gap-5 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label className={labelCls}>Brand Icon</Label>
+                <ImageUploadField
+                  field="icon"
+                  value={brandForm.watch("brandIconUrl") || undefined}
+                  onChange={(url) => brandForm.setValue("brandIconUrl", url)}
+                  disabled={!isOwner}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className={labelCls}>Brand Logo</Label>
+                <ImageUploadField
+                  field="logo"
+                  value={brandForm.watch("brandLogoUrl") || undefined}
+                  onChange={(url) => brandForm.setValue("brandLogoUrl", url)}
+                  disabled={!isOwner}
+                />
+              </div>
+            </div>
+
             <SectionDivider label="Identity" />
 
             <div className="grid gap-5 md:grid-cols-2">
@@ -216,16 +493,6 @@ export default function BrandSettingsPage() {
                   {...brandForm.register("shortBrandName")}
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className={labelCls}>Logo URL</Label>
-              <Input
-                disabled={!isOwner}
-                placeholder="https://cdn.example.com/logo.png"
-                className={inputCls}
-                {...brandForm.register("brandLogoUrl")}
-              />
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">

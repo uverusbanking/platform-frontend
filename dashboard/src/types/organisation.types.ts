@@ -8,6 +8,7 @@ export interface IBrandConfig {
   brandName?: string;
   shortBrandName?: string;
   brandLogoUrl?: string;
+  brandIconUrl?: string;
   primaryColor?: string;
   secondaryColor?: string;
   supportEmail?: string;
@@ -28,6 +29,7 @@ export interface IUpdateBrandSettingsPayload {
   brandName?: string;
   shortBrandName?: string;
   brandLogoUrl?: string;
+  brandIconUrl?: string;
   primaryColor?: string;
   secondaryColor?: string;
   supportEmail?: string;
