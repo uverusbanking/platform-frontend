@@ -325,7 +325,7 @@ export function PersonalSteps({ data, nextStep, closeDialog }: Props) {
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-gradient-primary hover:bg-primary-dark"
+            className="bg-primary hover:bg-primary-dark cursor-pointer"
           >
             {isSubmitting ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
