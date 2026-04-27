@@ -35,6 +35,7 @@ import {
   useUpdateConfiguredDomains,
 } from "@/hooks/mutations/usePlatformMutations";
 import { useUploadMutation } from "@/hooks/mutations/useUploadMutation";
+import axios from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import {
@@ -363,14 +364,26 @@ export function EditBrandConfigDialog({
       ]);
       toast.success("Brand configuration saved");
       onOpenChange(false);
-    } catch {
-      toast.error("Failed to save brand configuration");
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const data = err.response?.data as
+          | { message?: string; errors?: string[] }
+          | undefined;
+        const errors = data?.errors;
+        if (errors?.length) {
+          errors.forEach((e) => toast.error(e));
+        } else {
+          toast.error(data?.message ?? "Failed to save brand configuration");
+        }
+      } else {
+        toast.error("Failed to save brand configuration");
+      }
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Palette className="w-4 h-4" />
@@ -567,65 +580,64 @@ export function EditBrandConfigDialog({
                   </FormItem>
                 )}
               />
-              <FormField
-                name="brand.websiteUrl"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className={labelCls}>Website URL</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="https://example.com"
-                        className={inputCls}
-                        {...field}
-                        value={field.value ?? ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="brand.privacyUrl"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className={labelCls}>
-                      Privacy Policy URL
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="https://example.com/privacy"
-                        className={inputCls}
-                        {...field}
-                        value={field.value ?? ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="brand.termsUrl"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel className={labelCls}>
-                      Terms of Service URL
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="https://example.com/terms"
-                        className={inputCls}
-                        {...field}
-                        value={field.value ?? ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
+
+            <FormField
+              name="brand.websiteUrl"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className={labelCls}>Website URL</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="https://example.com"
+                      className={inputCls}
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="brand.privacyUrl"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className={labelCls}>Privacy Policy URL</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="https://example.com/privacy"
+                      className={inputCls}
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="brand.termsUrl"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className={labelCls}>
+                    Terms of Service URL
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="https://example.com/terms"
+                      className={inputCls}
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <SectionHeading label="SEO Metadata" />
 
