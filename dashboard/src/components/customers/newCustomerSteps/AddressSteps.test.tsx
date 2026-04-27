@@ -137,7 +137,7 @@ describe("AddressSteps Component", () => {
     const selects = screen.getAllByTestId("mock-select");
 
     // Change country to ghana
-    fireEvent.change(selects[0], { target: { value: "ghana" } });
+    fireEvent.change(selects[0], { target: { value: "2" } });
 
     await waitFor(() => {
       expect(selects[1]).toHaveValue("");
@@ -152,12 +152,12 @@ describe("AddressSteps Component", () => {
           data: { data: [{ name: "Nigeria", slug: "nigeria", id: "1" }] },
           isLoading: false,
         };
-      if (payload?.parent_id === "nigeria" && payload?.type === "STATE")
+      if (payload?.parent_id === "1" && payload?.type === "STATE")
         return {
           data: { data: [{ name: "Lagos", slug: "lagos", id: "11" }] },
           isLoading: false,
         };
-      if (payload?.parent_id === "lagos" && payload?.type === "LGA")
+      if (payload?.parent_id === "11" && payload?.type === "LGA")
         return {
           data: { data: [{ name: "Ikeja", slug: "ikeja", id: "111" }] },
           isLoading: false,
@@ -184,19 +184,19 @@ describe("AddressSteps Component", () => {
     const selects = screen.getAllByTestId("mock-select");
 
     await act(async () => {
-      fireEvent.change(selects[0], { target: { value: "nigeria" } });
+      fireEvent.change(selects[0], { target: { value: "1" } });
     });
 
     await waitFor(() => expect(selects[1]).not.toBeDisabled());
 
     await act(async () => {
-      fireEvent.change(selects[1], { target: { value: "lagos" } });
+      fireEvent.change(selects[1], { target: { value: "11" } });
     });
 
     await waitFor(() => expect(selects[2]).not.toBeDisabled());
 
     await act(async () => {
-      fireEvent.change(selects[2], { target: { value: "ikeja" } });
+      fireEvent.change(selects[2], { target: { value: "111" } });
     });
 
     await act(async () => {
@@ -207,9 +207,9 @@ describe("AddressSteps Component", () => {
       expect(nextStep).toHaveBeenCalledWith(
         expect.objectContaining({
           address: "123 Street",
-          country: "nigeria",
-          state: "lagos",
-          city: "ikeja",
+          country: "1",
+          state: "11",
+          city: "111",
           postalCode: "123456",
         }),
       );
