@@ -69,9 +69,16 @@ export default function BrandSettingsPage() {
   const { userData } = useUserStore();
   const isOwner = userData?.role?.toUpperCase() === "BRAND_OWNER";
 
-  const { data: brandData, isLoading: brandLoading } = useGetBrandSettings();
-  const { data: domainsData, isLoading: domainsLoading } =
-    useGetConfiguredDomains();
+  const {
+    data: brandData,
+    isLoading: brandLoading,
+    isError: brandError,
+  } = useGetBrandSettings();
+  const {
+    data: domainsData,
+    isLoading: domainsLoading,
+    isError: domainsError,
+  } = useGetConfiguredDomains();
   const { mutate: saveBrand, isPending: savingBrand } =
     useUpdateBrandSettings();
   const { mutate: saveDomains, isPending: savingDomains } =
@@ -174,6 +181,16 @@ export default function BrandSettingsPage() {
           </div>
         </CardHeader>
         <CardContent className="pt-8">
+          {(brandError || !brandData?.data) && !brandLoading && (
+            <div className="flex flex-col items-center justify-center gap-3 py-8 mb-6 text-center rounded-xl border border-dashed border-border/60 bg-muted/20">
+              <Palette className="h-8 w-8 text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground">
+                {brandError
+                  ? "Could not load brand settings. Fill in the form below to configure."
+                  : "No brand configuration set yet. Fill in the form below to get started."}
+              </p>
+            </div>
+          )}
           <form
             onSubmit={brandForm.handleSubmit(onSaveBrand)}
             className="space-y-6"
@@ -377,8 +394,21 @@ export default function BrandSettingsPage() {
               <div className="flex flex-col items-center justify-center gap-3 py-10 text-center rounded-xl border border-dashed border-border/60 bg-muted/20">
                 <Link2 className="h-8 w-8 text-muted-foreground/40" />
                 <p className="text-sm text-muted-foreground">
-                  No domains configured yet.
+                  {domainsError
+                    ? "Could not load domains. Add one below."
+                    : "No domains configured yet."}
                 </p>
+                {isOwner && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => append({ name: "", url: "" })}
+                  >
+                    <Plus className="w-3 h-3 mr-1.5" />
+                    Add Domain
+                  </Button>
+                )}
               </div>
             )}
 
