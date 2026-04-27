@@ -407,7 +407,7 @@ export function EmploymentSteps({
           <Button
             type="submit"
             disabled={isCreatingCustomer}
-            className="bg-gradient-primary hover:bg-primary-dark"
+            className="bg-primary hover:bg-primary-dark cursor-pointer"
           >
             {isCreatingCustomer ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

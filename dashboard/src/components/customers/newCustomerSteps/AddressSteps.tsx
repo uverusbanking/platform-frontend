@@ -185,7 +185,7 @@ export function AddressSteps({ data, nextStep, prevStep }: Props) {
                 </SelectTrigger>
                 <SelectContent>
                   {countries.map((country) => (
-                    <SelectItem key={country.id} value={country.slug}>
+                    <SelectItem key={country.id} value={country.id}>
                       {country.name}
                     </SelectItem>
                   ))}
@@ -228,7 +228,7 @@ export function AddressSteps({ data, nextStep, prevStep }: Props) {
                 </SelectTrigger>
                 <SelectContent>
                   {states.map((state) => (
-                    <SelectItem key={state.id} value={state.slug}>
+                    <SelectItem key={state.id} value={state.id}>
                       {state.name}
                     </SelectItem>
                   ))}
@@ -271,7 +271,7 @@ export function AddressSteps({ data, nextStep, prevStep }: Props) {
                 </SelectTrigger>
                 <SelectContent>
                   {lgas.map((lga) => (
-                    <SelectItem key={lga.id} value={lga.slug}>
+                    <SelectItem key={lga.id} value={lga.id}>
                       {lga.name}
                     </SelectItem>
                   ))}
@@ -316,7 +316,7 @@ export function AddressSteps({ data, nextStep, prevStep }: Props) {
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-gradient-primary hover:bg-primary-dark"
+            className="bg-primary hover:bg-primary-dark cursor-pointer"
           >
             {isSubmitting ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
