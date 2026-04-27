@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   Loader2,
@@ -86,25 +86,28 @@ export function EditOrganisationDialog({
     },
   });
 
-  // Location fetching logic
-  const watchedCountry = form.watch("country");
-  const watchedState = form.watch("state");
+  // Separate UUID state for cascade API calls; form stores human-readable names
+  const [selectedCountryId, setSelectedCountryId] = useState<string>("");
+  const [selectedStateId, setSelectedStateId] = useState<string>("");
 
   const { data: countriesResponse, isLoading: isLoadingCountries } =
     useGetLocations({ type: "COUNTRY" });
   const { data: statesResponse, isLoading: isLoadingStates } = useGetLocations({
-    parent_id: watchedCountry,
+    parent_id: selectedCountryId,
     type: "STATE",
+    enabled: !!selectedCountryId,
   });
   const { data: citiesResponse, isLoading: isLoadingCities } = useGetLocations({
-    parent_id: watchedState,
+    parent_id: selectedStateId,
     type: "LGA",
+    enabled: !!selectedStateId,
   });
 
   const countries = countriesResponse?.data || [];
   const states = statesResponse?.data || [];
   const cities = citiesResponse?.data || [];
 
+  // When the dialog opens, reset form and resolve country/state names → IDs
   useEffect(() => {
     if (open) {
       form.reset({
@@ -121,8 +124,34 @@ export function EditOrganisationDialog({
         provision_sandbox_token: false,
         live_organisation_id: organisation.id,
       });
+      setSelectedCountryId("");
+      setSelectedStateId("");
     }
   }, [open, organisation, form]);
+
+  // Once countries load, find the UUID for the saved country name
+  useEffect(() => {
+    if (
+      open &&
+      countries.length > 0 &&
+      organisation.registered_address_country
+    ) {
+      const match = countries.find(
+        (c) => c.name === organisation.registered_address_country,
+      );
+      if (match) setSelectedCountryId(match.id);
+    }
+  }, [open, countries, organisation.registered_address_country]);
+
+  // Once states load, find the UUID for the saved state name
+  useEffect(() => {
+    if (open && states.length > 0 && organisation.registered_address_state) {
+      const match = states.find(
+        (s) => s.name === organisation.registered_address_state,
+      );
+      if (match) setSelectedStateId(match.id);
+    }
+  }, [open, states, organisation.registered_address_state]);
 
   const onSubmit = async (data: EditOrganisationValues) => {
     try {
@@ -378,10 +407,13 @@ export function EditOrganisationDialog({
                         <Globe className="w-3 h-3" /> Country
                       </FormLabel>
                       <Select
-                        onValueChange={(val) => {
-                          field.onChange(val);
+                        onValueChange={(name) => {
+                          field.onChange(name);
                           form.setValue("state", "");
                           form.setValue("city", "");
+                          const match = countries.find((c) => c.name === name);
+                          setSelectedCountryId(match?.id ?? "");
+                          setSelectedStateId("");
                         }}
                         value={field.value}
                         disabled={isLoadingCountries}
@@ -399,7 +431,7 @@ export function EditOrganisationDialog({
                           {countries.map((country: ILocation) => (
                             <SelectItem
                               key={country.id}
-                              value={country.id}
+                              value={country.name}
                               className="rounded-lg"
                             >
                               {country.name}
@@ -421,13 +453,15 @@ export function EditOrganisationDialog({
                         State
                       </FormLabel>
                       <Select
-                        onValueChange={(val) => {
-                          field.onChange(val);
+                        onValueChange={(name) => {
+                          field.onChange(name);
                           form.setValue("city", "");
+                          const match = states.find((s) => s.name === name);
+                          setSelectedStateId(match?.id ?? "");
                         }}
                         value={field.value}
                         disabled={
-                          !watchedCountry ||
+                          !selectedCountryId ||
                           isLoadingStates ||
                           states.length === 0
                         }
@@ -445,7 +479,7 @@ export function EditOrganisationDialog({
                           {states.map((state: ILocation) => (
                             <SelectItem
                               key={state.id}
-                              value={state.id}
+                              value={state.name}
                               className="rounded-lg"
                             >
                               {state.name}
@@ -470,7 +504,7 @@ export function EditOrganisationDialog({
                         onValueChange={field.onChange}
                         value={field.value}
                         disabled={
-                          !watchedState ||
+                          !selectedStateId ||
                           isLoadingCities ||
                           cities.length === 0
                         }

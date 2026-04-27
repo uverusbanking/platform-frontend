@@ -886,6 +886,7 @@ export default function OrganisationDetailPage() {
       <ManageMembersDialog
         organisationId={id}
         organisationName={organisation.organisation_name}
+        initialMembers={organisation.members}
         open={isMembersDialogOpen}
         onOpenChange={setIsMembersDialogOpen}
       />

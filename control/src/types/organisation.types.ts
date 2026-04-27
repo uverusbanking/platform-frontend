@@ -27,6 +27,24 @@ export interface IOrganisation {
   kYCId: string;
   brand_settings?: IBrandConfig;
   configured_domains?: IConfiguredDomain[];
+  members?: IOrganisationMember[];
+}
+
+export interface IOrganisationMember {
+  id: string;
+  organisation_id: string;
+  email: string;
+  phone_number: string;
+  role: string;
+  status: string;
+  gender: string;
+  first_name: string;
+  last_name: string;
+  middle_name?: string | null;
+  kyc_verified?: boolean;
+  kyc_level?: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface IApiKey {

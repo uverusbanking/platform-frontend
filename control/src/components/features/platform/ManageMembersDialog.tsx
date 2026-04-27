@@ -27,6 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useGetOrganisationUsers } from "@/hooks/queries/useOrganisationQueries";
+import { IOrganisationMember } from "@/types/organisation.types";
 import { useGetRoles } from "@/hooks/queries/usePlatformQueries";
 import {
   useAddOrganisationUser,
@@ -57,6 +58,7 @@ import { Gender } from "@/types/enums";
 interface ManageMembersDialogProps {
   organisationId: string;
   organisationName: string;
+  initialMembers?: IOrganisationMember[];
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -65,6 +67,7 @@ interface ManageMembersDialogProps {
 export function ManageMembersDialog({
   organisationId,
   organisationName,
+  initialMembers,
   trigger,
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
@@ -79,17 +82,20 @@ export function ManageMembersDialog({
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddMode, setIsAddMode] = useState(false);
 
+  // Skip the separate fetch when the org detail response already includes members.
+  // Passing empty string exploits the hook's built-in `enabled: !!organisationId` guard.
   const { data: usersData, isLoading: isLoadingUsers } =
     useGetOrganisationUsers({
-      organisationId,
+      organisationId: initialMembers ? "" : organisationId,
     });
 
   // Fetch dynamic roles from API
   const { data: roles = [], isLoading: isLoadingRoles } =
     useGetRoles("PLATFORM");
 
-  // Mock filtering for now since the hook usually takes params but we want to filter locally for responsiveness
-  const users = (usersData?.users || []).filter(
+  const memberList = initialMembers ?? usersData?.users ?? [];
+
+  const users = memberList.filter(
     (u) =>
       u.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       u.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||

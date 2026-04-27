@@ -15,11 +15,14 @@ import {
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { IGetLocationPayload } from "@shared/core";
 
-export const useGetLocations = (payload: IGetLocationPayload) => {
+export const useGetLocations = (
+  payload: IGetLocationPayload & { enabled?: boolean },
+) => {
   return useQuery<IApiResponse<ILocation[]>, TError>({
     queryKey: [QUERY_KEYS.OPTIONS.LOCATIONS, payload.parent_id, payload.type],
     queryFn: () => getLocations(payload.parent_id, payload.type),
-    staleTime: 1000 * 60 * 60, // 1 hour
+    staleTime: 1000 * 60 * 60,
+    enabled: payload.enabled !== false,
   });
 };
 
