@@ -5,10 +5,16 @@ import {
   IUpdateOrganisationPayload,
   IOrganisationDocument,
   IUpdateDocumentsPayload,
+  IBrandConfig,
+  IConfiguredDomain,
+  IUpdateBrandSettingsPayload,
+  IUpdateConfiguredDomainsPayload,
 } from "@/types/organisation.types";
 import {
   updateOrganisation,
   updateOrganisationDocuments,
+  updateBrandSettings,
+  updateConfiguredDomains,
 } from "@/hooks/endpoints/useOrganisation";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 
@@ -37,6 +43,36 @@ export const useUpdateOrganisationDocuments = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.ORGANISATION_DOCUMENTS],
+      });
+    },
+  });
+};
+
+export const useUpdateBrandSettings = () => {
+  const queryClient = useQueryClient();
+  return useMutation<
+    IApiResponse<IBrandConfig>,
+    TError,
+    IUpdateBrandSettingsPayload
+  >({
+    mutationFn: updateBrandSettings,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.BRAND_SETTINGS] });
+    },
+  });
+};
+
+export const useUpdateConfiguredDomains = () => {
+  const queryClient = useQueryClient();
+  return useMutation<
+    IApiResponse<{ configured_domains: IConfiguredDomain[] }>,
+    TError,
+    IUpdateConfiguredDomainsPayload
+  >({
+    mutationFn: updateConfiguredDomains,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.CONFIGURED_DOMAINS],
       });
     },
   });

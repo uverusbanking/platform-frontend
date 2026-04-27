@@ -1,3 +1,47 @@
+export interface IBrandSeo {
+  title: string;
+  description: string;
+  author: string;
+}
+
+export interface IBrandConfig {
+  brandName?: string;
+  shortBrandName?: string;
+  brandLogoUrl?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  supportEmail?: string;
+  supportPhone?: string;
+  websiteUrl?: string;
+  privacyUrl?: string;
+  termsUrl?: string;
+  seo?: IBrandSeo;
+}
+
+export interface IConfiguredDomain {
+  id?: string;
+  name: string;
+  url: string;
+}
+
+export interface IUpdateBrandSettingsPayload {
+  brandName?: string;
+  shortBrandName?: string;
+  brandLogoUrl?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  supportEmail?: string;
+  supportPhone?: string;
+  websiteUrl?: string;
+  privacyUrl?: string;
+  termsUrl?: string;
+  seo?: IBrandSeo;
+}
+
+export interface IUpdateConfiguredDomainsPayload {
+  configured_domains: { name: string; url: string }[];
+}
+
 export interface IOrganisationStats {
   members: {
     total: number;

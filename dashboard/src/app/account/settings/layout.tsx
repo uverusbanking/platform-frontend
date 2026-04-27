@@ -1,7 +1,7 @@
 "use client";
 
 import { Link, useLocation, Outlet } from "react-router-dom";
-import { User, Building, Lock, FileText, Key } from "lucide-react";
+import { User, Building, Lock, FileText, Key, Palette } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const settingsNav = [
@@ -34,6 +34,12 @@ const settingsNav = [
     label: "API keys",
     href: "/account/settings/api-keys",
     icon: Key,
+  },
+  {
+    id: "brand",
+    label: "Brand Settings",
+    href: "/account/settings/brand",
+    icon: Palette,
   },
 ];
 

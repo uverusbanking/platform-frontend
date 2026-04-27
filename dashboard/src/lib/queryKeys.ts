@@ -17,4 +17,6 @@ export const QUERY_KEYS = {
   API_KEYS: "api-keys",
   USER_PROFILE: "user-profile",
   BANKS: "banks",
+  BRAND_SETTINGS: "brand-settings",
+  CONFIGURED_DOMAINS: "configured-domains",
 };

@@ -46,6 +46,7 @@ import { Badge } from "@/components/ui/badge";
 import { EditOrganisationDialog } from "@/components/features/platform/EditOrganisationDialog";
 import { ManageMembersDialog } from "@/components/features/platform/ManageMembersDialog";
 import { EditOrganisationDocumentsDialog } from "@/components/features/platform/EditOrganisationDocumentsDialog";
+import { EditBrandConfigDialog } from "@/components/features/platform/EditBrandConfigDialog";
 
 import {
   DropdownMenu,
@@ -75,6 +76,7 @@ export default function OrganisationDetailPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isMembersDialogOpen, setIsMembersDialogOpen] = useState(false);
   const [isDocsDialogOpen, setIsDocsDialogOpen] = useState(false);
+  const [isBrandDialogOpen, setIsBrandDialogOpen] = useState(false);
 
   const formatVolume = (val?: number) => {
     if (val === undefined) return "₦--";
@@ -359,9 +361,20 @@ export default function OrganisationDetailPage() {
           {organisation.brand_settings && (
             <Card className="border-none shadow-md bg-card/50 backdrop-blur-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                  <Palette className="w-4 h-4" />
-                  Brand Configuration
+                <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-2">
+                    <Palette className="w-4 h-4" />
+                    Brand Configuration
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs font-semibold"
+                    onClick={() => setIsBrandDialogOpen(true)}
+                  >
+                    <Edit className="w-3 h-3 mr-1" />
+                    Edit
+                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4 space-y-6">
@@ -845,6 +858,12 @@ export default function OrganisationDetailPage() {
         existingDocuments={documents || []}
         open={isDocsDialogOpen}
         onOpenChange={setIsDocsDialogOpen}
+      />
+
+      <EditBrandConfigDialog
+        organisation={organisation}
+        open={isBrandDialogOpen}
+        onOpenChange={setIsBrandDialogOpen}
       />
     </div>
   );

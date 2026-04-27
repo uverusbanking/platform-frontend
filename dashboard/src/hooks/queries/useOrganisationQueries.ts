@@ -4,11 +4,15 @@ import {
   IOrganisationStats,
   IOrganisation,
   IOrganisationDocument,
+  IBrandConfig,
+  IConfiguredDomain,
 } from "@/types/organisation.types";
 import {
   getOrganisation,
   getOrganisationDocuments,
   getOrganisationStats,
+  getBrandSettings,
+  getConfiguredDomains,
 } from "@/hooks/endpoints/useOrganisation";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 
@@ -33,5 +37,24 @@ export const useGetOrganisationDocuments = () => {
     queryKey: [QUERY_KEYS.ORGANISATION_DOCUMENTS],
     queryFn: getOrganisationDocuments,
     staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+};
+
+export const useGetBrandSettings = () => {
+  return useQuery<IApiResponse<IBrandConfig>, TError>({
+    queryKey: [QUERY_KEYS.BRAND_SETTINGS],
+    queryFn: getBrandSettings,
+    staleTime: 1000 * 60 * 10,
+  });
+};
+
+export const useGetConfiguredDomains = () => {
+  return useQuery<
+    IApiResponse<{ configured_domains: IConfiguredDomain[] }>,
+    TError
+  >({
+    queryKey: [QUERY_KEYS.CONFIGURED_DOMAINS],
+    queryFn: getConfiguredDomains,
+    staleTime: 1000 * 60 * 10,
   });
 };
