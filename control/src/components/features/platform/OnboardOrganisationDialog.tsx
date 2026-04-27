@@ -197,27 +197,23 @@ export function OnboardOrganisationDialog({
     if (step === 1) {
       const { cacNumber, tin, businessEmail } = form.getValues();
       setIsVerifyingOrg(true);
-      checkOrgMutation.mutateAsync(
-        {
+      try {
+        await checkOrgMutation.mutateAsync({
           cacRegistrationNumber: cacNumber,
           tin,
           businessEmail,
-        },
-        {
-          onSuccess: () => {
-            setIsVerifyingOrg(false);
-            setStep(step + 1);
-          },
-          onError: (error: unknown) => {
-            setIsVerifyingOrg(false);
-            const err = error as AxiosError<{ message: string }>;
-            toast.error(
-              err?.response?.data?.message ||
-                "Organisation verification failed. It might already exist.",
-            );
-          },
-        },
-      );
+        });
+        setIsVerifyingOrg(false);
+        setStep(step + 1);
+      } catch (error) {
+        setIsVerifyingOrg(false);
+        const err = error as AxiosError<{ message: string; errors?: string[] }>;
+        const message =
+          err?.response?.data?.errors?.[0] ||
+          err?.response?.data?.message ||
+          "Organisation verification failed. It might already exist.";
+        toast.error(message);
+      }
     } else {
       setStep(step + 1);
     }
