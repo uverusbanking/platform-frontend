@@ -265,6 +265,7 @@ export interface IBrandConfig {
   privacyUrl?: string;
   termsUrl?: string;
   seo?: IBrandSeo;
+  emailSenderName?: string;
 }
 
 export interface IConfiguredDomains {

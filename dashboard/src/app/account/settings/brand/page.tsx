@@ -667,6 +667,7 @@ export default function BrandSettingsPage() {
         websiteUrl: b.websiteUrl ?? "",
         privacyUrl: b.privacyUrl ?? "",
         termsUrl: b.termsUrl ?? "",
+        emailSenderName: b.emailSenderName ?? "",
         seo: {
           title: b.seo?.title ?? "",
           description: b.seo?.description ?? "",
@@ -917,6 +918,22 @@ export default function BrandSettingsPage() {
                   {...brandForm.register("termsUrl")}
                 />
               </div>
+            </div>
+
+            <SectionDivider label="Email" />
+
+            <div className="space-y-2">
+              <Label className={labelCls}>Email Sender Name</Label>
+              <Input
+                disabled={!isOwner}
+                placeholder="Acme Pay"
+                className={inputCls}
+                {...brandForm.register("emailSenderName")}
+              />
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Display name shown in the &ldquo;From&rdquo; field on emails sent to your customers.
+                Requires a verified Email Send-From Domain below.
+              </p>
             </div>
 
             <SectionDivider label="SEO Metadata" />

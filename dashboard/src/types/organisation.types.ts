@@ -17,6 +17,7 @@ export interface IBrandConfig {
   privacyUrl?: string;
   termsUrl?: string;
   seo?: IBrandSeo;
+  emailSenderName?: string;
 }
 
 export interface IConfiguredDomains {
@@ -55,6 +56,7 @@ export interface IUpdateBrandSettingsPayload {
   privacyUrl?: string;
   termsUrl?: string;
   seo?: IBrandSeo;
+  emailSenderName?: string;
 }
 
 export interface IUpdateConfiguredDomainsPayload {
