@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { HelmetProvider } from "react-helmet-async";
 import { SessionGuard } from "@/components/SessionGuard";
+import { useBrandConfig } from "@/hooks/queries/useBrandConfig";
 
 // Pages
 import Index from "./pages/Index";
@@ -43,6 +44,11 @@ import { AdminLayout } from "./components/admin/AdminLayout";
 import { UserAccountLayout } from "./components/UserAccountLayout";
 import { AuthLayout } from "./components/AuthLayout";
 
+function BrandConfigLoader() {
+  useBrandConfig();
+  return null;
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -61,6 +67,7 @@ const queryClient = new QueryClient({
 const App = () => (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
+      <BrandConfigLoader />
       <TooltipProvider>
         <Toaster />
         <Sonner />

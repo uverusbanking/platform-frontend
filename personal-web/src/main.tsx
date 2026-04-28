@@ -4,11 +4,11 @@ import "./index.css";
 import { BrandConfigService } from "@shared/core";
 
 async function init() {
-  // Load brand config (asynchronously, with fallback)
-  await BrandConfigService.loadConfig(
+  const config = await BrandConfigService.loadConfig(
     "personal",
-    import.meta.env.VITE_BRAND_CONFIG_URL,
+    import.meta.env.VITE_API_URL,
   );
+  BrandConfigService.applyToDocument(config);
 
   createRoot(document.getElementById("root")!).render(<App />);
 }
