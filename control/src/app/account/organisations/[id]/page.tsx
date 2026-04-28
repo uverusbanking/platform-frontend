@@ -429,21 +429,47 @@ export default function OrganisationDetailPage() {
                 <>
                   {/* Identity row */}
                   <div className="grid sm:grid-cols-3 gap-4">
-                    {organisation.brand_settings.brandLogoUrl && (
-                      <div className="sm:col-span-3 flex items-center gap-4 p-3 rounded-xl bg-muted/40 border border-border/30">
-                        <img
-                          src={organisation.brand_settings.brandLogoUrl}
-                          alt="Brand logo"
-                          className="h-10 max-w-[120px] object-contain rounded"
-                          onError={(e) => {
-                            (
-                              e.currentTarget as HTMLImageElement
-                            ).style.display = "none";
-                          }}
-                        />
-                        <div className="text-xs text-muted-foreground font-mono break-all">
-                          {organisation.brand_settings.brandLogoUrl}
-                        </div>
+                    {(organisation.brand_settings.brandIconUrl ||
+                      organisation.brand_settings.brandLogoUrl) && (
+                      <div className="sm:col-span-3 flex items-start gap-3">
+                        {organisation.brand_settings.brandIconUrl && (
+                          <div className="space-y-1.5 shrink-0">
+                            <span className="text-xs font-medium text-muted-foreground block">
+                              Icon
+                            </span>
+                            <div className="h-14 w-14 rounded-xl border border-border/40 bg-muted/30 overflow-hidden flex items-center justify-center">
+                              <img
+                                src={organisation.brand_settings.brandIconUrl}
+                                alt="Brand icon"
+                                className="w-full h-full object-contain"
+                                onError={(e) => {
+                                  (
+                                    e.currentTarget as HTMLImageElement
+                                  ).style.display = "none";
+                                }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                        {organisation.brand_settings.brandLogoUrl && (
+                          <div className="space-y-1.5 flex-1">
+                            <span className="text-xs font-medium text-muted-foreground block">
+                              Logo
+                            </span>
+                            <div className="h-14 rounded-xl border border-border/40 bg-muted/30 overflow-hidden flex items-center px-4">
+                              <img
+                                src={organisation.brand_settings.brandLogoUrl}
+                                alt="Brand logo"
+                                className="max-h-9 max-w-full object-contain"
+                                onError={(e) => {
+                                  (
+                                    e.currentTarget as HTMLImageElement
+                                  ).style.display = "none";
+                                }}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                     <div className="space-y-1">
@@ -732,11 +758,19 @@ export default function OrganisationDetailPage() {
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             {verifiable &&
-                              rec &&
-                              statusBadge(rec.verification_status)}
+                              (rec ? (
+                                statusBadge(rec.verification_status)
+                              ) : (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-[10px] text-muted-foreground gap-1"
+                                >
+                                  <AlertCircle className="w-2.5 h-2.5" />
+                                  Not initiated
+                                </Badge>
+                              ))}
                             {verifiable &&
-                              rec &&
-                              rec.verification_status !== "VERIFIED" && (
+                              rec?.verification_status !== "VERIFIED" && (
                                 <button
                                   type="button"
                                   className="text-[11px] font-semibold text-orange-600 hover:text-orange-700 underline underline-offset-2"

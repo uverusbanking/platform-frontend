@@ -58,10 +58,7 @@ export const getBrandSettings = async (): Promise<
 export const updateBrandSettings = async (
   payload: IUpdateBrandSettingsPayload,
 ): Promise<IApiResponse<IBrandConfig>> => {
-  const response = await apiClient.patch(
-    "/organisation/brand-settings",
-    payload,
-  );
+  const response = await apiClient.put("/organisation/brand-settings", payload);
   return response.data;
 };
 

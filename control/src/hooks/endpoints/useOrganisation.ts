@@ -337,7 +337,7 @@ export const updateBrandSettings = async (
   payload: IUpdateBrandSettingsPayload,
 ): Promise<IApiResponse<unknown>> => {
   const { id, brand } = payload;
-  const response = await apiClient.patch(
+  const response = await apiClient.put(
     `/organisations/platform/${id}/brand-settings`,
     brand,
   );
@@ -348,7 +348,7 @@ export const updateConfiguredDomains = async (
   payload: IUpdateConfiguredDomainsPayload,
 ): Promise<IApiResponse<unknown>> => {
   const { id, ...data } = payload;
-  const response = await apiClient.patch(
+  const response = await apiClient.put(
     `/organisations/platform/${id}/configured-domains`,
     data,
   );
