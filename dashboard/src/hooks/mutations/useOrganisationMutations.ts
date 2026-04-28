@@ -6,7 +6,7 @@ import {
   IOrganisationDocument,
   IUpdateDocumentsPayload,
   IBrandConfig,
-  IConfiguredDomain,
+  IConfiguredDomains,
   IUpdateBrandSettingsPayload,
   IUpdateConfiguredDomainsPayload,
 } from "@/types/organisation.types";
@@ -65,7 +65,7 @@ export const useUpdateBrandSettings = () => {
 export const useUpdateConfiguredDomains = () => {
   const queryClient = useQueryClient();
   return useMutation<
-    IApiResponse<{ configured_domains: IConfiguredDomain[] }>,
+    IApiResponse<{ configured_domains: IConfiguredDomains }>,
     TError,
     IUpdateConfiguredDomainsPayload
   >({

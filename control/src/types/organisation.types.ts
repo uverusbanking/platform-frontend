@@ -26,7 +26,7 @@ export interface IOrganisation {
   metadata: any;
   kYCId: string;
   brand_settings?: IBrandConfig;
-  configured_domains?: IConfiguredDomain[];
+  configured_domains?: IConfiguredDomains;
   members?: IOrganisationMember[];
 }
 
@@ -267,9 +267,11 @@ export interface IBrandConfig {
   seo?: IBrandSeo;
 }
 
-export interface IConfiguredDomain {
-  name: string;
-  url: string;
+export interface IConfiguredDomains {
+  personal_app?: string;
+  corporate_app?: string;
+  marketing?: string;
+  email?: string;
 }
 
 export interface IUpdateBrandSettingsPayload {
@@ -279,5 +281,8 @@ export interface IUpdateBrandSettingsPayload {
 
 export interface IUpdateConfiguredDomainsPayload {
   id: string;
-  configured_domains: IConfiguredDomain[];
+  personal_app?: string;
+  corporate_app?: string;
+  marketing?: string;
+  email?: string;
 }

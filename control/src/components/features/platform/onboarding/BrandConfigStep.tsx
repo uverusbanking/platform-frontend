@@ -1,7 +1,7 @@
 "use client";
 
-import { useFormContext, useFieldArray } from "react-hook-form";
-import { Plus, Trash2 } from "lucide-react";
+import { useFormContext } from "react-hook-form";
+import { Globe } from "lucide-react";
 import {
   FormControl,
   FormField,
@@ -10,7 +10,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 const inputCls =
@@ -65,10 +64,6 @@ function ColorInput({ name, label }: { name: string; label: string }) {
 
 export function BrandConfigStep() {
   const form = useFormContext();
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "config.domains",
-  });
 
   return (
     <div className="space-y-6">
@@ -293,66 +288,61 @@ export function BrandConfigStep() {
 
       <SectionDivider label="Configured Domains" />
 
-      <div className="space-y-3">
-        {fields.map((f, i) => (
-          <div key={f.id} className="flex gap-3 items-start">
-            <FormField
-              name={`config.domains.${i}.name`}
-              control={form.control}
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  {i === 0 && (
-                    <FormLabel className={labelCls}>Environment</FormLabel>
-                  )}
-                  <FormControl>
-                    <Input
-                      placeholder="Production"
-                      className={inputCls}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              name={`config.domains.${i}.url`}
-              control={form.control}
-              render={({ field }) => (
-                <FormItem className="flex-[2]">
-                  {i === 0 && <FormLabel className={labelCls}>URL</FormLabel>}
-                  <FormControl>
-                    <Input
-                      placeholder="https://app.company.com"
-                      className={inputCls}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className={`text-destructive hover:bg-destructive/10 rounded-lg shrink-0 ${i === 0 ? "mt-6" : ""}`}
-              onClick={() => remove(i)}
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
-        ))}
+      <p className="text-[11px] text-muted-foreground -mt-3">
+        Configure the domain for each role. Personal App and Corporate App are
+        used for origin verification.
+      </p>
 
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full rounded-xl h-10 border-dashed font-bold text-xs uppercase tracking-wider"
-          onClick={() => append({ name: "", url: "" })}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Domain
-        </Button>
+      <div className="space-y-4">
+        {(
+          [
+            {
+              key: "config.domains.personal_app",
+              label: "Personal App Domain",
+              placeholder: "app.company.com",
+            },
+            {
+              key: "config.domains.corporate_app",
+              label: "Corporate App Domain",
+              placeholder: "business.company.com",
+            },
+            {
+              key: "config.domains.marketing",
+              label: "Marketing / Root Domain",
+              placeholder: "company.com",
+            },
+            {
+              key: "config.domains.email",
+              label: "Email Send-From Domain",
+              placeholder: "mail.company.com",
+            },
+          ] as const
+        ).map(({ key, label, placeholder }) => (
+          <FormField
+            key={key}
+            name={key}
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className={labelCls}>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Globe className="w-3 h-3" />
+                    {label}
+                  </span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={placeholder}
+                    className={inputCls}
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ))}
       </div>
     </div>
   );

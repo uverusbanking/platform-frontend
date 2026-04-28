@@ -119,7 +119,12 @@ export function OnboardOrganisationDialog({
           termsUrl: "",
           seo: { title: "", description: "", author: "" },
         },
-        domains: [],
+        domains: {
+          personal_app: "",
+          corporate_app: "",
+          marketing: "",
+          email: "",
+        },
       },
     },
   });
@@ -146,10 +151,15 @@ export function OnboardOrganisationDialog({
           });
         }
 
-        if (domains && domains.length > 0) {
+        const hasDomains =
+          domains &&
+          Object.values(domains).some(
+            (v) => typeof v === "string" && v.trim() !== "",
+          );
+        if (hasDomains) {
           await configuredDomainsMutation.mutateAsync({
             id: orgId,
-            configured_domains: domains,
+            ...domains,
           });
         }
       }

@@ -29,7 +29,7 @@ import {
   IUpdateBrandSettingsPayload,
   IUpdateConfiguredDomainsPayload,
   IBrandConfig,
-  IConfiguredDomain,
+  IConfiguredDomains,
 } from "@/types/organisation.types";
 
 // --- API payload transformers (camelCase → snake_case) ---
@@ -325,7 +325,7 @@ export const getOrgBrandSettings = async (
 
 export const getOrgConfiguredDomains = async (
   id: string,
-): Promise<IApiResponse<{ configured_domains: IConfiguredDomain[] }>> => {
+): Promise<IApiResponse<{ configured_domains: IConfiguredDomains }>> => {
   const response = await apiClient.get(
     `/organisations/platform/${id}/configured-domains`,
   );
@@ -346,10 +346,10 @@ export const updateBrandSettings = async (
 export const updateConfiguredDomains = async (
   payload: IUpdateConfiguredDomainsPayload,
 ): Promise<IApiResponse<unknown>> => {
-  const { id, configured_domains } = payload;
+  const { id, ...data } = payload;
   const response = await apiClient.patch(
     `/organisations/platform/${id}/configured-domains`,
-    { configured_domains },
+    data,
   );
   return response.data;
 };

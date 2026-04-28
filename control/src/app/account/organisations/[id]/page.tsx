@@ -601,65 +601,69 @@ export default function OrganisationDetailPage() {
               <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                 <Globe className="w-4 h-4" />
                 Configured Domains
-                {organisation.configured_domains &&
-                  organisation.configured_domains.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      className="ml-auto font-bold text-xs"
-                    >
-                      {organisation.configured_domains.length}
-                    </Badge>
-                  )}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-2">
-              {!organisation.configured_domains ||
-              organisation.configured_domains.length === 0 ? (
-                <div className="flex flex-col items-center justify-center gap-3 py-8 text-center rounded-xl border border-dashed border-border/60 bg-muted/20">
-                  <Link2 className="h-8 w-8 text-muted-foreground/40" />
-                  <p className="text-sm text-muted-foreground">
-                    No domains configured yet.
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsBrandDialogOpen(true)}
-                  >
-                    Add Domains
-                  </Button>
-                </div>
-              ) : (
-                <div className="divide-y divide-border/40">
-                  {organisation.configured_domains.map((domain) => (
-                    <div
-                      key={domain.url}
-                      className="flex items-center justify-between py-3 first:pt-2 last:pb-0"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                          <Link2 className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-sm">
-                            {domain.name}
-                          </div>
-                          <div className="text-xs text-muted-foreground font-mono">
-                            {domain.url}
-                          </div>
-                        </div>
-                      </div>
-                      <a
-                        href={domain.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-muted-foreground hover:text-primary transition-colors"
+              {(() => {
+                const d = organisation.configured_domains;
+                const entries = [
+                  { label: "Personal App", value: d?.personal_app },
+                  { label: "Corporate App", value: d?.corporate_app },
+                  { label: "Marketing", value: d?.marketing },
+                  { label: "Email Domain", value: d?.email },
+                ].filter((e) => !!e.value);
+
+                if (entries.length === 0) {
+                  return (
+                    <div className="flex flex-col items-center justify-center gap-3 py-8 text-center rounded-xl border border-dashed border-border/60 bg-muted/20">
+                      <Link2 className="h-8 w-8 text-muted-foreground/40" />
+                      <p className="text-sm text-muted-foreground">
+                        No domains configured yet.
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsBrandDialogOpen(true)}
                       >
-                        <ExternalLink className="w-4 h-4" />
-                      </a>
+                        Configure Domains
+                      </Button>
                     </div>
-                  ))}
-                </div>
-              )}
+                  );
+                }
+
+                return (
+                  <div className="divide-y divide-border/40">
+                    {entries.map(({ label, value }) => (
+                      <div
+                        key={label}
+                        className="flex items-center justify-between py-3 first:pt-2 last:pb-0"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                            <Link2 className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <div className="font-semibold text-sm">{label}</div>
+                            <div className="text-xs text-muted-foreground font-mono">
+                              {value}
+                            </div>
+                          </div>
+                        </div>
+                        {value && value.startsWith("http") && (
+                          <a
+                            href={value}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-muted-foreground hover:text-primary transition-colors"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </CardContent>
           </Card>
 

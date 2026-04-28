@@ -19,10 +19,11 @@ export interface IBrandConfig {
   seo?: IBrandSeo;
 }
 
-export interface IConfiguredDomain {
-  id?: string;
-  name: string;
-  url: string;
+export interface IConfiguredDomains {
+  personal_app?: string;
+  corporate_app?: string;
+  marketing?: string;
+  email?: string;
 }
 
 export interface IUpdateBrandSettingsPayload {
@@ -41,7 +42,10 @@ export interface IUpdateBrandSettingsPayload {
 }
 
 export interface IUpdateConfiguredDomainsPayload {
-  configured_domains: { name: string; url: string }[];
+  personal_app?: string;
+  corporate_app?: string;
+  marketing?: string;
+  email?: string;
 }
 
 export interface IOrganisationStats {

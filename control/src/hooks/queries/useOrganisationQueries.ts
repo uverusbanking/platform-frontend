@@ -3,7 +3,7 @@ import { TError, IApiResponse } from "@/types/apiResponse.type";
 import {
   IApiKey,
   IBrandConfig,
-  IConfiguredDomain,
+  IConfiguredDomains,
 } from "@/types/organisation.types";
 import {
   getOrganisationUsers,
@@ -115,7 +115,7 @@ export const useGetOrgBrandSettings = (id: string) => {
 
 export const useGetOrgConfiguredDomains = (id: string) => {
   return useQuery<
-    IApiResponse<{ configured_domains: IConfiguredDomain[] }>,
+    IApiResponse<{ configured_domains: IConfiguredDomains }>,
     TError
   >({
     queryKey: [QUERY_KEYS.ORGANISATION.CONFIGURED_DOMAINS, id],

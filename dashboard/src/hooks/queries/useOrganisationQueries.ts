@@ -5,7 +5,7 @@ import {
   IOrganisation,
   IOrganisationDocument,
   IBrandConfig,
-  IConfiguredDomain,
+  IConfiguredDomains,
 } from "@/types/organisation.types";
 import {
   getOrganisation,
@@ -50,7 +50,7 @@ export const useGetBrandSettings = () => {
 
 export const useGetConfiguredDomains = () => {
   return useQuery<
-    IApiResponse<{ configured_domains: IConfiguredDomain[] }>,
+    IApiResponse<{ configured_domains: IConfiguredDomains }>,
     TError
   >({
     queryKey: [QUERY_KEYS.CONFIGURED_DOMAINS],

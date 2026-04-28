@@ -50,9 +50,26 @@ const brandConfigSchema = z.object({
     .optional(),
 });
 
+const fqdnOrEmpty = z
+  .string()
+  .trim()
+  .refine(
+    (v) =>
+      v === "" ||
+      /^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/.test(
+        v,
+      ),
+    {
+      message: "Must be a valid domain (e.g. app.example.com)",
+    },
+  )
+  .optional();
+
 const configuredDomainSchema = z.object({
-  name: z.string().trim().min(1, "Environment name is required"),
-  url: z.string().trim().url("Must be a valid URL"),
+  personal_app: fqdnOrEmpty,
+  corporate_app: fqdnOrEmpty,
+  marketing: fqdnOrEmpty,
+  email: fqdnOrEmpty,
 });
 
 export const OrganisationOnboardSchema = z.object({
@@ -79,7 +96,7 @@ export const OrganisationOnboardSchema = z.object({
   config: z
     .object({
       brand: brandConfigSchema.optional(),
-      domains: z.array(configuredDomainSchema).optional(),
+      domains: configuredDomainSchema.optional(),
     })
     .optional(),
 });

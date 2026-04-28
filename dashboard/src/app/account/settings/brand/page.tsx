@@ -1,14 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
   Loader2,
   Palette,
   Globe,
-  Plus,
-  Trash2,
   Shield,
   Link2,
   UploadCloud,
@@ -28,6 +26,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { IConfiguredDomains } from "@/types/organisation.types";
 
 import { useUserStore } from "@/state/userStore";
 import {
@@ -314,9 +313,7 @@ interface BrandFormValues extends IUpdateBrandSettingsPayload {
   seo: { title: string; description: string; author: string };
 }
 
-interface DomainsFormValues {
-  domains: { name: string; url: string }[];
-}
+type DomainsFormValues = IConfiguredDomains;
 
 export default function BrandSettingsPage() {
   const { userData } = useUserStore();
@@ -339,11 +336,12 @@ export default function BrandSettingsPage() {
 
   const brandForm = useForm<BrandFormValues>();
   const domainsForm = useForm<DomainsFormValues>({
-    defaultValues: { domains: [] },
-  });
-  const { fields, append, remove } = useFieldArray({
-    control: domainsForm.control,
-    name: "domains",
+    defaultValues: {
+      personal_app: "",
+      corporate_app: "",
+      marketing: "",
+      email: "",
+    },
   });
 
   useEffect(() => {
@@ -371,9 +369,12 @@ export default function BrandSettingsPage() {
   }, [brandData, brandForm]);
 
   useEffect(() => {
-    const domains = domainsData?.data?.configured_domains ?? [];
+    const d = domainsData?.data?.configured_domains ?? {};
     domainsForm.reset({
-      domains: domains.map((d) => ({ name: d.name, url: d.url })),
+      personal_app: d.personal_app ?? "",
+      corporate_app: d.corporate_app ?? "",
+      marketing: d.marketing ?? "",
+      email: d.email ?? "",
     });
   }, [domainsData, domainsForm]);
 
@@ -385,13 +386,10 @@ export default function BrandSettingsPage() {
   };
 
   const onSaveDomains = (values: DomainsFormValues) => {
-    saveDomains(
-      { configured_domains: values.domains },
-      {
-        onSuccess: () => toast.success("Domains saved"),
-        onError: () => toast.error("Failed to save domains"),
-      },
-    );
+    saveDomains(values, {
+      onSuccess: () => toast.success("Domains saved"),
+      onError: () => toast.error("Failed to save domains"),
+    });
   };
 
   if (brandLoading || domainsLoading) {
@@ -647,7 +645,8 @@ export default function BrandSettingsPage() {
                 Configured Domains
               </CardTitle>
               <CardDescription>
-                Register the domains your application is deployed on.
+                Register the four typed domains for your organisation (personal
+                app, corporate app, marketing, and email).
               </CardDescription>
             </div>
           </div>
@@ -657,96 +656,77 @@ export default function BrandSettingsPage() {
             onSubmit={domainsForm.handleSubmit(onSaveDomains)}
             className="space-y-4"
           >
-            {fields.length === 0 && (
-              <div className="flex flex-col items-center justify-center gap-3 py-10 text-center rounded-xl border border-dashed border-border/60 bg-muted/20">
-                <Link2 className="h-8 w-8 text-muted-foreground/40" />
+            {domainsError && (
+              <div className="flex flex-col items-center justify-center gap-3 py-6 text-center rounded-xl border border-dashed border-border/60 bg-muted/20">
+                <Link2 className="h-7 w-7 text-muted-foreground/40" />
                 <p className="text-sm text-muted-foreground">
-                  {domainsError
-                    ? "Could not load domains. Add one below."
-                    : "No domains configured yet."}
+                  Could not load domains. You can still update them below.
                 </p>
-                {isOwner && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => append({ name: "", url: "" })}
-                  >
-                    <Plus className="w-3 h-3 mr-1.5" />
-                    Add Domain
-                  </Button>
-                )}
               </div>
             )}
 
-            {fields.map((field, index) => (
-              <div key={field.id} className="flex items-center gap-3">
-                <div className="grid grid-cols-2 gap-3 flex-1">
-                  <div className="space-y-1.5">
-                    {index === 0 && (
-                      <Label className={labelCls}>Environment</Label>
-                    )}
-                    <Input
-                      disabled={!isOwner}
-                      placeholder="production"
-                      className={inputCls}
-                      {...domainsForm.register(`domains.${index}.name`)}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    {index === 0 && <Label className={labelCls}>URL</Label>}
-                    <Input
-                      disabled={!isOwner}
-                      placeholder="https://app.example.com"
-                      className={inputCls}
-                      {...domainsForm.register(`domains.${index}.url`)}
-                    />
-                  </div>
-                </div>
-                {isOwner && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className={`text-destructive hover:bg-destructive/10 shrink-0 ${index === 0 ? "mt-6" : ""}`}
-                    onClick={() => remove(index)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                )}
+            <p className="text-[11px] text-muted-foreground">
+              Configure the domain for each role. Personal App and Corporate App
+              are used for origin verification.
+            </p>
+
+            {(
+              [
+                {
+                  key: "personal_app",
+                  label: "Personal App Domain",
+                  placeholder: "app.example.com",
+                },
+                {
+                  key: "corporate_app",
+                  label: "Corporate App Domain",
+                  placeholder: "business.example.com",
+                },
+                {
+                  key: "marketing",
+                  label: "Marketing / Root Domain",
+                  placeholder: "example.com",
+                },
+                {
+                  key: "email",
+                  label: "Email Send-From Domain",
+                  placeholder: "mail.example.com",
+                },
+              ] as const
+            ).map(({ key, label, placeholder }) => (
+              <div key={key} className="space-y-1.5">
+                <Label className={labelCls}>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Globe className="w-3 h-3" />
+                    {label}
+                  </span>
+                </Label>
+                <Input
+                  disabled={!isOwner}
+                  placeholder={placeholder}
+                  className={inputCls}
+                  {...domainsForm.register(key)}
+                />
               </div>
             ))}
 
             {isOwner && (
-              <>
+              <div className="flex justify-end pt-4 border-t border-border/40">
                 <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="w-full border-dashed"
-                  onClick={() => append({ name: "", url: "" })}
+                  type="submit"
+                  disabled={savingDomains}
+                  className="min-w-[150px] shadow-sm bg-orange-600 hover:bg-orange-700 text-white font-bold h-11 rounded-xl"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Domain
+                  {savingDomains ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Domains"
+                  )}
                 </Button>
-
-                <div className="flex justify-end pt-4 border-t border-border/40">
-                  <Button
-                    type="submit"
-                    disabled={savingDomains}
-                    className="min-w-[150px] shadow-sm bg-orange-600 hover:bg-orange-700 text-white font-bold h-11 rounded-xl"
-                  >
-                    {savingDomains ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      "Save Domains"
-                    )}
-                  </Button>
-                </div>
-              </>
+              </div>
             )}
           </form>
         </CardContent>

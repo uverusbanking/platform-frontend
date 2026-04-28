@@ -7,7 +7,7 @@ import {
   IOrganisationDocument,
   IUpdateDocumentsPayload,
   IBrandConfig,
-  IConfiguredDomain,
+  IConfiguredDomains,
   IUpdateBrandSettingsPayload,
   IUpdateConfiguredDomainsPayload,
 } from "@/types/organisation.types";
@@ -65,7 +65,7 @@ export const updateBrandSettings = async (
 };
 
 export const getConfiguredDomains = async (): Promise<
-  IApiResponse<{ configured_domains: IConfiguredDomain[] }>
+  IApiResponse<{ configured_domains: IConfiguredDomains }>
 > => {
   const response = await apiClient.get("/organisation/configured-domains-list");
   return response.data;
@@ -73,7 +73,7 @@ export const getConfiguredDomains = async (): Promise<
 
 export const updateConfiguredDomains = async (
   payload: IUpdateConfiguredDomainsPayload,
-): Promise<IApiResponse<{ configured_domains: IConfiguredDomain[] }>> => {
+): Promise<IApiResponse<{ configured_domains: IConfiguredDomains }>> => {
   const response = await apiClient.patch(
     "/organisation/configured-domains",
     payload,

@@ -1,17 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  Plus,
-  Trash2,
-  Loader2,
-  Palette,
-  Globe,
-  UploadCloud,
-  X,
-} from "lucide-react";
+import { Loader2, Palette, Globe, UploadCloud, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -41,7 +33,7 @@ import { QUERY_KEYS } from "@/lib/queryKeys";
 import {
   IOrganisation,
   IBrandConfig,
-  IConfiguredDomain,
+  IConfiguredDomains,
 } from "@/types/organisation.types";
 
 const labelCls =
@@ -305,7 +297,7 @@ interface FormValues {
   brand: IBrandConfig & {
     seo: { title: string; description: string; author: string };
   };
-  domains: IConfiguredDomain[];
+  domains: IConfiguredDomains;
 }
 
 interface Props {
@@ -330,11 +322,6 @@ export function EditBrandConfigDialog({
     defaultValues: buildDefaults(organisation),
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "domains",
-  });
-
   useEffect(() => {
     if (open) form.reset(buildDefaults(organisation));
   }, [open, organisation, form]);
@@ -345,7 +332,7 @@ export function EditBrandConfigDialog({
         updateBrand({ id: organisation.id, brand: values.brand }),
         updateDomains({
           id: organisation.id,
-          configured_domains: values.domains,
+          ...values.domains,
         }),
       ]);
       await Promise.all([
@@ -701,73 +688,65 @@ export function EditBrandConfigDialog({
 
             <SectionHeading label="Configured Domains" />
 
+            <p className="text-[11px] text-muted-foreground -mt-2">
+              Configure the domains for each role. Only Personal App and
+              Corporate App domains are used for origin verification.
+            </p>
+
             <div className="space-y-3">
-              {fields.map((field, index) => (
-                <div key={field.id} className="flex items-start gap-2">
-                  <Globe className="w-4 h-4 mt-3 text-muted-foreground shrink-0" />
-                  <div className="grid grid-cols-2 gap-2 flex-1">
-                    <FormField
-                      name={`domains.${index}.name`}
-                      control={form.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          {index === 0 && (
-                            <FormLabel className={labelCls}>
-                              Environment
-                            </FormLabel>
-                          )}
-                          <FormControl>
-                            <Input
-                              placeholder="production"
-                              className={inputCls}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      name={`domains.${index}.url`}
-                      control={form.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          {index === 0 && (
-                            <FormLabel className={labelCls}>URL</FormLabel>
-                          )}
-                          <FormControl>
-                            <Input
-                              placeholder="https://app.example.com"
-                              className={inputCls}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="mt-1 text-destructive hover:bg-destructive/10 shrink-0"
-                    onClick={() => remove(index)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+              {(
+                [
+                  {
+                    key: "personal_app",
+                    label: "Personal App Domain",
+                    placeholder: "app.example.com",
+                    icon: <Globe className="w-3.5 h-3.5" />,
+                  },
+                  {
+                    key: "corporate_app",
+                    label: "Corporate App Domain",
+                    placeholder: "business.example.com",
+                    icon: <Globe className="w-3.5 h-3.5" />,
+                  },
+                  {
+                    key: "marketing",
+                    label: "Marketing / Root Domain",
+                    placeholder: "example.com",
+                    icon: <Globe className="w-3.5 h-3.5" />,
+                  },
+                  {
+                    key: "email",
+                    label: "Email Send-From Domain",
+                    placeholder: "mail.example.com",
+                    icon: <Globe className="w-3.5 h-3.5" />,
+                  },
+                ] as const
+              ).map(({ key, label, placeholder, icon }) => (
+                <FormField
+                  key={key}
+                  name={`domains.${key}`}
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={labelCls}>
+                        <span className="inline-flex items-center gap-1.5">
+                          {icon}
+                          {label}
+                        </span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={placeholder}
+                          className={inputCls}
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               ))}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="w-full border-dashed"
-                onClick={() => append({ name: "", url: "" })}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Domain
-              </Button>
             </div>
 
             <div className="flex justify-end gap-3 pt-2 border-t border-border/40">
@@ -793,6 +772,7 @@ export function EditBrandConfigDialog({
 
 function buildDefaults(org: IOrganisation): FormValues {
   const b = org.brand_settings ?? {};
+  const d = org.configured_domains ?? {};
   return {
     brand: {
       brandName: b.brandName ?? "",
@@ -812,9 +792,11 @@ function buildDefaults(org: IOrganisation): FormValues {
         author: b.seo?.author ?? "",
       },
     },
-    domains: (org.configured_domains ?? []).map((d) => ({
-      name: d.name,
-      url: d.url,
-    })),
+    domains: {
+      personal_app: d.personal_app ?? "",
+      corporate_app: d.corporate_app ?? "",
+      marketing: d.marketing ?? "",
+      email: d.email ?? "",
+    },
   };
 }
