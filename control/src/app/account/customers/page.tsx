@@ -362,14 +362,14 @@ export default function Customers() {
                     customers.map((customer) => (
                       <TableRow
                         key={customer.id}
-                        className="group border-b border-border/30 hover:bg-muted/40 transition-all cursor-pointer h-20"
+                        className="group/row border-b border-border/30 hover:bg-muted/40 transition-all cursor-pointer h-20"
                         onClick={() =>
                           navigate(`/account/customers/${customer.id}`)
                         }
                       >
                         <TableCell className="pl-6">
                           <div className="flex items-center gap-3.5">
-                            <Avatar className="h-11 w-11 border-2 border-background ring-2 ring-primary/5 shadow-sm transition-transform group-hover:scale-105">
+                            <Avatar className="h-11 w-11 border-2 border-background ring-2 ring-primary/5 shadow-sm transition-transform group-hover/row:scale-105">
                               <AvatarImage
                                 src={`https://api.dicebear.com/7.x/initials/svg?seed=${customer.first_name}`}
                               />
@@ -379,7 +379,7 @@ export default function Customers() {
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col min-w-0">
-                              <div className="font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                              <div className="font-bold text-foreground truncate group-hover/row:text-primary transition-colors">
                                 {customer.first_name} {customer.last_name}
                               </div>
                               <div className="text-[11px] font-mono text-muted-foreground flex items-center gap-1.5 leading-none mt-1">

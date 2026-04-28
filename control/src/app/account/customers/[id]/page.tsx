@@ -518,10 +518,10 @@ export default function CustomerDetailPage() {
                     {transactions.map((tx, i) => (
                       <div
                         key={tx.id}
-                        className={`flex items-center justify-between p-5 hover:bg-muted/40 transition-all cursor-pointer group border-l-4 ${
+                        className={`flex items-center justify-between p-5 transition-all cursor-pointer group/tx border-l-4 ${
                           tx.type === "Credit"
-                            ? "border-l-success group-hover:bg-success/5"
-                            : "border-l-error group-hover:bg-error/5"
+                            ? "border-l-success hover:bg-success/5"
+                            : "border-l-error hover:bg-error/5"
                         } ${i !== transactions.length - 1 ? "border-b border-border/30" : ""}`}
                       >
                         <div className="flex items-center gap-4">
@@ -539,7 +539,7 @@ export default function CustomerDetailPage() {
                             )}
                           </div>
                           <div className="flex flex-col gap-0.5">
-                            <div className="font-bold text-foreground group-hover:text-primary transition-colors">
+                            <div className="font-bold text-foreground group-hover/tx:text-primary transition-colors">
                               {tx.desc}
                             </div>
                             <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest">

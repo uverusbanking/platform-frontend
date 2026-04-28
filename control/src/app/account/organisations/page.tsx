@@ -264,7 +264,7 @@ export default function OrganisationsPage() {
                   organisations.map((organisation) => (
                     <TableRow
                       key={organisation.id}
-                      className="group border-b border-border/30 hover:bg-muted/40 transition-all h-20 cursor-pointer"
+                      className="group/row border-b border-border/30 hover:bg-muted/40 transition-all h-20 cursor-pointer"
                       onClick={() =>
                         navigate(`/account/organisations/${organisation.id}`)
                       }
@@ -277,7 +277,7 @@ export default function OrganisationsPage() {
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col min-w-0">
-                            <div className="font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                            <div className="font-bold text-foreground truncate group-hover/row:text-primary transition-colors">
                               {organisation.organisation_name}
                             </div>
                             <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground flex items-center gap-1.5 leading-none mt-1">
