@@ -20,10 +20,3 @@ export const changePassword = async (
   const response = await apiClient.put("/account/change-password", payload);
   return response.data;
 };
-
-export const updateViewMode = async (
-  environment: "LIVE" | "SANDBOX",
-): Promise<IApiResponse<IUser>> => {
-  const response = await apiClient.patch("/account/view-mode", { environment });
-  return response.data;
-};

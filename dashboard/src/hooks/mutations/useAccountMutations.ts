@@ -7,11 +7,7 @@ import {
   IUpdateProfilePayload,
   IChangePasswordPayload,
 } from "@/types/userAccount.types";
-import {
-  updateProfile,
-  changePassword,
-  updateViewMode,
-} from "@/hooks/endpoints/useAccount";
+import { updateProfile, changePassword } from "@/hooks/endpoints/useAccount";
 
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
@@ -58,20 +54,5 @@ export const useUpdateProfile = () => {
 export const useChangePassword = () => {
   return useMutation<IApiResponse<unknown>, TError, IChangePasswordPayload>({
     mutationFn: changePassword,
-  });
-};
-
-export const useUpdateViewMode = () => {
-  const queryClient = useQueryClient();
-  const _updateUser = useUserStore((state) => state._updateUser);
-
-  return useMutation<IApiResponse<IUser>, TError, "LIVE" | "SANDBOX">({
-    mutationFn: updateViewMode,
-    onSuccess: (response) => {
-      if (response.status && response.data) {
-        _updateUser(response.data);
-      }
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.USER_PROFILE] });
-    },
   });
 };

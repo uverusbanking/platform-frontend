@@ -15,30 +15,10 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useUserStore } from "@/state/userStore";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { useUpdateViewMode } from "@/hooks/mutations/useAccountMutations";
-import { toast } from "sonner";
 
 export function DashboardHeader() {
   const _logOutUser = useUserStore((state) => state._logOutUser);
   const userData = useUserStore((state) => state.userData);
-  const { mutate: updateViewMode, isPending } = useUpdateViewMode();
-
-  const isSandbox = userData.view_mode === "SANDBOX";
-
-  const handleToggleEnvironment = (checked: boolean) => {
-    const newMode = checked ? "SANDBOX" : "LIVE";
-    updateViewMode(newMode, {
-      onSuccess: () => {
-        toast.success(`Switched to ${newMode} mode`);
-      },
-      onError: () => {
-        toast.error("Failed to switch environment");
-      },
-    });
-  };
-
   const fullName = `${userData.first_name} ${userData.last_name}`;
   const initial = userData.first_name
     ? userData.first_name[0].toUpperCase()
@@ -60,33 +40,6 @@ export function DashboardHeader() {
 
         {/* Actions */}
         <div className="flex items-center gap-6">
-          {/* Environment Switcher */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-elevated/50 border border-border shadow-sm transition-all hover:bg-surface-elevated">
-            <Label
-              htmlFor="env-switch"
-              className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${
-                isSandbox ? "text-muted-foreground" : "text-success"
-              }`}
-            >
-              Live
-            </Label>
-            <Switch
-              id="env-switch"
-              checked={isSandbox}
-              onCheckedChange={handleToggleEnvironment}
-              disabled={isPending}
-              className="data-[state=checked]:bg-warning data-[state=unchecked]:bg-success scale-75"
-            />
-            <Label
-              htmlFor="env-switch"
-              className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${
-                isSandbox ? "text-warning" : "text-muted-foreground"
-              }`}
-            >
-              Sandbox
-            </Label>
-          </div>
-
           <div className="flex items-center gap-3">
             {/* Notifications */}
             <DropdownMenu>
