@@ -33,7 +33,7 @@ export default function OrganisationSettingsPage() {
   const { mutate: updateOrg, isPending: isUpdating } = useUpdateOrganisation();
 
   const organisation = orgData?.data;
-  const isOwner = userData?.role?.toUpperCase() === "BRAND_OWNER";
+  const isOwner = userData?.role?.toUpperCase() === "ORGANISATION_OWNER";
 
   const {
     register,

@@ -616,7 +616,7 @@ type DomainsFormValues = IConfiguredDomains;
 
 export default function BrandSettingsPage() {
   const { userData } = useUserStore();
-  const isOwner = userData?.role?.toUpperCase() === "BRAND_OWNER";
+  const isOwner = userData?.role?.toUpperCase() === "ORGANISATION_OWNER";
 
   const [verifyingDomain, setVerifyingDomain] = useState<
     "PERSONAL_APP" | "CORPORATE_APP" | "EMAIL" | null
