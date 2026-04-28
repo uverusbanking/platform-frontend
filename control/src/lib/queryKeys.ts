@@ -9,6 +9,7 @@ export const QUERY_KEYS = {
     API_KEYS: "api-keys",
     BRAND_SETTINGS: "org-brand-settings",
     CONFIGURED_DOMAINS: "org-configured-domains",
+    DOMAIN_VERIFICATION: "org-domain-verification",
   },
   PLATFORM: {
     ORGANISATIONS: "platform-organisations",

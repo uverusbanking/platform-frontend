@@ -6,6 +6,7 @@ import {
   IOrganisationDocument,
   IBrandConfig,
   IConfiguredDomains,
+  IDomainVerificationStatus,
 } from "@/types/organisation.types";
 import {
   getOrganisation,
@@ -13,6 +14,7 @@ import {
   getOrganisationStats,
   getBrandSettings,
   getConfiguredDomains,
+  getDomainVerificationStatuses,
 } from "@/hooks/endpoints/useOrganisation";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 
@@ -56,5 +58,13 @@ export const useGetConfiguredDomains = () => {
     queryKey: [QUERY_KEYS.CONFIGURED_DOMAINS],
     queryFn: getConfiguredDomains,
     staleTime: 1000 * 60 * 10,
+  });
+};
+
+export const useGetDomainVerificationStatuses = () => {
+  return useQuery<IApiResponse<IDomainVerificationStatus[]>, TError>({
+    queryKey: [QUERY_KEYS.DOMAIN_VERIFICATION],
+    queryFn: getDomainVerificationStatuses,
+    staleTime: 1000 * 60 * 2,
   });
 };

@@ -10,6 +10,7 @@ import {
   IConfiguredDomains,
   IUpdateBrandSettingsPayload,
   IUpdateConfiguredDomainsPayload,
+  IDomainVerificationStatus,
 } from "@/types/organisation.types";
 
 export const getOrganisationStats = async (): Promise<
@@ -77,6 +78,46 @@ export const updateConfiguredDomains = async (
   const response = await apiClient.patch(
     "/organisation/configured-domains",
     payload,
+  );
+  return response.data;
+};
+
+export const getDomainVerificationStatuses = async (): Promise<
+  IApiResponse<IDomainVerificationStatus[]>
+> => {
+  const response = await apiClient.get(
+    "/organisation/configured-domains/verification-status",
+  );
+  return response.data;
+};
+
+export const initiateDomainVerification = async (
+  type: string,
+): Promise<
+  IApiResponse<{
+    txt_host: string;
+    txt_value: string;
+    ttl: number;
+    already_verified: boolean;
+  }>
+> => {
+  const response = await apiClient.post(
+    `/organisation/configured-domains/${type}/verify/initiate`,
+  );
+  return response.data;
+};
+
+export const checkDomainVerification = async (
+  type: string,
+): Promise<
+  IApiResponse<{
+    status: string;
+    verified_at: string | null;
+    last_checked_at: string | null;
+  }>
+> => {
+  const response = await apiClient.post(
+    `/organisation/configured-domains/${type}/verify/check`,
   );
   return response.data;
 };

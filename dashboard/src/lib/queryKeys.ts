@@ -19,4 +19,5 @@ export const QUERY_KEYS = {
   BANKS: "banks",
   BRAND_SETTINGS: "brand-settings",
   CONFIGURED_DOMAINS: "configured-domains",
+  DOMAIN_VERIFICATION: "domain-verification",
 };

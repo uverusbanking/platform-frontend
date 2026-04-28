@@ -28,6 +28,7 @@ import {
   IUpdateOrganisationPayload,
   IUpdateBrandSettingsPayload,
   IUpdateConfiguredDomainsPayload,
+  IDomainVerificationStatus,
   IBrandConfig,
   IConfiguredDomains,
 } from "@/types/organisation.types";
@@ -350,6 +351,28 @@ export const updateConfiguredDomains = async (
   const response = await apiClient.patch(
     `/organisations/platform/${id}/configured-domains`,
     data,
+  );
+  return response.data;
+};
+
+export const getOrgDomainVerificationStatuses = async (
+  id: string,
+): Promise<IApiResponse<IDomainVerificationStatus[]>> => {
+  const response = await apiClient.get(
+    `/organisations/platform/${id}/configured-domains/verification-status`,
+  );
+  return response.data;
+};
+
+export const overrideDomainVerification = async ({
+  orgId,
+  type,
+}: {
+  orgId: string;
+  type: string;
+}): Promise<IApiResponse<{ status: string; verified_at: string | null }>> => {
+  const response = await apiClient.post(
+    `/organisations/platform/${orgId}/configured-domains/${type}/verify/override`,
   );
   return response.data;
 };

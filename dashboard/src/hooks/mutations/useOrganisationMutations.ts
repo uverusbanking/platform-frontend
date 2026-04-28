@@ -15,6 +15,8 @@ import {
   updateOrganisationDocuments,
   updateBrandSettings,
   updateConfiguredDomains,
+  initiateDomainVerification,
+  checkDomainVerification,
 } from "@/hooks/endpoints/useOrganisation";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 
@@ -73,6 +75,44 @@ export const useUpdateConfiguredDomains = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.CONFIGURED_DOMAINS],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.DOMAIN_VERIFICATION],
+      });
+    },
+  });
+};
+
+export const useInitiateDomainVerification = () => {
+  return useMutation<
+    IApiResponse<{
+      txt_host: string;
+      txt_value: string;
+      ttl: number;
+      already_verified: boolean;
+    }>,
+    TError,
+    string
+  >({
+    mutationFn: initiateDomainVerification,
+  });
+};
+
+export const useCheckDomainVerification = () => {
+  const queryClient = useQueryClient();
+  return useMutation<
+    IApiResponse<{
+      status: string;
+      verified_at: string | null;
+      last_checked_at: string | null;
+    }>,
+    TError,
+    string
+  >({
+    mutationFn: checkDomainVerification,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.DOMAIN_VERIFICATION],
       });
     },
   });

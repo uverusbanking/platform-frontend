@@ -27,6 +27,7 @@ import {
   Palette,
   Globe,
   Link2,
+  Loader2,
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -35,13 +36,22 @@ import {
   useGetOrganisationStatsById,
   useGetOrgBrandSettings,
   useGetOrgConfiguredDomains,
+  useGetOrgDomainVerificationStatuses,
 } from "@/hooks/queries/useOrganisationQueries";
-import { useUpdateOrganisationDocumentStatus } from "@/hooks/mutations/useOrganisationMutations";
+import {
+  useUpdateOrganisationDocumentStatus,
+  useOverrideDomainVerification,
+} from "@/hooks/mutations/useOrganisationMutations";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { IOrganisationDocument } from "@/types/organisation.types";
+import {
+  IOrganisationDocument,
+  IDomainVerificationStatus,
+  DomainVerificationStatus,
+} from "@/types/organisation.types";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -73,6 +83,10 @@ export default function OrganisationDetailPage() {
     });
   const { data: brandSettingsResponse } = useGetOrgBrandSettings(id);
   const { data: configuredDomainsResponse } = useGetOrgConfiguredDomains(id);
+  const { data: domainVerificationResponse } =
+    useGetOrgDomainVerificationStatuses(id);
+  const { mutate: overrideDomain, isPending: overriding } =
+    useOverrideDomainVerification(id);
   const organisation = organisationResponse?.data
     ? {
         ...organisationResponse.data,
@@ -91,6 +105,11 @@ export default function OrganisationDetailPage() {
   const [isMembersDialogOpen, setIsMembersDialogOpen] = useState(false);
   const [isDocsDialogOpen, setIsDocsDialogOpen] = useState(false);
   const [isBrandDialogOpen, setIsBrandDialogOpen] = useState(false);
+  const [overrideConfirm, setOverrideConfirm] = useState<string | null>(null);
+
+  const verificationMap = Object.fromEntries(
+    (domainVerificationResponse?.data ?? []).map((v) => [v.type, v]),
+  ) as Partial<Record<string, IDomainVerificationStatus>>;
 
   const formatVolume = (val?: number) => {
     if (val === undefined) return "₦--";
@@ -606,14 +625,39 @@ export default function OrganisationDetailPage() {
             <CardContent className="pt-2">
               {(() => {
                 const d = organisation.configured_domains;
-                const entries = [
-                  { label: "Personal App", value: d?.personal_app },
-                  { label: "Corporate App", value: d?.corporate_app },
-                  { label: "Marketing", value: d?.marketing },
-                  { label: "Email Domain", value: d?.email },
+                const rows: {
+                  label: string;
+                  value?: string;
+                  domainType: string;
+                  verifiable: boolean;
+                }[] = [
+                  {
+                    label: "Personal App",
+                    value: d?.personal_app,
+                    domainType: "PERSONAL_APP",
+                    verifiable: true,
+                  },
+                  {
+                    label: "Corporate App",
+                    value: d?.corporate_app,
+                    domainType: "CORPORATE_APP",
+                    verifiable: true,
+                  },
+                  {
+                    label: "Marketing",
+                    value: d?.marketing,
+                    domainType: "MARKETING",
+                    verifiable: false,
+                  },
+                  {
+                    label: "Email Domain",
+                    value: d?.email,
+                    domainType: "EMAIL",
+                    verifiable: true,
+                  },
                 ].filter((e) => !!e.value);
 
-                if (entries.length === 0) {
+                if (rows.length === 0) {
                   return (
                     <div className="flex flex-col items-center justify-center gap-3 py-8 text-center rounded-xl border border-dashed border-border/60 bg-muted/20">
                       <Link2 className="h-8 w-8 text-muted-foreground/40" />
@@ -631,41 +675,139 @@ export default function OrganisationDetailPage() {
                   );
                 }
 
+                const statusBadge = (status: DomainVerificationStatus) => {
+                  if (status === "VERIFIED")
+                    return (
+                      <Badge className="bg-green-100 text-green-700 border-green-200 text-[10px] gap-1">
+                        <CheckCircle2 className="w-2.5 h-2.5" />
+                        Verified
+                      </Badge>
+                    );
+                  if (status === "PENDING")
+                    return (
+                      <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-[10px] gap-1">
+                        <Clock className="w-2.5 h-2.5" />
+                        Pending
+                      </Badge>
+                    );
+                  if (status === "FAILED")
+                    return (
+                      <Badge className="bg-red-100 text-red-700 border-red-200 text-[10px] gap-1">
+                        <AlertCircle className="w-2.5 h-2.5" />
+                        Failed
+                      </Badge>
+                    );
+                  return (
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] text-muted-foreground gap-1"
+                    >
+                      <AlertCircle className="w-2.5 h-2.5" />
+                      Unverified
+                    </Badge>
+                  );
+                };
+
                 return (
                   <div className="divide-y divide-border/40">
-                    {entries.map(({ label, value }) => (
-                      <div
-                        key={label}
-                        className="flex items-center justify-between py-3 first:pt-2 last:pb-0"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                            <Link2 className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <div className="font-semibold text-sm">{label}</div>
-                            <div className="text-xs text-muted-foreground font-mono">
-                              {value}
+                    {rows.map(({ label, value, domainType, verifiable }) => {
+                      const rec = verificationMap[domainType];
+                      return (
+                        <div
+                          key={label}
+                          className="flex items-center justify-between py-3 first:pt-2 last:pb-0 gap-3"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                              <Link2 className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-semibold text-sm">
+                                {label}
+                              </div>
+                              <div className="text-xs text-muted-foreground font-mono truncate">
+                                {value}
+                              </div>
                             </div>
                           </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {verifiable &&
+                              rec &&
+                              statusBadge(rec.verification_status)}
+                            {verifiable &&
+                              rec &&
+                              rec.verification_status !== "VERIFIED" && (
+                                <button
+                                  type="button"
+                                  className="text-[11px] font-semibold text-orange-600 hover:text-orange-700 underline underline-offset-2"
+                                  onClick={() => setOverrideConfirm(domainType)}
+                                >
+                                  Override
+                                </button>
+                              )}
+                          </div>
                         </div>
-                        {value && value.startsWith("http") && (
-                          <a
-                            href={value}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-muted-foreground hover:text-primary transition-colors"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 );
               })()}
             </CardContent>
           </Card>
+
+          {/* Override confirmation dialog */}
+          <Dialog
+            open={!!overrideConfirm}
+            onOpenChange={(v) => !v && setOverrideConfirm(null)}
+          >
+            <DialogContent className="max-w-sm">
+              <DialogTitle className="flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-orange-500" />
+                Manually verify domain
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                This will mark the{" "}
+                <strong>
+                  {overrideConfirm?.replace("_", " ").toLowerCase()}
+                </strong>{" "}
+                domain as verified without a DNS check. Only do this after
+                out-of-band confirmation.
+              </p>
+              <div className="flex justify-end gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setOverrideConfirm(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={overriding}
+                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                  onClick={() => {
+                    if (!overrideConfirm) return;
+                    overrideDomain(overrideConfirm, {
+                      onSuccess: () => {
+                        toast.success("Domain marked as verified");
+                        setOverrideConfirm(null);
+                      },
+                      onError: () => toast.error("Override failed"),
+                    });
+                  }}
+                >
+                  {overriding ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                      Overriding…
+                    </>
+                  ) : (
+                    "Confirm Override"
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Documents Section - Grid of Cards */}
           <div className="space-y-4">

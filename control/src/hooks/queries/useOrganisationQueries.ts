@@ -4,6 +4,7 @@ import {
   IApiKey,
   IBrandConfig,
   IConfiguredDomains,
+  IDomainVerificationStatus,
 } from "@/types/organisation.types";
 import {
   getOrganisationUsers,
@@ -29,6 +30,7 @@ import {
   getOrganisationStatistics,
   getOrgBrandSettings,
   getOrgConfiguredDomains,
+  getOrgDomainVerificationStatuses,
 } from "@/hooks/endpoints/useOrganisation";
 import {
   IGetOrganisationStatsParams,
@@ -122,5 +124,14 @@ export const useGetOrgConfiguredDomains = (id: string) => {
     queryFn: () => getOrgConfiguredDomains(id),
     enabled: !!id,
     staleTime: 1000 * 60 * 10,
+  });
+};
+
+export const useGetOrgDomainVerificationStatuses = (id: string) => {
+  return useQuery<IApiResponse<IDomainVerificationStatus[]>, TError>({
+    queryKey: [QUERY_KEYS.ORGANISATION.DOMAIN_VERIFICATION, id],
+    queryFn: () => getOrgDomainVerificationStatuses(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 2,
   });
 };

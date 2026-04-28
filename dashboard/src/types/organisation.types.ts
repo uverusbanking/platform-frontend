@@ -26,6 +26,22 @@ export interface IConfiguredDomains {
   email?: string;
 }
 
+export type DomainVerificationStatus =
+  | "UNVERIFIED"
+  | "PENDING"
+  | "VERIFIED"
+  | "FAILED";
+
+export interface IDomainVerificationStatus {
+  type: "PERSONAL_APP" | "CORPORATE_APP" | "MARKETING" | "EMAIL";
+  url: string;
+  verification_status: DomainVerificationStatus;
+  verified_at: string | null;
+  last_checked_at: string | null;
+  txt_host: string | null;
+  txt_value: string | null;
+}
+
 export interface IUpdateBrandSettingsPayload {
   brandName?: string;
   shortBrandName?: string;

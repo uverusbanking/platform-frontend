@@ -11,6 +11,11 @@ import {
   Link2,
   UploadCloud,
   X,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  Copy,
+  Check,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -26,16 +31,30 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { IConfiguredDomains } from "@/types/organisation.types";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
+  IConfiguredDomains,
+  IDomainVerificationStatus,
+  DomainVerificationStatus,
+} from "@/types/organisation.types";
 
 import { useUserStore } from "@/state/userStore";
 import {
   useGetBrandSettings,
   useGetConfiguredDomains,
+  useGetDomainVerificationStatuses,
 } from "@/hooks/queries/useOrganisationQueries";
 import {
   useUpdateBrandSettings,
   useUpdateConfiguredDomains,
+  useInitiateDomainVerification,
+  useCheckDomainVerification,
 } from "@/hooks/mutations/useOrganisationMutations";
 import { uploadFile } from "@/hooks/endpoints/useFile";
 import { IUpdateBrandSettingsPayload } from "@/types/organisation.types";
@@ -309,6 +328,276 @@ function SectionDivider({ label }: { label: string }) {
   );
 }
 
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      className="ml-1.5 text-muted-foreground hover:text-foreground transition-colors shrink-0"
+      title="Copy"
+    >
+      {copied ? (
+        <Check className="w-3.5 h-3.5 text-green-500" />
+      ) : (
+        <Copy className="w-3.5 h-3.5" />
+      )}
+    </button>
+  );
+}
+
+function VerificationBadge({ status }: { status: DomainVerificationStatus }) {
+  if (status === "VERIFIED")
+    return (
+      <Badge className="bg-green-100 text-green-700 border-green-200 gap-1">
+        <CheckCircle2 className="w-3 h-3" /> Verified
+      </Badge>
+    );
+  if (status === "PENDING")
+    return (
+      <Badge className="bg-blue-100 text-blue-700 border-blue-200 gap-1">
+        <Clock className="w-3 h-3" /> Pending
+      </Badge>
+    );
+  if (status === "FAILED")
+    return (
+      <Badge className="bg-red-100 text-red-700 border-red-200 gap-1">
+        <AlertCircle className="w-3 h-3" /> Failed
+      </Badge>
+    );
+  return (
+    <Badge variant="secondary" className="text-muted-foreground gap-1">
+      <AlertCircle className="w-3 h-3" /> Not verified
+    </Badge>
+  );
+}
+
+const EMAIL_SPF_HINT = `v=spf1 include:mail.zeptomail.com ~all`;
+const EMAIL_DMARC_HINT = (domain: string) =>
+  `v=DMARC1; p=none; rua=mailto:dmarc@${domain}`;
+
+interface VerifyDomainSheetProps {
+  domainKey: "PERSONAL_APP" | "CORPORATE_APP" | "EMAIL";
+  domainLabel: string;
+  domainUrl: string;
+  verificationRecord: IDomainVerificationStatus | undefined;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}
+
+function VerifyDomainSheet({
+  domainKey,
+  domainLabel,
+  domainUrl,
+  verificationRecord,
+  open,
+  onOpenChange,
+}: VerifyDomainSheetProps) {
+  const {
+    mutate: initiate,
+    isPending: initiating,
+    data: initiateData,
+  } = useInitiateDomainVerification();
+  const {
+    mutate: check,
+    isPending: checking,
+    data: checkData,
+  } = useCheckDomainVerification();
+
+  const dnsInfo =
+    initiateData?.data ??
+    (verificationRecord?.txt_host
+      ? {
+          txt_host: verificationRecord.txt_host,
+          txt_value: verificationRecord.txt_value ?? "",
+          already_verified:
+            verificationRecord.verification_status === "VERIFIED",
+        }
+      : null);
+
+  const lastStatus =
+    checkData?.data?.status ?? verificationRecord?.verification_status;
+
+  useEffect(() => {
+    if (open && !dnsInfo) {
+      initiate(domainKey.toLowerCase());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+        <SheetHeader className="mb-6">
+          <SheetTitle className="flex items-center gap-2">
+            <Globe className="w-4 h-4 text-blue-500" />
+            Verify {domainLabel}
+          </SheetTitle>
+          <SheetDescription>
+            Add the DNS TXT record below to prove ownership of{" "}
+            <strong>{domainUrl}</strong>.
+          </SheetDescription>
+        </SheetHeader>
+
+        {initiating && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground py-8 justify-center">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Generating verification record…
+          </div>
+        )}
+
+        {dnsInfo && (
+          <div className="space-y-5">
+            {dnsInfo.already_verified ? (
+              <div className="flex items-center gap-2 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700">
+                <CheckCircle2 className="w-5 h-5 shrink-0" />
+                <p className="text-sm font-medium">
+                  Domain is already verified.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="rounded-xl border border-border/60 overflow-hidden text-sm">
+                  <div className="bg-muted/30 px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Add this TXT record to your DNS
+                  </div>
+                  <div className="divide-y divide-border/40">
+                    {[
+                      { label: "Type", value: "TXT" },
+                      { label: "Host / Name", value: dnsInfo.txt_host ?? "" },
+                      { label: "Value", value: dnsInfo.txt_value ?? "" },
+                      { label: "TTL", value: "300" },
+                    ].map(({ label, value }) => (
+                      <div
+                        key={label}
+                        className="flex items-start justify-between gap-3 px-4 py-3"
+                      >
+                        <span className="text-muted-foreground shrink-0 w-24">
+                          {label}
+                        </span>
+                        <span className="font-mono text-xs break-all text-right flex items-center gap-1">
+                          {value}
+                          <CopyButton text={value} />
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  DNS changes can take up to 48 hours to propagate. After adding
+                  the record, click <strong>Check Verification</strong> — you
+                  can retry as many times as needed.
+                </p>
+
+                {lastStatus === "VERIFIED" && (
+                  <div className="flex items-center gap-2 p-3 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    Domain verified successfully!
+                  </div>
+                )}
+                {lastStatus === "FAILED" && (
+                  <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    Record not found yet. Check the values and try again.
+                  </div>
+                )}
+
+                <Button
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold h-11 rounded-xl"
+                  disabled={checking || lastStatus === "VERIFIED"}
+                  onClick={() => check(domainKey.toLowerCase())}
+                >
+                  {checking ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Checking…
+                    </>
+                  ) : (
+                    "Check Verification"
+                  )}
+                </Button>
+              </>
+            )}
+
+            {/* Email-specific delivery records */}
+            {domainKey === "EMAIL" && (
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center gap-3">
+                  <div className="h-px bg-border/40 flex-1" />
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2">
+                    Email Delivery Records
+                  </span>
+                  <div className="h-px bg-border/40 flex-1" />
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Add these records to improve deliverability. SPF and DMARC are
+                  required; DKIM will be provided after ZeptoMail onboarding.
+                </p>
+                <div className="rounded-xl border border-border/60 overflow-hidden text-sm">
+                  <div className="bg-muted/30 px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                    SPF Record
+                  </div>
+                  <div className="divide-y divide-border/40">
+                    {[
+                      { label: "Type", value: "TXT" },
+                      { label: "Host / Name", value: domainUrl },
+                      { label: "Value", value: EMAIL_SPF_HINT },
+                    ].map(({ label, value }) => (
+                      <div
+                        key={label}
+                        className="flex items-start justify-between gap-3 px-4 py-3"
+                      >
+                        <span className="text-muted-foreground shrink-0 w-24">
+                          {label}
+                        </span>
+                        <span className="font-mono text-xs break-all text-right flex items-center gap-1">
+                          {value}
+                          <CopyButton text={value} />
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-border/60 overflow-hidden text-sm">
+                  <div className="bg-muted/30 px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                    DMARC Record
+                  </div>
+                  <div className="divide-y divide-border/40">
+                    {[
+                      { label: "Type", value: "TXT" },
+                      { label: "Host / Name", value: `_dmarc.${domainUrl}` },
+                      { label: "Value", value: EMAIL_DMARC_HINT(domainUrl) },
+                    ].map(({ label, value }) => (
+                      <div
+                        key={label}
+                        className="flex items-start justify-between gap-3 px-4 py-3"
+                      >
+                        <span className="text-muted-foreground shrink-0 w-24">
+                          {label}
+                        </span>
+                        <span className="font-mono text-xs break-all text-right flex items-center gap-1">
+                          {value}
+                          <CopyButton text={value} />
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}
+
 function extractApiErrors(err: unknown): { message: string; errors: string[] } {
   const data = (
     err as { response?: { data?: { message?: string; errors?: unknown[] } } }
@@ -329,6 +618,10 @@ export default function BrandSettingsPage() {
   const { userData } = useUserStore();
   const isOwner = userData?.role?.toUpperCase() === "BRAND_OWNER";
 
+  const [verifyingDomain, setVerifyingDomain] = useState<
+    "PERSONAL_APP" | "CORPORATE_APP" | "EMAIL" | null
+  >(null);
+
   const {
     data: brandData,
     isLoading: brandLoading,
@@ -339,10 +632,15 @@ export default function BrandSettingsPage() {
     isLoading: domainsLoading,
     isError: domainsError,
   } = useGetConfiguredDomains();
+  const { data: verificationData } = useGetDomainVerificationStatuses();
   const { mutate: saveBrand, isPending: savingBrand } =
     useUpdateBrandSettings();
   const { mutate: saveDomains, isPending: savingDomains } =
     useUpdateConfiguredDomains();
+
+  const verificationMap = Object.fromEntries(
+    (verificationData?.data ?? []).map((v) => [v.type, v]),
+  ) as Partial<Record<string, IDomainVerificationStatus>>;
 
   const brandForm = useForm<BrandFormValues>();
   const domainsForm = useForm<DomainsFormValues>({
@@ -685,8 +983,9 @@ export default function BrandSettingsPage() {
                 Configured Domains
               </CardTitle>
               <CardDescription>
-                Register the four typed domains for your organisation (personal
-                app, corporate app, marketing, and email).
+                Register domains for your organisation. Personal App and
+                Corporate App domains must be verified before customers can log
+                in.
               </CardDescription>
             </div>
           </div>
@@ -705,50 +1004,87 @@ export default function BrandSettingsPage() {
               </div>
             )}
 
-            <p className="text-[11px] text-muted-foreground">
-              Configure the domain for each role. Personal App and Corporate App
-              are used for origin verification.
-            </p>
-
-            {(
-              [
-                {
-                  key: "personal_app",
-                  label: "Personal App Domain",
-                  placeholder: "app.example.com",
-                },
-                {
-                  key: "corporate_app",
-                  label: "Corporate App Domain",
-                  placeholder: "business.example.com",
-                },
-                {
-                  key: "marketing",
-                  label: "Marketing / Root Domain",
-                  placeholder: "example.com",
-                },
-                {
-                  key: "email",
-                  label: "Email Send-From Domain",
-                  placeholder: "mail.example.com",
-                },
-              ] as const
-            ).map(({ key, label, placeholder }) => (
-              <div key={key} className="space-y-1.5">
-                <Label className={labelCls}>
-                  <span className="inline-flex items-center gap-1.5">
-                    <Globe className="w-3 h-3" />
-                    {label}
-                  </span>
-                </Label>
-                <Input
-                  disabled={!isOwner}
-                  placeholder={placeholder}
-                  className={inputCls}
-                  {...domainsForm.register(key)}
-                />
-              </div>
-            ))}
+            {[
+              {
+                key: "personal_app" as const,
+                domainType: "PERSONAL_APP" as const,
+                label: "Personal App Domain",
+                placeholder: "app.example.com",
+                verifiable: true,
+              },
+              {
+                key: "corporate_app" as const,
+                domainType: "CORPORATE_APP" as const,
+                label: "Corporate App Domain",
+                placeholder: "business.example.com",
+                verifiable: true,
+              },
+              {
+                key: "marketing" as const,
+                domainType: null,
+                label: "Marketing / Root Domain",
+                placeholder: "example.com",
+                verifiable: false,
+              },
+              {
+                key: "email" as const,
+                domainType: "EMAIL" as const,
+                label: "Email Send-From Domain",
+                placeholder: "mail.example.com",
+                verifiable: true,
+              },
+            ].map(({ key, domainType, label, placeholder, verifiable }) => {
+              const rec = domainType ? verificationMap[domainType] : undefined;
+              const currentUrl = domainsForm.watch(key);
+              const canVerify = verifiable && !!currentUrl;
+              return (
+                <div key={key} className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label className={labelCls}>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Globe className="w-3 h-3" />
+                        {label}
+                      </span>
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      {rec && (
+                        <VerificationBadge status={rec.verification_status} />
+                      )}
+                      {canVerify &&
+                        isOwner &&
+                        domainType !== "MARKETING" &&
+                        domainType && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setVerifyingDomain(
+                                domainType as
+                                  | "PERSONAL_APP"
+                                  | "CORPORATE_APP"
+                                  | "EMAIL",
+                              )
+                            }
+                            className="text-[11px] font-semibold text-blue-600 hover:text-blue-700 underline underline-offset-2"
+                          >
+                            {rec?.verification_status === "VERIFIED"
+                              ? "View record"
+                              : rec?.verification_status === "PENDING" ||
+                                  rec?.verification_status === "FAILED"
+                                ? "Retry"
+                                : "Verify"}
+                          </button>
+                        )}
+                    </div>
+                  </div>
+                  <Input
+                    disabled={!isOwner}
+                    placeholder={placeholder}
+                    className={inputCls}
+                    {...domainsForm.register(key)}
+                  />
+                </div>
+              );
+            })}
 
             {isOwner && (
               <div className="flex justify-end pt-4 border-t border-border/40">
@@ -771,6 +1107,30 @@ export default function BrandSettingsPage() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Verification sheet */}
+      {verifyingDomain && (
+        <VerifyDomainSheet
+          domainKey={verifyingDomain}
+          domainLabel={
+            verifyingDomain === "PERSONAL_APP"
+              ? "Personal App Domain"
+              : verifyingDomain === "CORPORATE_APP"
+                ? "Corporate App Domain"
+                : "Email Send-From Domain"
+          }
+          domainUrl={
+            (verifyingDomain === "PERSONAL_APP"
+              ? domainsForm.getValues("personal_app")
+              : verifyingDomain === "CORPORATE_APP"
+                ? domainsForm.getValues("corporate_app")
+                : domainsForm.getValues("email")) ?? ""
+          }
+          verificationRecord={verificationMap[verifyingDomain]}
+          open={!!verifyingDomain}
+          onOpenChange={(v) => !v && setVerifyingDomain(null)}
+        />
+      )}
     </div>
   );
 }

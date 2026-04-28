@@ -12,6 +12,7 @@ import {
   deleteApiKey,
   updateOrganisationDocumentStatus,
   IUpdateDocumentStatusPayload,
+  overrideDomainVerification,
 } from "@/hooks/endpoints/useOrganisation";
 import { IAddOrganisationUserPayload } from "@/types/organisation.types";
 import { QUERY_KEYS } from "@/lib/queryKeys";
@@ -139,6 +140,22 @@ export const useUpdateOrganisationDocumentStatus = () => {
       });
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.ORGANISATION.STATS],
+      });
+    },
+  });
+};
+
+export const useOverrideDomainVerification = (orgId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation<
+    IApiResponse<{ status: string; verified_at: string | null }>,
+    TError,
+    string
+  >({
+    mutationFn: (type: string) => overrideDomainVerification({ orgId, type }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.DOMAIN_VERIFICATION, orgId],
       });
     },
   });
