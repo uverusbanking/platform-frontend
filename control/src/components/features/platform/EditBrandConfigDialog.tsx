@@ -352,19 +352,28 @@ export function EditBrandConfigDialog({
       toast.success("Brand configuration saved");
       onOpenChange(false);
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        const data = err.response?.data as
-          | { message?: string; errors?: string[] }
-          | undefined;
-        const errors = data?.errors;
-        if (errors?.length) {
-          errors.forEach((e) => toast.error(e));
-        } else {
-          toast.error(data?.message ?? "Failed to save brand configuration");
-        }
-      } else {
-        toast.error("Failed to save brand configuration");
-      }
+      const data = axios.isAxiosError(err)
+        ? (err.response?.data as
+            | { message?: string; errors?: string[] }
+            | undefined)
+        : undefined;
+      const errors = data?.errors ?? [];
+      const items =
+        errors.length > 0
+          ? errors
+          : [data?.message ?? "Failed to save brand configuration"];
+      toast.error("Failed to save brand configuration", {
+        description: (
+          <ul className="mt-1 space-y-0.5">
+            {items.map((e, i) => (
+              <li key={i} className="text-xs">
+                · {e}
+              </li>
+            ))}
+          </ul>
+        ),
+        duration: 6000,
+      });
     }
   };
 

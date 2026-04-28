@@ -309,6 +309,16 @@ function SectionDivider({ label }: { label: string }) {
   );
 }
 
+function extractApiErrors(err: unknown): { message: string; errors: string[] } {
+  const data = (
+    err as { response?: { data?: { message?: string; errors?: unknown[] } } }
+  )?.response?.data;
+  return {
+    message: data?.message ?? "Something went wrong",
+    errors: Array.isArray(data?.errors) ? (data.errors as string[]) : [],
+  };
+}
+
 interface BrandFormValues extends IUpdateBrandSettingsPayload {
   seo: { title: string; description: string; author: string };
 }
@@ -381,14 +391,44 @@ export default function BrandSettingsPage() {
   const onSaveBrand = (values: BrandFormValues) => {
     saveBrand(values, {
       onSuccess: () => toast.success("Brand settings saved"),
-      onError: () => toast.error("Failed to save brand settings"),
+      onError: (err) => {
+        const { message, errors } = extractApiErrors(err);
+        const items = errors.length > 0 ? errors : [message];
+        toast.error("Failed to save brand settings", {
+          description: (
+            <ul className="mt-1 space-y-0.5">
+              {items.map((e, i) => (
+                <li key={i} className="text-xs">
+                  · {e}
+                </li>
+              ))}
+            </ul>
+          ),
+          duration: 6000,
+        });
+      },
     });
   };
 
   const onSaveDomains = (values: DomainsFormValues) => {
     saveDomains(values, {
       onSuccess: () => toast.success("Domains saved"),
-      onError: () => toast.error("Failed to save domains"),
+      onError: (err) => {
+        const { message, errors } = extractApiErrors(err);
+        const items = errors.length > 0 ? errors : [message];
+        toast.error("Failed to save domains", {
+          description: (
+            <ul className="mt-1 space-y-0.5">
+              {items.map((e, i) => (
+                <li key={i} className="text-xs">
+                  · {e}
+                </li>
+              ))}
+            </ul>
+          ),
+          duration: 6000,
+        });
+      },
     });
   };
 
