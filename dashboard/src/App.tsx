@@ -57,6 +57,7 @@ import DocumentsPage from "@/app/account/settings/documents/page";
 import SecurityPage from "@/app/account/settings/security/page";
 import ApiKeysPage from "@/app/account/settings/api-keys/page";
 import BrandPage from "@/app/account/settings/brand/page";
+import IntegrationsPage from "@/app/account/settings/integrations/page";
 
 // 404
 import NotFound from "@/app/not-found";
@@ -185,6 +186,7 @@ const App = () => (
                   <Route path="security" element={<SecurityPage />} />
                   <Route path="api-keys" element={<ApiKeysPage />} />
                   <Route path="brand" element={<BrandPage />} />
+                  <Route path="integrations" element={<IntegrationsPage />} />
                 </Route>
               </Route>
 

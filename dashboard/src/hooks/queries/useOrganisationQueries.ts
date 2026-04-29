@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { IApiResponse, TError } from "@/types/apiResponseType";
 import {
   IOrganisationStats,
@@ -17,6 +17,12 @@ import {
   getDomainVerificationStatuses,
   getGoLiveChecklist,
   IGoLiveChecklist,
+  getPaymentConfigs,
+  upsertPaymentConfig,
+  removePaymentConfig,
+  IPaymentConfig,
+  IUpsertPaymentConfigPayload,
+  PaymentProviderType,
 } from "@/hooks/endpoints/useOrganisation";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 
@@ -76,5 +82,45 @@ export const useGetGoLiveChecklist = () => {
     queryKey: [QUERY_KEYS.GO_LIVE_CHECKLIST],
     queryFn: getGoLiveChecklist,
     staleTime: 1000 * 60 * 2,
+  });
+};
+
+export const useGetPaymentConfigs = () => {
+  return useQuery<IApiResponse<IPaymentConfig[]>, TError>({
+    queryKey: [QUERY_KEYS.PAYMENT_CONFIG],
+    queryFn: getPaymentConfigs,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useUpsertPaymentConfig = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: IUpsertPaymentConfigPayload) =>
+      upsertPaymentConfig(payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.PAYMENT_CONFIG],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GO_LIVE_CHECKLIST],
+      });
+    },
+  });
+};
+
+export const useRemovePaymentConfig = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (providerType: PaymentProviderType) =>
+      removePaymentConfig(providerType),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.PAYMENT_CONFIG],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GO_LIVE_CHECKLIST],
+      });
+    },
   });
 };

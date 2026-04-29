@@ -1,7 +1,15 @@
 "use client";
 
 import { Link, useLocation, Outlet } from "react-router-dom";
-import { User, Building, Lock, FileText, Key, Palette } from "lucide-react";
+import {
+  User,
+  Building,
+  Lock,
+  FileText,
+  Key,
+  Palette,
+  Plug,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const settingsNav = [
@@ -40,6 +48,12 @@ const settingsNav = [
     label: "Brand Settings",
     href: "/account/settings/brand",
     icon: Palette,
+  },
+  {
+    id: "integrations",
+    label: "Integrations",
+    href: "/account/settings/integrations",
+    icon: Plug,
   },
 ];
 

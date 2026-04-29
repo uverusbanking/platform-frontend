@@ -21,4 +21,5 @@ export const QUERY_KEYS = {
   CONFIGURED_DOMAINS: "configured-domains",
   DOMAIN_VERIFICATION: "domain-verification",
   GO_LIVE_CHECKLIST: "go-live-checklist",
+  PAYMENT_CONFIG: "payment-config",
 };
