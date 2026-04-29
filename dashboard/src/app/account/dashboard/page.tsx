@@ -63,17 +63,17 @@ export default function Dashboard() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <KPICard
             title="Total Members"
-            value={stats?.members.total.toString() || "NIL"}
-            change={`${stats?.members.active || "NIL"}`}
+            value={stats?.members?.total?.toString() || "NIL"}
+            change={`${stats?.members?.active || "NIL"}`}
             changeType="positive"
             description="staff members"
             icon={Users}
           />
           <KPICard
             title="Documents"
-            value={stats?.documents.total.toString() || "NIL"}
-            change={`${stats?.documents.pending || "NIL"}`}
-            changeType={stats?.documents.pending ? "negative" : "positive"}
+            value={stats?.documents?.total?.toString() || "NIL"}
+            change={`${stats?.documents?.pending || "NIL"}`}
+            changeType={stats?.documents?.pending ? "negative" : "positive"}
             description="total uploaded"
             icon={FileText}
           />

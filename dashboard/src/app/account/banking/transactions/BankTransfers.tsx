@@ -65,7 +65,9 @@ function BankTransfers({ customer }: Props) {
   );
   const { mutateAsync: verifyAccount, isPending: isVerifyingAccount } =
     useVerifyAccount();
-  const banks = bankResponse?.data.length ? bankResponse.data : defaultBankList;
+  const banks = bankResponse?.data?.length
+    ? bankResponse.data
+    : defaultBankList;
   const { mutateAsync: initiateTransfer, isPending: isInitiatingTransfer } =
     useInitiateTransfer();
   const [apiResponse, setApiResponse] = useState(defaultApiResponse);

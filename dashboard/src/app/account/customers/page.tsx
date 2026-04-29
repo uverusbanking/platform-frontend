@@ -236,7 +236,7 @@ export default function Customers() {
                 {isLoading ? (
                   <Skeleton className="h-10 w-24" />
                 ) : (
-                  meta?.pagination.total
+                  meta?.pagination?.total
                 )}
               </div>
               <p className="text-xs text-muted-foreground font-medium">
@@ -515,7 +515,7 @@ export default function Customers() {
           <div className="px-6 py-5 bg-muted/20 border-t border-border/30">
             <Pagination
               currentPage={page}
-              totalPages={meta?.pagination.total_pages || 0}
+              totalPages={meta?.pagination?.total_pages || 0}
               onPageChange={setPage}
               isLoading={isLoading}
             />

@@ -58,7 +58,7 @@ export default function SearchableUserVirtualSelect({
       }
     }
     // Update hasMore based on pagination
-    if (customerResponse?.meta.pagination) {
+    if (customerResponse?.meta?.pagination) {
       setHasMore(
         customerResponse.meta.pagination.page <
           customerResponse.meta.pagination.total_pages,
