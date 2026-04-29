@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useGetOrganisationStats } from "@/hooks/queries/useOrganisationQueries";
 import { KPICardSkeleton } from "@/components/dashboard/KPICardSkeleton";
+import { GoLiveNotice } from "@/components/dashboard/GoLiveNotice";
 
 // Sample data for demonstration
 // const transactionData = [
@@ -43,6 +44,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
+      <GoLiveNotice />
       {/* Page Header */}
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">

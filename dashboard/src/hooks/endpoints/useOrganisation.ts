@@ -118,3 +118,22 @@ export const checkDomainVerification = async (
   );
   return response.data;
 };
+
+export interface IGoLiveChecklistItem {
+  key: string;
+  label: string;
+  status: "complete" | "pending";
+  detail?: string;
+}
+
+export interface IGoLiveChecklist {
+  overall_ready: boolean;
+  items: IGoLiveChecklistItem[];
+}
+
+export const getGoLiveChecklist = async (): Promise<
+  IApiResponse<IGoLiveChecklist>
+> => {
+  const response = await apiClient.get("/organisations/go-live-checklist");
+  return response.data;
+};

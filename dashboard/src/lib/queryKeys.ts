@@ -20,4 +20,5 @@ export const QUERY_KEYS = {
   BRAND_SETTINGS: "brand-settings",
   CONFIGURED_DOMAINS: "configured-domains",
   DOMAIN_VERIFICATION: "domain-verification",
+  GO_LIVE_CHECKLIST: "go-live-checklist",
 };

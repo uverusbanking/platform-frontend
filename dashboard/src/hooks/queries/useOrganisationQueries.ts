@@ -15,6 +15,8 @@ import {
   getBrandSettings,
   getConfiguredDomains,
   getDomainVerificationStatuses,
+  getGoLiveChecklist,
+  IGoLiveChecklist,
 } from "@/hooks/endpoints/useOrganisation";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 
@@ -65,6 +67,14 @@ export const useGetDomainVerificationStatuses = () => {
   return useQuery<IApiResponse<IDomainVerificationStatus[]>, TError>({
     queryKey: [QUERY_KEYS.DOMAIN_VERIFICATION],
     queryFn: getDomainVerificationStatuses,
+    staleTime: 1000 * 60 * 2,
+  });
+};
+
+export const useGetGoLiveChecklist = () => {
+  return useQuery<IApiResponse<IGoLiveChecklist>, TError>({
+    queryKey: [QUERY_KEYS.GO_LIVE_CHECKLIST],
+    queryFn: getGoLiveChecklist,
     staleTime: 1000 * 60 * 2,
   });
 };
