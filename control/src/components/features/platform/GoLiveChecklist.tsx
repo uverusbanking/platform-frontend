@@ -76,7 +76,7 @@ export function GoLiveChecklist({
     );
   }
 
-  if (!checklist) return null;
+  if (!checklist?.items) return null;
 
   return (
     <Card className={`border-border/50 ${isAlreadyActive ? "opacity-60" : ""}`}>
