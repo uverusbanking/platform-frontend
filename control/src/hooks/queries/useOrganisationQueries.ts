@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { TError, IApiResponse } from "@/types/apiResponse.type";
 import {
   IApiKey,
@@ -31,6 +31,9 @@ import {
   getOrgBrandSettings,
   getOrgConfiguredDomains,
   getOrgDomainVerificationStatuses,
+  getOrgGoLiveChecklist,
+  updateOrganisationStatus,
+  IGoLiveChecklist,
 } from "@/hooks/endpoints/useOrganisation";
 import {
   IGetOrganisationStatsParams,
@@ -133,5 +136,29 @@ export const useGetOrgDomainVerificationStatuses = (id: string) => {
     queryFn: () => getOrgDomainVerificationStatuses(id),
     enabled: !!id,
     staleTime: 1000 * 60 * 2,
+  });
+};
+
+export const useGetOrgGoLiveChecklist = (id: string) => {
+  return useQuery<IApiResponse<IGoLiveChecklist>, TError>({
+    queryKey: [QUERY_KEYS.ORGANISATION.GO_LIVE_CHECKLIST, id],
+    queryFn: () => getOrgGoLiveChecklist(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 2,
+  });
+};
+
+export const useUpdateOrganisationStatus = (id: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (status: string) => updateOrganisationStatus({ id, status }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.GET_BY_ID, id],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.GO_LIVE_CHECKLIST, id],
+      });
+    },
   });
 };

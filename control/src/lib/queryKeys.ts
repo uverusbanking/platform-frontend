@@ -10,6 +10,7 @@ export const QUERY_KEYS = {
     BRAND_SETTINGS: "org-brand-settings",
     CONFIGURED_DOMAINS: "org-configured-domains",
     DOMAIN_VERIFICATION: "org-domain-verification",
+    GO_LIVE_CHECKLIST: "org-go-live-checklist",
   },
   PLATFORM: {
     ORGANISATIONS: "platform-organisations",

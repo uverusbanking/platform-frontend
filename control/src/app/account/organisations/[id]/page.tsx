@@ -38,6 +38,7 @@ import {
   useGetOrgConfiguredDomains,
   useGetOrgDomainVerificationStatuses,
 } from "@/hooks/queries/useOrganisationQueries";
+import { GoLiveChecklist } from "@/components/features/platform/GoLiveChecklist";
 import {
   useUpdateOrganisationDocumentStatus,
   useOverrideDomainVerification,
@@ -945,6 +946,10 @@ export default function OrganisationDetailPage() {
 
         {/* Right Column: Contact & Metadata */}
         <div className="lg:col-span-4 space-y-6">
+          <GoLiveChecklist
+            organisationId={id}
+            currentStatus={organisation.status}
+          />
           <Card className="border-none shadow-lg bg-card/80 backdrop-blur-xl sticky top-6">
             <CardHeader className="pb-2 border-b border-border/50">
               <CardTitle className="text-sm font-bold uppercase tracking-widest text-primary flex items-center gap-2">

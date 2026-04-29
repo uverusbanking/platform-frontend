@@ -376,3 +376,40 @@ export const overrideDomainVerification = async ({
   );
   return response.data;
 };
+
+export interface IGoLiveChecklistItem {
+  key: string;
+  label: string;
+  status: "complete" | "pending";
+  detail?: string;
+}
+
+export interface IGoLiveChecklist {
+  overall_ready: boolean;
+  items: IGoLiveChecklistItem[];
+}
+
+export const getOrgGoLiveChecklist = async (
+  id: string,
+): Promise<IApiResponse<IGoLiveChecklist>> => {
+  const response = await apiClient.get(
+    `/organisations/platform/${id}/go-live-checklist`,
+  );
+  return response.data;
+};
+
+export const updateOrganisationStatus = async ({
+  id,
+  status,
+}: {
+  id: string;
+  status: string;
+}): Promise<IApiResponse<unknown>> => {
+  const response = await apiClient.patch(
+    `/organisations/platform/${id}/status`,
+    {
+      status,
+    },
+  );
+  return response.data;
+};
