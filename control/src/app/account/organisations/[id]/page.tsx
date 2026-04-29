@@ -39,6 +39,7 @@ import {
   useGetOrgDomainVerificationStatuses,
 } from "@/hooks/queries/useOrganisationQueries";
 import { GoLiveChecklist } from "@/components/features/platform/GoLiveChecklist";
+import { PaymentConfigSection } from "@/components/features/platform/PaymentConfigSection";
 import {
   useUpdateOrganisationDocumentStatus,
   useOverrideDomainVerification,
@@ -843,6 +844,9 @@ export default function OrganisationDetailPage() {
               </div>
             </DialogContent>
           </Dialog>
+
+          {/* Payment Providers */}
+          <PaymentConfigSection organisationId={id} />
 
           {/* Documents Section - Grid of Cards */}
           <div className="space-y-4">

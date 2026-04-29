@@ -413,3 +413,66 @@ export const updateOrganisationStatus = async ({
   );
   return response.data;
 };
+
+export type PaymentProviderType =
+  | "BUDPAY"
+  | "FLUTTERWAVE"
+  | "PROVIDUS"
+  | "MONNIFY"
+  | "STRIPE";
+
+export interface IPaymentConfig {
+  id: string;
+  organisation_id: string;
+  provider_type: PaymentProviderType;
+  environment: "LIVE" | "SANDBOX";
+  public_key: string | null;
+  has_secret_key: boolean;
+  merchant_id: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IUpsertPaymentConfigPayload {
+  providerType: PaymentProviderType;
+  secretKey: string;
+  publicKey?: string;
+  merchantId?: string;
+}
+
+export const getOrgPaymentConfigs = async (
+  id: string,
+): Promise<IApiResponse<IPaymentConfig[]>> => {
+  const response = await apiClient.get(
+    `/organisations/platform/${id}/payment-config`,
+  );
+  return response.data;
+};
+
+export const upsertOrgPaymentConfig = async ({
+  id,
+  payload,
+}: {
+  id: string;
+  payload: IUpsertPaymentConfigPayload;
+}): Promise<IApiResponse<unknown>> => {
+  const response = await apiClient.patch(
+    `/organisations/platform/${id}/payment-config`,
+    payload,
+  );
+  return response.data;
+};
+
+export const removeOrgPaymentConfig = async ({
+  id,
+  providerType,
+}: {
+  id: string;
+  providerType: PaymentProviderType;
+}): Promise<IApiResponse<unknown>> => {
+  const response = await apiClient.delete(
+    `/organisations/platform/${id}/payment-config/${providerType}`,
+  );
+  return response.data;
+};

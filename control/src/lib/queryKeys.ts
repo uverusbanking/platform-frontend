@@ -11,6 +11,7 @@ export const QUERY_KEYS = {
     CONFIGURED_DOMAINS: "org-configured-domains",
     DOMAIN_VERIFICATION: "org-domain-verification",
     GO_LIVE_CHECKLIST: "org-go-live-checklist",
+    PAYMENT_CONFIG: "org-payment-config",
   },
   PLATFORM: {
     ORGANISATIONS: "platform-organisations",

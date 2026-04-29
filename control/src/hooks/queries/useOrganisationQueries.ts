@@ -34,6 +34,12 @@ import {
   getOrgGoLiveChecklist,
   updateOrganisationStatus,
   IGoLiveChecklist,
+  getOrgPaymentConfigs,
+  upsertOrgPaymentConfig,
+  removeOrgPaymentConfig,
+  IPaymentConfig,
+  IUpsertPaymentConfigPayload,
+  PaymentProviderType,
 } from "@/hooks/endpoints/useOrganisation";
 import {
   IGetOrganisationStatsParams,
@@ -145,6 +151,47 @@ export const useGetOrgGoLiveChecklist = (id: string) => {
     queryFn: () => getOrgGoLiveChecklist(id),
     enabled: !!id,
     staleTime: 1000 * 60 * 2,
+  });
+};
+
+export const useGetOrgPaymentConfigs = (id: string) => {
+  return useQuery<IApiResponse<IPaymentConfig[]>, TError>({
+    queryKey: [QUERY_KEYS.ORGANISATION.PAYMENT_CONFIG, id],
+    queryFn: () => getOrgPaymentConfigs(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useUpsertOrgPaymentConfig = (id: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: IUpsertPaymentConfigPayload) =>
+      upsertOrgPaymentConfig({ id, payload }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.PAYMENT_CONFIG, id],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.GO_LIVE_CHECKLIST, id],
+      });
+    },
+  });
+};
+
+export const useRemoveOrgPaymentConfig = (id: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (providerType: PaymentProviderType) =>
+      removeOrgPaymentConfig({ id, providerType }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.PAYMENT_CONFIG, id],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.GO_LIVE_CHECKLIST, id],
+      });
+    },
   });
 };
 
