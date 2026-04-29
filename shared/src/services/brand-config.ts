@@ -1,4 +1,5 @@
 export interface BrandConfig {
+  status?: string;
   brandName: string;
   shortBrandName: string;
   brandLogoUrl?: string | null;

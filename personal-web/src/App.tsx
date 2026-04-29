@@ -8,6 +8,7 @@ import { AdminProvider } from "@/contexts/AdminContext";
 import { HelmetProvider } from "react-helmet-async";
 import { SessionGuard } from "@/components/SessionGuard";
 import { useBrandConfig } from "@/hooks/queries/useBrandConfig";
+import { OrgPendingScreen } from "@/components/OrgPendingScreen";
 
 // Pages
 import Index from "./pages/Index";
@@ -44,9 +45,91 @@ import { AdminLayout } from "./components/admin/AdminLayout";
 import { UserAccountLayout } from "./components/UserAccountLayout";
 import { AuthLayout } from "./components/AuthLayout";
 
-function BrandConfigLoader() {
-  useBrandConfig();
-  return null;
+function AppContent() {
+  const { data: brandConfig } = useBrandConfig();
+
+  if (brandConfig?.status && brandConfig.status !== "ACTIVE") {
+    return <OrgPendingScreen brandConfig={brandConfig} />;
+  }
+
+  return (
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
+        <AuthProvider>
+          <AdminProvider>
+            <SessionGuard>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+
+                {/* Auth Routes */}
+                <Route path="/auth" element={<AuthLayout />}>
+                  <Route path="" element={<Navigate to="login" replace />} />
+                  <Route path="login" element={<Navigate to="/" replace />} />
+                  <Route path="register" element={<Register />} />
+                  <Route path="forgot-password" element={<ForgotPassword />} />
+                  <Route path="reset-password" element={<ResetPassword />} />
+                  <Route path="verify-otp" element={<VerifyOTP />} />
+                </Route>
+
+                {/* User Account/Dashboard Routes */}
+                <Route path="/account" element={<UserAccountLayout />}>
+                  <Route
+                    path=""
+                    element={<Navigate to="dashboard" replace />}
+                  />
+                  <Route path="dashboard" element={<Dashboard />} />
+                  <Route path="send" element={<Send />} />
+                  <Route path="receive" element={<Receive />} />
+                  <Route path="transactions" element={<Transactions />} />
+                  <Route
+                    path="transactions/:id"
+                    element={<TransactionDetail />}
+                  />
+                  <Route path="profile" element={<Profile />} />
+                  <Route path="settings" element={<Settings />} />
+                  <Route path="notifications" element={<Notifications />} />
+                  <Route
+                    path="kyc-verification"
+                    element={<KYCVerification />}
+                  />
+                </Route>
+
+                {/* Admin Dashboard Routes */}
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/admin-login" element={<AdminLogin />} />
+                <Route path="/admin-dashboard" element={<AdminLayout />}>
+                  <Route
+                    path=""
+                    element={<Navigate to="dashboard" replace />}
+                  />
+                  <Route path="dashboard" element={<AdminDashboard />} />
+
+                  <Route path="users" element={<AdminUsers />} />
+                  <Route path="kyc" element={<AdminKYC />} />
+                  <Route path="tiers" element={<AdminTiers />} />
+                  <Route path="wallets" element={<AdminWallets />} />
+                  <Route path="transactions" element={<AdminTransactions />} />
+                  <Route path="audit-logs" element={<AdminAuditLogs />} />
+                </Route>
+
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </SessionGuard>
+          </AdminProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </TooltipProvider>
+  );
 }
 
 const queryClient = new QueryClient({
@@ -67,89 +150,7 @@ const queryClient = new QueryClient({
 const App = () => (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
-      <BrandConfigLoader />
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
-          }}
-        >
-          <AuthProvider>
-            <AdminProvider>
-              <SessionGuard>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/terms" element={<TermsOfService />} />
-                  <Route path="/privacy" element={<PrivacyPolicy />} />
-
-                  {/* Auth Routes */}
-                  <Route path="/auth" element={<AuthLayout />}>
-                    <Route path="" element={<Navigate to="login" replace />} />
-                    <Route path="login" element={<Navigate to="/" replace />} />
-                    <Route path="register" element={<Register />} />
-                    <Route
-                      path="forgot-password"
-                      element={<ForgotPassword />}
-                    />
-                    <Route path="reset-password" element={<ResetPassword />} />
-                    <Route path="verify-otp" element={<VerifyOTP />} />
-                  </Route>
-
-                  {/* User Account/Dashboard Routes */}
-                  <Route path="/account" element={<UserAccountLayout />}>
-                    <Route
-                      path=""
-                      element={<Navigate to="dashboard" replace />}
-                    />
-                    <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="send" element={<Send />} />
-                    <Route path="receive" element={<Receive />} />
-                    <Route path="transactions" element={<Transactions />} />
-                    <Route
-                      path="transactions/:id"
-                      element={<TransactionDetail />}
-                    />
-                    <Route path="profile" element={<Profile />} />
-                    <Route path="settings" element={<Settings />} />
-                    <Route path="notifications" element={<Notifications />} />
-                    <Route
-                      path="kyc-verification"
-                      element={<KYCVerification />}
-                    />
-                  </Route>
-
-                  {/* Admin Dashboard Routes */}
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="/admin-login" element={<AdminLogin />} />
-                  <Route path="/admin-dashboard" element={<AdminLayout />}>
-                    <Route
-                      path=""
-                      element={<Navigate to="dashboard" replace />}
-                    />
-                    <Route path="dashboard" element={<AdminDashboard />} />
-
-                    <Route path="users" element={<AdminUsers />} />
-                    <Route path="kyc" element={<AdminKYC />} />
-                    <Route path="tiers" element={<AdminTiers />} />
-                    <Route path="wallets" element={<AdminWallets />} />
-                    <Route
-                      path="transactions"
-                      element={<AdminTransactions />}
-                    />
-                    <Route path="audit-logs" element={<AdminAuditLogs />} />
-                  </Route>
-
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </SessionGuard>
-            </AdminProvider>
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
+      <AppContent />
     </QueryClientProvider>
   </HelmetProvider>
 );
