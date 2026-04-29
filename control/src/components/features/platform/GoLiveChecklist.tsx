@@ -52,7 +52,7 @@ export function GoLiveChecklist({
   const isAlreadyActive = currentStatus === "ACTIVE";
   const pendingItems =
     checklist?.items?.filter((i) => i.status === "pending") ?? [];
-  const completedCount = (checklist?.items.length ?? 0) - pendingItems.length;
+  const completedCount = (checklist?.items?.length ?? 0) - pendingItems.length;
 
   const handleActivate = () => {
     updateStatus("ACTIVE", {
