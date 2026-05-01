@@ -710,12 +710,19 @@ export default function BrandSettingsPage() {
   };
 
   const onSaveDomains = (values: DomainsFormValues) => {
-    saveDomains(values, {
-      onSuccess: () => toast.success("Domains saved"),
+    // Filter out empty strings before sending
+    const filteredValues = Object.fromEntries(
+      Object.entries(values).filter(
+        ([_, v]) => v !== "" && v !== null && v !== undefined,
+      ),
+    ) as DomainsFormValues;
+
+    saveDomains(filteredValues, {
+      onSuccess: () => toast.success("Domain configurations saved"),
       onError: (err) => {
         const { message, errors } = extractApiErrors(err);
         const items = errors.length > 0 ? errors : [message];
-        toast.error("Failed to save domains", {
+        toast.error("Failed to save domain configurations", {
           description: (
             <ul className="mt-1 space-y-0.5">
               {items.map((e, i) => (
@@ -931,8 +938,9 @@ export default function BrandSettingsPage() {
                 {...brandForm.register("emailSenderName")}
               />
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Display name shown in the &ldquo;From&rdquo; field on emails sent to your customers.
-                Requires a verified Email Send-From Domain below.
+                Display name shown in the &ldquo;From&rdquo; field on emails
+                sent to your customers. Requires a verified Email Send-From
+                Domain below.
               </p>
             </div>
 

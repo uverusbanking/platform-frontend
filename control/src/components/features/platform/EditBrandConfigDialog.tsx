@@ -96,13 +96,27 @@ export function EditBrandConfigDialog({
   }, [open, organisation, form]);
 
   const onSubmit = async (values: FormValues) => {
+    const clean = (obj: any) =>
+      Object.fromEntries(
+        Object.entries(obj).filter(
+          ([_, v]) => v !== "" && v !== null && v !== undefined,
+        ),
+      );
+
+    const filteredValues = {
+      brand: clean(values.brand),
+      domains: clean(values.domains),
+      identifiers: clean(values.identifiers),
+    } as unknown as FormValues;
+
     try {
       const mutations: Promise<unknown>[] = [
-        updateBrand({ id: organisation.id, brand: values.brand }),
-        updateDomains({ id: organisation.id, ...values.domains }),
+        updateBrand({ id: organisation.id, brand: filteredValues.brand }),
+        updateDomains({ id: organisation.id, ...filteredValues.domains }),
       ];
 
-      const { slug, prefix, short_name, short_code } = values.identifiers;
+      const { slug, prefix, short_name, short_code } =
+        filteredValues.identifiers;
       if (slug || prefix || short_name || short_code) {
         mutations.push(
           updateOrg({
