@@ -1,5 +1,9 @@
 export interface BrandConfig {
   status?: string;
+  /** False when the org is non-operational (FROZEN, SUSPENDED, INACTIVE, etc.). */
+  available?: boolean;
+  /** Structured code from the server — see OrgStatusCode in assert-org-operational. */
+  unavailabilityCode?: string;
   brandName: string;
   shortBrandName: string;
   brandLogoUrl?: string | null;

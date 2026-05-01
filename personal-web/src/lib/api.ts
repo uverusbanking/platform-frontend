@@ -60,26 +60,40 @@ class ApiClient {
       const sessionId = localStorage.getItem("sb-session-id");
       if (sessionId) {
         try {
-          const refreshResponse = await fetch(`${this.baseURL}/api/v1/customers/personal/auth/refresh-token`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "origin-domain": typeof window !== "undefined" ? window.location.host : "",
+          const refreshResponse = await fetch(
+            `${this.baseURL}/api/v1/customers/personal/auth/refresh-token`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "origin-domain":
+                  typeof window !== "undefined" ? window.location.host : "",
+              },
+              body: JSON.stringify({ session_id: sessionId }),
             },
-            body: JSON.stringify({ session_id: sessionId }),
-          });
+          );
 
           if (refreshResponse.ok) {
             const refreshData = await refreshResponse.json();
-            const newToken = refreshData.data?.access_token || refreshData.access_token;
+            const newToken =
+              refreshData.data?.access_token || refreshData.access_token;
             if (newToken) {
               localStorage.setItem("sb-access-token", newToken);
               if (refreshData.data?.session_id || refreshData.session_id) {
-                localStorage.setItem("sb-session-id", refreshData.data?.session_id || refreshData.session_id);
+                localStorage.setItem(
+                  "sb-session-id",
+                  refreshData.data?.session_id || refreshData.session_id,
+                );
               }
               // Retry with new token
-              const retryHeaders = { ...headers, "Authorization": `Bearer ${newToken}` };
-              const retryResponse = await fetch(url, { ...fetchOptions, headers: retryHeaders });
+              const retryHeaders = {
+                ...headers,
+                Authorization: `Bearer ${newToken}`,
+              };
+              const retryResponse = await fetch(url, {
+                ...fetchOptions,
+                headers: retryHeaders,
+              });
               if (retryResponse.ok) return retryResponse.json();
             }
           }
@@ -93,6 +107,18 @@ class ApiClient {
       const error = await response
         .json()
         .catch(() => ({ message: response.statusText }));
+
+      // Org-gate: surface a full-screen block rather than a generic error toast.
+      if (
+        response.status === 503 &&
+        typeof error?.code === "string" &&
+        error.code.startsWith("ORG_")
+      ) {
+        window.dispatchEvent(
+          new CustomEvent("org-unavailable", { detail: { code: error.code } }),
+        );
+      }
+
       throw new Error(
         error.message || `HTTP error! status: ${response.status}`,
       );

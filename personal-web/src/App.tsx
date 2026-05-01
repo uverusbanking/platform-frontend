@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,7 +9,8 @@ import { AdminProvider } from "@/contexts/AdminContext";
 import { HelmetProvider } from "react-helmet-async";
 import { SessionGuard } from "@/components/SessionGuard";
 import { useBrandConfig } from "@/hooks/queries/useBrandConfig";
-import { OrgPendingScreen } from "@/components/OrgPendingScreen";
+import { OrgUnavailableScreen } from "@/components/OrgUnavailableScreen";
+import { BrandConfigService } from "@shared/core";
 
 // Pages
 import Index from "./pages/Index";
@@ -46,10 +48,42 @@ import { UserAccountLayout } from "./components/UserAccountLayout";
 import { AuthLayout } from "./components/AuthLayout";
 
 function AppContent() {
-  const { data: brandConfig } = useBrandConfig();
+  const { data: brandConfig, refetch: refetchBrandConfig } = useBrandConfig();
+  const [midSessionCode, setMidSessionCode] = useState<string | undefined>(
+    undefined,
+  );
 
-  if (brandConfig?.status && brandConfig.status !== "ACTIVE") {
-    return <OrgPendingScreen brandConfig={brandConfig} />;
+  // Listen for org-unavailable events dispatched by the API client when a
+  // mid-session request returns 503 with an ORG_* code.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const code = (e as CustomEvent<{ code: string }>).detail?.code;
+      if (code) {
+        setMidSessionCode(code);
+        refetchBrandConfig();
+      }
+    };
+    window.addEventListener("org-unavailable", handler);
+    return () => window.removeEventListener("org-unavailable", handler);
+  }, [refetchBrandConfig]);
+
+  const unavailabilityCode =
+    midSessionCode ||
+    (brandConfig?.available === false
+      ? brandConfig.unavailabilityCode
+      : undefined) ||
+    (brandConfig?.status && brandConfig.status !== "ACTIVE"
+      ? `ORG_${brandConfig.status}`
+      : undefined);
+
+  if (unavailabilityCode) {
+    const config = brandConfig ?? BrandConfigService.getConfigSync("personal");
+    return (
+      <OrgUnavailableScreen
+        brandConfig={config}
+        unavailabilityCode={unavailabilityCode}
+      />
+    );
   }
 
   return (
