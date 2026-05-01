@@ -28,6 +28,7 @@ const brandConfigSchema = z.object({
   brandName: z.string().trim().optional(),
   shortBrandName: z.string().trim().optional(),
   brandLogoUrl: optionalUrl,
+  brandIconUrl: optionalUrl,
   primaryColor: hexColor,
   secondaryColor: hexColor,
   supportEmail: z
@@ -46,6 +47,34 @@ const brandConfigSchema = z.object({
       title: z.string().trim().optional(),
       description: z.string().trim().optional(),
       author: z.string().trim().optional(),
+    })
+    .optional(),
+});
+
+const identifiersSchema = z.object({
+  slug: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || /^[a-z][a-z0-9-]{2,31}$/.test(v), {
+      message:
+        "Slug must be 3–32 chars, start with a letter, and contain only lowercase letters, numbers, and hyphens",
+    })
+    .optional(),
+  prefix: z
+    .string()
+    .trim()
+    .max(10, "Prefix must be 10 characters or fewer")
+    .optional(),
+  short_name: z
+    .string()
+    .trim()
+    .max(30, "Trading name must be 30 characters or fewer")
+    .optional(),
+  short_code: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || v.length === 3, {
+      message: "Short code must be exactly 3 characters",
     })
     .optional(),
 });
@@ -97,6 +126,7 @@ export const OrganisationOnboardSchema = z.object({
     .object({
       brand: brandConfigSchema.optional(),
       domains: configuredDomainSchema.optional(),
+      identifiers: identifiersSchema.optional(),
     })
     .optional(),
 });

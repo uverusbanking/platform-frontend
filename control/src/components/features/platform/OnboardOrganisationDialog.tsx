@@ -30,6 +30,7 @@ import {
   useCheckOrganisationExists,
   useUpdateBrandSettings,
   useUpdateConfiguredDomains,
+  useUpdateOrganisation,
 } from "@/hooks/mutations/usePlatformMutations";
 import { IBrandConfig } from "@/types/organisation.types";
 import { toast } from "sonner";
@@ -62,6 +63,7 @@ export function OnboardOrganisationDialog({
   const checkOrgMutation = useCheckOrganisationExists();
   const brandSettingsMutation = useUpdateBrandSettings();
   const configuredDomainsMutation = useUpdateConfiguredDomains();
+  const updateOrgMutation = useUpdateOrganisation();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -110,6 +112,7 @@ export function OnboardOrganisationDialog({
           brandName: "",
           shortBrandName: "",
           brandLogoUrl: "",
+          brandIconUrl: "",
           primaryColor: "",
           secondaryColor: "",
           supportEmail: "",
@@ -124,6 +127,12 @@ export function OnboardOrganisationDialog({
           corporate_app: "",
           marketing: "",
           email: "",
+        },
+        identifiers: {
+          slug: "",
+          prefix: "",
+          short_name: "",
+          short_code: "",
         },
       },
     },
@@ -160,6 +169,22 @@ export function OnboardOrganisationDialog({
           await configuredDomainsMutation.mutateAsync({
             id: orgId,
             ...domains,
+          });
+        }
+
+        const identifiers = values.config?.identifiers;
+        const hasIdentifiers =
+          identifiers &&
+          Object.values(identifiers).some(
+            (v) => typeof v === "string" && v.trim() !== "",
+          );
+        if (hasIdentifiers) {
+          await updateOrgMutation.mutateAsync({
+            id: orgId,
+            slug: identifiers.slug || undefined,
+            prefix: identifiers.prefix || undefined,
+            short_name: identifiers.short_name || undefined,
+            short_code: identifiers.short_code || undefined,
           });
         }
       }

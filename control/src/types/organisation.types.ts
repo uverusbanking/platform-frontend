@@ -4,6 +4,10 @@ export interface IOrganisation {
   id: string;
   platform_id: string;
   organisation_name: string;
+  slug?: string;
+  prefix?: string;
+  short_name?: string;
+  short_code?: string;
   cac_registration_number: string;
   tin: string;
   business_email: string;
@@ -234,6 +238,10 @@ export interface IUpdateOrganisationPayload {
   status?: string;
   provision_sandbox_token?: boolean;
   live_organisation_id?: string;
+  slug?: string;
+  prefix?: string;
+  short_name?: string;
+  short_code?: string;
 }
 
 export interface IUpdateOrganisationDocumentsPayload {

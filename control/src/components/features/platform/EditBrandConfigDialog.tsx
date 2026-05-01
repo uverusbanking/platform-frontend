@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Loader2, Palette, Globe, UploadCloud, X } from "lucide-react";
+import { Loader2, Palette, Globe } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -25,8 +25,8 @@ import { Button } from "@/components/ui/button";
 import {
   useUpdateBrandSettings,
   useUpdateConfiguredDomains,
+  useUpdateOrganisation,
 } from "@/hooks/mutations/usePlatformMutations";
-import { useUploadMutation } from "@/hooks/mutations/useUploadMutation";
 import axios from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/queryKeys";
@@ -35,251 +35,12 @@ import {
   IBrandConfig,
   IConfiguredDomains,
 } from "@/types/organisation.types";
+import { ImageUploadField } from "./shared/ImageUploadField";
 
 const labelCls =
   "text-xs font-semibold uppercase tracking-wider text-muted-foreground";
 const inputCls =
   "h-11 bg-muted/30 border-border/60 hover:border-primary/40 focus:border-primary transition-all";
-
-// Icon: 1024×1024px, no transparency — scales to iOS/Android/PWA icons
-// Logo: min 800×200px (4:1 ratio), transparency OK — used in nav bars / headers
-const IMAGE_SPECS = {
-  icon: {
-    label: "Brand Icon",
-    hint: "Square app icon — 1024×1024px min, PNG/JPG, ≤2 MB. Used as the iOS, Android, and web app icon.",
-    minW: 1024,
-    minH: 1024,
-    maxMB: 2,
-    accept: "image/png,image/jpeg",
-    types: ["PNG", "JPG", "JPEG"],
-    aspectHint: "1:1 (square)",
-  },
-  logo: {
-    label: "Brand Logo",
-    hint: "Horizontal logo — min 800×200px, PNG with transparency, ≤2 MB. Used in navigation bars and headers.",
-    minW: 800,
-    minH: 200,
-    maxMB: 2,
-    accept: "image/png",
-    types: ["PNG"],
-    aspectHint: "4:1 recommended",
-  },
-} as const;
-
-type ImageField = keyof typeof IMAGE_SPECS;
-
-function validateImageFile(
-  file: File,
-  spec: (typeof IMAGE_SPECS)[ImageField],
-): Promise<string | null> {
-  return new Promise((resolve) => {
-    if (file.size > spec.maxMB * 1024 * 1024) {
-      resolve(`File must be ≤${spec.maxMB} MB`);
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    const img = new window.Image();
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      if (img.naturalWidth < spec.minW || img.naturalHeight < spec.minH) {
-        resolve(
-          `Image must be at least ${spec.minW}×${spec.minH}px (got ${img.naturalWidth}×${img.naturalHeight}px)`,
-        );
-      } else {
-        resolve(null);
-      }
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      resolve("Could not read image dimensions");
-    };
-    img.src = url;
-  });
-}
-
-interface ImageUploadFieldProps {
-  field: ImageField;
-  value: string | undefined;
-  onChange: (url: string) => void;
-}
-
-function ImageUploadField({ field, value, onChange }: ImageUploadFieldProps) {
-  const spec = IMAGE_SPECS[field];
-  const uploadMutation = useUploadMutation();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [staged, setStaged] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [validating, setValidating] = useState(false);
-
-  const handleFileSelect = async (file: File) => {
-    setValidating(true);
-    const error = await validateImageFile(file, spec);
-    setValidating(false);
-    if (error) {
-      toast.error(error);
-      return;
-    }
-    setStaged(file);
-    setPreview(URL.createObjectURL(file));
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFileSelect(file);
-    e.target.value = "";
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file) handleFileSelect(file);
-  };
-
-  const handleUpload = async () => {
-    if (!staged) return;
-    const loading = toast.loading("Uploading image…");
-    try {
-      const res = await uploadMutation.mutateAsync({
-        file: staged,
-        userType: "PLATFORM",
-      });
-      onChange(res.data.file_url);
-      toast.success("Image uploaded", { id: loading });
-      setStaged(null);
-      if (preview) {
-        URL.revokeObjectURL(preview);
-        setPreview(null);
-      }
-    } catch {
-      toast.error("Upload failed", { id: loading });
-    }
-  };
-
-  const handleClearStaged = () => {
-    setStaged(null);
-    if (preview) {
-      URL.revokeObjectURL(preview);
-      setPreview(null);
-    }
-  };
-
-  const isSquare = field === "icon";
-  const previewSrc = preview ?? value;
-
-  return (
-    <div className="space-y-2">
-      <p className="text-[11px] text-muted-foreground">{spec.hint}</p>
-
-      <div
-        className={`relative border-2 border-dashed rounded-xl transition-colors ${
-          staged
-            ? "border-amber-400/60 bg-amber-400/5"
-            : value
-              ? "border-success/40 bg-success/5"
-              : "border-border/60 hover:border-primary/40 bg-muted/20"
-        }`}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDrop}
-      >
-        <input
-          ref={inputRef}
-          type="file"
-          accept={spec.accept}
-          className="hidden"
-          onChange={handleInputChange}
-        />
-
-        {previewSrc ? (
-          <div className="flex items-center gap-4 p-4">
-            <div
-              className={`overflow-hidden rounded-lg border border-border/40 bg-checkered shrink-0 ${
-                isSquare ? "w-16 h-16" : "w-32 h-12"
-              }`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={previewSrc}
-                alt={spec.label}
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <div className="flex-1 min-w-0">
-              {staged ? (
-                <p className="text-xs font-medium text-amber-600 truncate">
-                  {staged.name}{" "}
-                  <span className="text-muted-foreground">
-                    (pending upload)
-                  </span>
-                </p>
-              ) : (
-                <p className="text-xs font-medium text-success truncate">
-                  Uploaded
-                </p>
-              )}
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                {spec.aspectHint}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              {staged ? (
-                <>
-                  <Button
-                    type="button"
-                    size="sm"
-                    disabled={uploadMutation.isPending || validating}
-                    onClick={handleUpload}
-                  >
-                    {uploadMutation.isPending ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      "Confirm"
-                    )}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                    onClick={handleClearStaged}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => inputRef.current?.click()}
-                >
-                  Replace
-                </Button>
-              )}
-            </div>
-          </div>
-        ) : (
-          <button
-            type="button"
-            className="w-full flex flex-col items-center gap-2 py-6 px-4 text-center"
-            onClick={() => inputRef.current?.click()}
-            disabled={validating || uploadMutation.isPending}
-          >
-            {validating ? (
-              <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
-            ) : (
-              <UploadCloud className="w-6 h-6 text-muted-foreground" />
-            )}
-            <span className="text-xs text-muted-foreground">
-              {validating
-                ? "Validating…"
-                : `Click or drag ${spec.types.join("/")} here`}
-            </span>
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
 
 function SectionHeading({ label }: { label: string }) {
   return (
@@ -298,6 +59,12 @@ interface FormValues {
     seo: { title: string; description: string; author: string };
   };
   domains: IConfiguredDomains;
+  identifiers: {
+    slug: string;
+    prefix: string;
+    short_name: string;
+    short_code: string;
+  };
 }
 
 interface Props {
@@ -316,7 +83,9 @@ export function EditBrandConfigDialog({
     useUpdateBrandSettings();
   const { mutateAsync: updateDomains, isPending: domainsPending } =
     useUpdateConfiguredDomains();
-  const isPending = brandPending || domainsPending;
+  const { mutateAsync: updateOrg, isPending: orgPending } =
+    useUpdateOrganisation();
+  const isPending = brandPending || domainsPending || orgPending;
 
   const form = useForm<FormValues>({
     defaultValues: buildDefaults(organisation),
@@ -328,13 +97,26 @@ export function EditBrandConfigDialog({
 
   const onSubmit = async (values: FormValues) => {
     try {
-      await Promise.all([
+      const mutations: Promise<unknown>[] = [
         updateBrand({ id: organisation.id, brand: values.brand }),
-        updateDomains({
-          id: organisation.id,
-          ...values.domains,
-        }),
-      ]);
+        updateDomains({ id: organisation.id, ...values.domains }),
+      ];
+
+      const { slug, prefix, short_name, short_code } = values.identifiers;
+      if (slug || prefix || short_name || short_code) {
+        mutations.push(
+          updateOrg({
+            id: organisation.id,
+            slug: slug || undefined,
+            prefix: prefix || undefined,
+            short_name: short_name || undefined,
+            short_code: short_code || undefined,
+          }),
+        );
+      }
+
+      await Promise.all(mutations);
+
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: [QUERY_KEYS.ORGANISATION.GET_BY_ID, organisation.id],
@@ -530,6 +312,122 @@ export function EditBrandConfigDialog({
                         />
                       </div>
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <SectionHeading label="Organisation Identifiers" />
+
+            <p className="text-[11px] text-muted-foreground -mt-2">
+              Identifiers used for routing, branding, and reference generation.
+              The slug is semi-permanent; prefix changes freely.
+            </p>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                name="identifiers.slug"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel className={labelCls}>Slug</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="acme-pay"
+                        className={inputCls}
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value
+                              .toLowerCase()
+                              .replace(/[^a-z0-9-]/g, ""),
+                          )
+                        }
+                      />
+                    </FormControl>
+                    <p className="text-[11px] text-muted-foreground">
+                      Used as subdomain, API routing key, and brand config
+                      identifier. 3–32 chars, lowercase letters, numbers, and
+                      hyphens only.
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="identifiers.prefix"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={labelCls}>Prefix</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="ACME"
+                        className={inputCls}
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value
+                              .toUpperCase()
+                              .replace(/[^A-Z0-9]/g, ""),
+                          )
+                        }
+                      />
+                    </FormControl>
+                    <p className="text-[11px] text-muted-foreground">
+                      Prefixed to account numbers. Max 10 chars, uppercase.
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="identifiers.short_name"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={labelCls}>Trading Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Acme Bank"
+                        className={inputCls}
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <p className="text-[11px] text-muted-foreground">
+                      Short trading name, max 30 chars.
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="identifiers.short_code"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={labelCls}>Short Code</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="ACM"
+                        maxLength={3}
+                        className={inputCls}
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value.toUpperCase().slice(0, 3),
+                          )
+                        }
+                      />
+                    </FormControl>
+                    <p className="text-[11px] text-muted-foreground">
+                      Exactly 3 chars. Prefixed to reference IDs.
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -806,6 +704,12 @@ function buildDefaults(org: IOrganisation): FormValues {
       corporate_app: d.corporate_app ?? "",
       marketing: d.marketing ?? "",
       email: d.email ?? "",
+    },
+    identifiers: {
+      slug: org.slug ?? "",
+      prefix: org.prefix ?? "",
+      short_name: org.short_name ?? "",
+      short_code: org.short_code ?? "",
     },
   };
 }

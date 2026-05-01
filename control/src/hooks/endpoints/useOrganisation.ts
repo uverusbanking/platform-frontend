@@ -106,6 +106,10 @@ function toUpdatePayload(p: IUpdateOrganisationPayload) {
     ...(p.live_organisation_id !== undefined && {
       live_organisation_id: p.live_organisation_id,
     }),
+    ...(p.slug !== undefined && { slug: p.slug }),
+    ...(p.prefix !== undefined && { prefix: p.prefix }),
+    ...(p.short_name !== undefined && { short_name: p.short_name }),
+    ...(p.short_code !== undefined && { short_code: p.short_code }),
   };
 }
 
