@@ -137,7 +137,7 @@ const TransactionDetail = () => {
     );
   }
 
-  const type = transactionData.type === "WALLET_FUNDING" ? "credit" : "debit";
+  const type = transactionData.type;
   const amount = parseFloat(transactionData.amount || "0");
 
   let mappedStatus: "successful" | "pending" | "failed" | "reversed" =
@@ -177,8 +177,14 @@ const TransactionDetail = () => {
   }[mappedStatus];
 
   const receiptRows = [
-    { label: "Type", value: type === "credit" ? "Credit" : "Debit" },
-    { label: type === "credit" ? "From" : "To", value: counterpartyName },
+    {
+      label: "Type",
+      value: type.toLowerCase() === "credit" ? "Credit" : "Debit",
+    },
+    {
+      label: type.toLowerCase() === "credit" ? "From" : "To",
+      value: counterpartyName,
+    },
     { label: "Bank", value: counterpartyBank },
     ...(counterpartyAccount
       ? [{ label: "Account", value: counterpartyAccount }]
@@ -325,7 +331,7 @@ const TransactionDetail = () => {
                 letterSpacing: "-0.5px",
               }}
             >
-              {type === "credit" ? "+" : "-"}
+              {type.toLowerCase() === "credit" ? "+" : "-"}
               {formatCurrency(amount)}
             </p>
             <span
@@ -416,18 +422,18 @@ const TransactionDetail = () => {
         <Card>
           <CardContent className="py-8 text-center">
             <div
-              className={`w-16 h-16 rounded-full ${type === "credit" ? "bg-success/10" : "bg-destructive/10"} flex items-center justify-center mx-auto mb-4`}
+              className={`w-16 h-16 rounded-full ${type.toLowerCase() === "credit" ? "bg-success/10" : "bg-destructive/10"} flex items-center justify-center mx-auto mb-4`}
             >
-              {type === "credit" ? (
+              {type.toLowerCase() === "credit" ? (
                 <ArrowDownLeft size={32} className="text-success" />
               ) : (
                 <ArrowUpRight size={32} className="text-destructive" />
               )}
             </div>
             <p
-              className={`text-3xl font-bold mb-2 ${type === "credit" ? "text-success" : "text-foreground"}`}
+              className={`text-3xl font-bold mb-2 ${type.toLowerCase() === "credit" ? "text-success" : "text-foreground"}`}
             >
-              {type === "credit" ? "+" : "-"}
+              {type.toLowerCase() === "credit" ? "+" : "-"}
               {formatCurrency(amount)}
             </p>
             <div
@@ -457,7 +463,7 @@ const TransactionDetail = () => {
             {counterpartyName && (
               <div className="flex justify-between py-4">
                 <span className="text-muted-foreground">
-                  {type === "credit" ? "From" : "To"}
+                  {type.toLowerCase() === "credit" ? "From" : "To"}
                 </span>
                 <span className="font-medium">{counterpartyName}</span>
               </div>
@@ -565,7 +571,7 @@ const TransactionDetail = () => {
             Back to History
           </Button>
 
-          {type === "debit" && mappedStatus === "successful" && (
+          {type.toLowerCase() === "debit" && mappedStatus === "successful" && (
             <Button
               variant="gradient"
               className="w-full"
