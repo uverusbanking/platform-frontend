@@ -37,7 +37,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsFetching } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/queryKeys";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 
 import { BusinessInfoStep } from "./onboarding/BusinessInfoStep";
 import { DirectorsStep } from "./onboarding/DirectorsStep";
@@ -138,65 +138,112 @@ export function OnboardOrganisationDialog({
     },
   });
 
+  function showApiError(error: unknown, title: string) {
+    const data = axios.isAxiosError(error)
+      ? (error.response?.data as
+          | { message?: string; errors?: string[] }
+          | undefined)
+      : undefined;
+    const errors = data?.errors ?? [];
+    const items = errors.length > 0 ? errors : [data?.message ?? title];
+    toast.error(title, {
+      description: (
+        <ul className="mt-1 space-y-0.5">
+          {items.map((e, i) => (
+            <li key={i} className="text-xs">
+              · {e}
+            </li>
+          ))}
+        </ul>
+      ),
+      duration: 6000,
+    });
+  }
+
   const onSubmit = async (values: FormValues) => {
+    // Registration is the critical step — abort on failure
+    let orgId: string | undefined;
     try {
       const org = await registerMutation.mutateAsync(values);
-      const orgId = org.data?.organisation?.id ?? org.data?.id;
-
-      if (orgId) {
-        const brand = values.config?.brand;
-        const domains = values.config?.domains;
-
-        const hasBrandData =
-          brand &&
-          Object.values(brand).some((v) =>
-            typeof v === "string" ? v.trim() !== "" : !!v,
-          );
-
-        if (hasBrandData) {
-          await brandSettingsMutation.mutateAsync({
-            id: orgId,
-            brand: brand as IBrandConfig,
-          });
-        }
-
-        const hasDomains =
-          domains &&
-          Object.values(domains).some(
-            (v) => typeof v === "string" && v.trim() !== "",
-          );
-        if (hasDomains) {
-          await configuredDomainsMutation.mutateAsync({
-            id: orgId,
-            ...domains,
-          });
-        }
-
-        const identifiers = values.config?.identifiers;
-        const hasIdentifiers =
-          identifiers &&
-          Object.values(identifiers).some(
-            (v) => typeof v === "string" && v.trim() !== "",
-          );
-        if (hasIdentifiers) {
-          await updateOrgMutation.mutateAsync({
-            id: orgId,
-            slug: identifiers.slug || undefined,
-            prefix: identifiers.prefix || undefined,
-            short_name: identifiers.short_name || undefined,
-            short_code: identifiers.short_code || undefined,
-          });
-        }
-      }
-
-      toast.success("Organisation onboarded successfully!");
-      setOpen(false);
-      form.reset();
-      setStep(1);
+      orgId = org.data?.organisation?.id ?? org.data?.id;
     } catch (error) {
-      console.error("Submission error:", error);
-      toast.error("Failed to onboard company. Please check the details.");
+      console.error("Registration error:", error);
+      showApiError(error, "Failed to register organisation");
+      return;
     }
+
+    if (!orgId) {
+      toast.error("Organisation created but ID could not be resolved.");
+      return;
+    }
+
+    let hasConfigError = false;
+
+    const brand = values.config?.brand;
+    const hasBrandData =
+      brand &&
+      Object.values(brand).some((v) =>
+        typeof v === "string" ? v.trim() !== "" : !!v,
+      );
+    if (hasBrandData) {
+      try {
+        await brandSettingsMutation.mutateAsync({
+          id: orgId,
+          brand: brand as IBrandConfig,
+        });
+      } catch (err) {
+        hasConfigError = true;
+        showApiError(err, "Brand configuration couldn't be saved");
+      }
+    }
+
+    const domains = values.config?.domains;
+    const hasDomains =
+      domains &&
+      Object.values(domains).some(
+        (v) => typeof v === "string" && v.trim() !== "",
+      );
+    if (hasDomains) {
+      try {
+        await configuredDomainsMutation.mutateAsync({ id: orgId, ...domains });
+      } catch (err) {
+        hasConfigError = true;
+        showApiError(err, "Domain configuration couldn't be saved");
+      }
+    }
+
+    const identifiers = values.config?.identifiers;
+    const hasIdentifiers =
+      identifiers &&
+      Object.values(identifiers).some(
+        (v) => typeof v === "string" && v.trim() !== "",
+      );
+    if (hasIdentifiers) {
+      try {
+        await updateOrgMutation.mutateAsync({
+          id: orgId,
+          slug: identifiers.slug || undefined,
+          prefix: identifiers.prefix || undefined,
+          short_name: identifiers.short_name || undefined,
+          short_code: identifiers.short_code || undefined,
+        });
+      } catch (err) {
+        hasConfigError = true;
+        showApiError(err, "Organisation identifiers couldn't be saved");
+      }
+    }
+
+    if (hasConfigError) {
+      toast.warning(
+        "Organisation created — some settings couldn't be saved. Review the errors and update via the edit dialog.",
+        { duration: 8000 },
+      );
+    } else {
+      toast.success("Organisation onboarded successfully!");
+    }
+    setOpen(false);
+    form.reset();
+    setStep(1);
   };
 
   const onError = (errors: FieldErrors<FormValues>) => {
