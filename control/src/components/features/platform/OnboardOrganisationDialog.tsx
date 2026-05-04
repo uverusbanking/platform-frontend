@@ -141,7 +141,7 @@ export function OnboardOrganisationDialog({
   const onSubmit = async (values: FormValues) => {
     try {
       const org = await registerMutation.mutateAsync(values);
-      const orgId = org.data?.id;
+      const orgId = org.data?.organisation?.id ?? org.data?.id;
 
       if (orgId) {
         const brand = values.config?.brand;

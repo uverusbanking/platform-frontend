@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Loader2, UploadCloud, X } from "lucide-react";
+import { Loader2, UploadCloud } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useUploadMutation } from "@/hooks/mutations/useUploadMutation";
@@ -76,9 +76,9 @@ export function ImageUploadField({
   const spec = IMAGE_SPECS[field];
   const uploadMutation = useUploadMutation();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [staged, setStaged] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
   const [validating, setValidating] = useState(false);
+
+  const busy = validating || uploadMutation.isPending;
 
   const handleFileSelect = async (file: File) => {
     setValidating(true);
@@ -88,8 +88,17 @@ export function ImageUploadField({
       toast.error(error);
       return;
     }
-    setStaged(file);
-    setPreview(URL.createObjectURL(file));
+    const loading = toast.loading("Uploading image…");
+    try {
+      const res = await uploadMutation.mutateAsync({
+        file,
+        userType: "PLATFORM",
+      });
+      onChange(res.data.file_url);
+      toast.success("Image uploaded", { id: loading });
+    } catch {
+      toast.error("Upload failed", { id: loading });
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,36 +113,7 @@ export function ImageUploadField({
     if (file) handleFileSelect(file);
   };
 
-  const handleUpload = async () => {
-    if (!staged) return;
-    const loading = toast.loading("Uploading image…");
-    try {
-      const res = await uploadMutation.mutateAsync({
-        file: staged,
-        userType: "PLATFORM",
-      });
-      onChange(res.data.file_url);
-      toast.success("Image uploaded", { id: loading });
-      setStaged(null);
-      if (preview) {
-        URL.revokeObjectURL(preview);
-        setPreview(null);
-      }
-    } catch {
-      toast.error("Upload failed", { id: loading });
-    }
-  };
-
-  const handleClearStaged = () => {
-    setStaged(null);
-    if (preview) {
-      URL.revokeObjectURL(preview);
-      setPreview(null);
-    }
-  };
-
   const isSquare = field === "icon";
-  const previewSrc = preview ?? value;
 
   return (
     <div className="space-y-2">
@@ -141,11 +121,9 @@ export function ImageUploadField({
 
       <div
         className={`relative border-2 border-dashed rounded-xl transition-colors ${
-          staged
-            ? "border-amber-400/60 bg-amber-400/5"
-            : value
-              ? "border-success/40 bg-success/5"
-              : "border-border/60 hover:border-primary/40 bg-muted/20"
+          value
+            ? "border-success/40 bg-success/5"
+            : "border-border/60 hover:border-primary/40 bg-muted/20"
         }`}
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
@@ -158,7 +136,7 @@ export function ImageUploadField({
           onChange={handleInputChange}
         />
 
-        {previewSrc ? (
+        {value ? (
           <div className="flex items-center gap-4 p-4">
             <div
               className={`overflow-hidden rounded-lg border border-border/40 bg-checkered shrink-0 ${
@@ -167,73 +145,41 @@ export function ImageUploadField({
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={previewSrc}
+                src={value}
                 alt={spec.label}
                 className="w-full h-full object-contain"
               />
             </div>
             <div className="flex-1 min-w-0">
-              {staged ? (
-                <p className="text-xs font-medium text-amber-600 truncate">
-                  {staged.name}{" "}
-                  <span className="text-muted-foreground">
-                    (pending upload)
-                  </span>
-                </p>
-              ) : (
-                <p className="text-xs font-medium text-success truncate">
-                  Uploaded
-                </p>
-              )}
+              <p className="text-xs font-medium text-success truncate">
+                Uploaded
+              </p>
               <p className="text-[11px] text-muted-foreground mt-0.5">
                 {spec.aspectHint}
               </p>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              {staged ? (
-                <>
-                  <Button
-                    type="button"
-                    size="sm"
-                    disabled={uploadMutation.isPending || validating}
-                    onClick={handleUpload}
-                  >
-                    {uploadMutation.isPending ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      "Confirm"
-                    )}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                    onClick={handleClearStaged}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={busy}
+              onClick={() => inputRef.current?.click()}
+            >
+              {busy ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => inputRef.current?.click()}
-                >
-                  Replace
-                </Button>
+                "Replace"
               )}
-            </div>
+            </Button>
           </div>
         ) : (
           <button
             type="button"
             className="w-full flex flex-col items-center gap-2 py-6 px-4 text-center"
             onClick={() => inputRef.current?.click()}
-            disabled={validating || uploadMutation.isPending}
+            disabled={busy}
           >
-            {validating ? (
+            {busy ? (
               <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
             ) : (
               <UploadCloud className="w-6 h-6 text-muted-foreground" />
@@ -241,7 +187,9 @@ export function ImageUploadField({
             <span className="text-xs text-muted-foreground">
               {validating
                 ? "Validating…"
-                : `Click or drag ${spec.types.join("/")} here`}
+                : uploadMutation.isPending
+                  ? "Uploading…"
+                  : `Click or drag ${spec.types.join("/")} here`}
             </span>
           </button>
         )}
