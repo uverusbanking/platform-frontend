@@ -5,13 +5,8 @@ import { useTransactions } from "@/hooks/queries/useTransactions";
 import { useNotifications } from "@/hooks/useNotifications";
 import { UserTier, TierLimits } from "@/hooks/useUserTier";
 import { usePlatformKYC } from "@/hooks/usePlatformKYC";
-import {
-  formatCurrency,
-  formatAccountNumber,
-  formatRelativeTime,
-} from "@/lib/currency";
+import { formatCurrency, formatAccountNumber } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppLayout } from "@/components/AppLayout";
 import { TierBadge } from "@/components/dashboard/TierBadge";
@@ -21,14 +16,11 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
   type CarouselApi,
 } from "@/components/ui/carousel";
 import {
   Copy,
   Bell,
-  User,
   Send,
   QrCode,
   History,
@@ -37,8 +29,7 @@ import {
   LogOut,
   Eye,
   EyeOff,
-  ArrowDownLeft, // Added
-  ArrowUpRight, // Added
+  Wifi,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useUserProfile } from "@/hooks/queries/useUser";
@@ -51,12 +42,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { user, signOut, loading: authLoading } = useAuth();
 
-  const {
-    data: profile,
-    isLoading,
-    error: profileError,
-  } = useUserProfile({
-    refetchInterval: 5000, // Poll every 5 seconds to simulate socket
+  const { data: profile } = useUserProfile({
+    refetchInterval: 5000,
   });
 
   const { data: transactionsResponse, isLoading: txLoading } = useTransactions({
@@ -68,8 +55,6 @@ const Dashboard = () => {
     wallets,
     wallet: initialWallet,
     isLoadingWallet,
-    virtualAccount,
-    isLoadingVirtualAccount,
   } = useWallet();
 
   const [api, setApi] = useState<CarouselApi>();
@@ -77,7 +62,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!api) return;
-
     api.on("select", () => {
       setCurrentWalletIndex(api.selectedScrollSnap());
     });
@@ -85,13 +69,11 @@ const Dashboard = () => {
 
   const activeWallet = wallets[currentWalletIndex] || initialWallet;
 
-  // Real-time balance updates via WebSocket
   const { socketBalance, balanceFlash } = useBalanceSocket({
     showToast: true,
     walletId: activeWallet?.id,
   });
 
-  // Safely extract transactions array
   const transactions = transactionsResponse?.data || [];
   const { unreadCount } = useNotifications();
 
@@ -100,7 +82,6 @@ const Dashboard = () => {
   const currentTierLevel = apiTier?.kyc_level || 1;
   const currentTier = `tier_${currentTierLevel}` as UserTier;
 
-  // Construct tierLimits from API data
   const tierLimits = apiTier
     ? ({
         tier: currentTier,
@@ -115,8 +96,6 @@ const Dashboard = () => {
       } as TierLimits)
     : undefined;
 
-  const tierLoading = statusLoading;
-
   const getTierProgress = () => (currentTierLevel / 3) * 100;
 
   const [showBalance, setShowBalance] = useState(true);
@@ -127,101 +106,139 @@ const Dashboard = () => {
     }
   }, [user, authLoading, navigate]);
 
-  const copyAccountNumber = () => {
-    const accountNumber =
-      virtualAccount?.account_number || profile?.accountNumber;
-    if (accountNumber) {
-      navigator.clipboard.writeText(accountNumber);
-      toast.success("Account number copied!");
-    } else {
-      toast.error("No account number available");
-    }
-  };
-
   const handleSignOut = async () => {
     await signOut();
     navigate("/auth/login");
   };
 
+  const firstName = profile?.firstName || user?.email?.split("@")[0] || "";
+  const lastName = profile?.lastName || "";
+  const initials = (firstName[0] || "") + (lastName[0] || "");
+  const displayName = firstName + (lastName ? " " + lastName : "");
+
   if (authLoading || !user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading...</p>
+        <div className="text-center space-y-3">
+          <div className="w-12 h-12 border-[3px] border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-muted-foreground text-sm">Loading your dashboard…</p>
         </div>
       </div>
     );
   }
 
+  const quickActions = [
+    {
+      icon: Send,
+      label: "Send",
+      path: "/account/send",
+      gradient: "from-emerald-500 to-teal-600",
+      shadow: "shadow-emerald-500/30",
+    },
+    {
+      icon: QrCode,
+      label: "Receive",
+      path: "/account/receive",
+      gradient: "from-blue-500 to-indigo-600",
+      shadow: "shadow-blue-500/30",
+    },
+    {
+      icon: History,
+      label: "History",
+      path: "/account/transactions",
+      gradient: "from-amber-500 to-orange-600",
+      shadow: "shadow-amber-500/30",
+    },
+    {
+      icon: CreditCard,
+      label: "Cards",
+      path: "/account/cards",
+      gradient: "from-slate-400 to-slate-500",
+      shadow: "shadow-slate-400/20",
+      disabled: true,
+    },
+  ];
+
   return (
     <AppLayout showHeader={false}>
-      {/* Header */}
-      <header className="bg-gradient-hero safe-top">
-        <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 max-w-4xl">
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
+      {/* ── Hero Header ── */}
+      <header className="bg-gradient-hero safe-top pb-8">
+        <div className="container mx-auto px-4 sm:px-6 pt-4 sm:pt-6 max-w-2xl">
+          {/* Top Bar */}
+          <div className="flex items-center justify-between mb-6">
+            {/* Avatar + Greeting */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                <User size={20} className="text-white sm:hidden" />
-                <User size={24} className="text-white hidden sm:block" />
+              <div className="relative">
+                <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center ring-2 ring-white/30 shrink-0">
+                  <span className="text-white font-bold text-sm uppercase tracking-wide">
+                    {initials || "U"}
+                  </span>
+                </div>
+                <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full ring-2 ring-white/20" />
               </div>
-              <div className="min-w-0">
-                <p className="text-white/70 text-xs sm:text-sm">Welcome back</p>
-                <p className="text-white font-semibold text-sm sm:text-base truncate">
-                  {(profile?.firstName || "") +
-                    " " +
-                    (profile?.lastName || "") || user.email?.split("@")[0]}
+              <div>
+                <p className="text-white/60 text-xs leading-none mb-1">Good day,</p>
+                <p className="text-white font-semibold text-sm leading-tight line-clamp-1 max-w-[150px]">
+                  {displayName}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
+
+            {/* Actions */}
+            <div className="flex items-center gap-2">
               <button
-                className="relative p-2.5 sm:p-2 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors touch-manipulation"
+                className="relative w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors flex items-center justify-center touch-manipulation"
                 onClick={() => navigate("/account/notifications")}
                 aria-label="Notifications"
               >
-                <Bell size={20} className="text-white" />
+                <Bell size={18} className="text-white" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-destructive text-white text-xs font-bold rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
                     {unreadCount > 9 ? "9+" : unreadCount}
                   </span>
                 )}
               </button>
               <button
-                className="p-2.5 sm:p-2 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors touch-manipulation"
+                className="w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors flex items-center justify-center touch-manipulation"
                 onClick={handleSignOut}
                 aria-label="Sign out"
               >
-                <LogOut size={20} className="text-white" />
+                <LogOut size={18} className="text-white" />
               </button>
             </div>
           </div>
 
-          {/* Balance Carousel */}
+          {/* ── Balance Cards Carousel ── */}
           {isLoadingWallet ? (
-            <Card className="bg-black/40 backdrop-blur-xl border-white/20 text-white">
-              <CardContent className="p-4 sm:p-6">
-                <Skeleton className="h-8 sm:h-10 w-48 bg-white/20 mb-4" />
-                <Skeleton className="h-12 w-full bg-white/10 rounded-xl" />
-              </CardContent>
-            </Card>
+            <div className="rounded-3xl bg-white/10 backdrop-blur-xl p-5 space-y-4">
+              <Skeleton className="h-4 w-28 bg-white/20 rounded-full" />
+              <Skeleton className="h-10 w-48 bg-white/20 rounded-xl" />
+              <Skeleton className="h-12 w-full bg-white/10 rounded-2xl" />
+            </div>
           ) : (
-            <div className="relative group">
+            <div className="relative">
               <Carousel setApi={setApi} className="w-full">
-                <CarouselContent>
-                  {wallets.map((w) => (
-                    <CarouselItem
-                      key={w.id}
-                      className="basis-[92%] sm:basis-full"
-                    >
-                      <Card className="bg-black/40 backdrop-blur-xl border-white/20 text-white overflow-hidden">
-                        <CardContent className="p-4 sm:p-6">
-                          <div className="flex items-center justify-between mb-2">
+                <CarouselContent className="-ml-2">
+                  {wallets.map((w) => {
+                    const isActive = activeWallet?.id === w.id;
+                    const displayBalance = parseFloat(
+                      (isActive ? socketBalance : null) ?? w.balance ?? "0"
+                    );
+
+                    return (
+                      <CarouselItem key={w.id} className="pl-2 basis-[93%] sm:basis-full">
+                        <div className="rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 p-5 space-y-4 overflow-hidden relative">
+                          {/* Decorative blobs */}
+                          <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/5 pointer-events-none" />
+                          <div className="absolute -bottom-8 -left-6 w-28 h-28 rounded-full bg-white/5 pointer-events-none" />
+
+                          {/* Card header */}
+                          <div className="flex items-center justify-between relative">
                             <div className="flex items-center gap-2">
-                              <p className="text-white/90 text-xs sm:text-sm font-medium">
+                              <span className="text-white/70 text-xs font-medium">
                                 {w.name || "Available Balance"}
-                              </p>
-                              <span className="px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-medium uppercase tracking-wider text-white/60">
+                              </span>
+                              <span className="px-2 py-0.5 rounded-full bg-white/15 text-[10px] font-semibold uppercase tracking-widest text-white/70">
                                 {w.currency}
                               </span>
                             </div>
@@ -230,48 +247,44 @@ const Dashboard = () => {
                                 e.stopPropagation();
                                 setShowBalance(!showBalance);
                               }}
-                              className="p-1.5 hover:bg-white/10 rounded-lg touch-manipulation"
-                              aria-label={
-                                showBalance ? "Hide balance" : "Show balance"
-                              }
+                              className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors touch-manipulation"
+                              aria-label={showBalance ? "Hide balance" : "Show balance"}
                             >
-                              {showBalance ? (
-                                <Eye size={18} />
-                              ) : (
-                                <EyeOff size={18} />
-                              )}
+                              {showBalance
+                                ? <Eye size={14} className="text-white/80" />
+                                : <EyeOff size={14} className="text-white/80" />}
                             </button>
                           </div>
 
-                          <p
-                            className={[
-                              "text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 transition-all duration-500",
-                              balanceFlash && activeWallet?.id === w.id
-                                ? "text-emerald-300 drop-shadow-[0_0_12px_rgba(52,211,153,0.8)]"
-                                : "text-white",
-                            ].join(" ")}
-                          >
-                            {showBalance
-                              ? formatCurrency(
-                                  parseFloat(
-                                    (activeWallet?.id === w.id
-                                      ? socketBalance
-                                      : null) ??
-                                      w.balance ??
-                                      "0",
-                                  ),
-                                  w.currency,
-                                )
-                              : "****.**"}
-                          </p>
+                          {/* Balance */}
+                          <div className="relative">
+                            <p
+                              className={cn(
+                                "text-3xl sm:text-4xl font-extrabold tracking-tight transition-all duration-500 leading-none",
+                                balanceFlash && isActive
+                                  ? "text-emerald-300 drop-shadow-[0_0_16px_rgba(52,211,153,0.9)]"
+                                  : "text-white"
+                              )}
+                            >
+                              {showBalance
+                                ? formatCurrency(displayBalance, w.currency)
+                                : "••••••"}
+                            </p>
+                            {balanceFlash && isActive && (
+                              <span className="absolute top-0 right-0 flex items-center gap-1 text-[10px] font-semibold text-emerald-300">
+                                <Wifi size={10} />
+                                Live
+                              </span>
+                            )}
+                          </div>
 
-                          {/* Virtual Account Info - Only show for the specific wallet if it matches the profile/virtualAccount */}
-                          <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-white/15">
+                          {/* Account chip */}
+                          <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/10 border border-white/10">
                             <div className="flex-1 min-w-0">
-                              <p className="text-white/60 text-[10px] sm:text-xs mb-0.5 sm:mb-1">
+                              <p className="text-white/50 text-[10px] font-medium mb-0.5">
                                 {w.bank_name || "Virtual Account"}
                               </p>
-                              <p className="font-mono font-semibold text-sm sm:text-base truncate">
+                              <p className="font-mono font-semibold text-sm text-white truncate">
                                 {formatAccountNumber(w.account_number || "")}
                               </p>
                             </div>
@@ -281,27 +294,19 @@ const Dashboard = () => {
                                 navigator.clipboard.writeText(w.account_number);
                                 toast.success("Account number copied!");
                               }}
-                              className="p-2 sm:p-2.5 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors shrink-0 touch-manipulation"
+                              className="w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 active:bg-white/35 flex items-center justify-center transition-colors shrink-0 touch-manipulation"
                               aria-label="Copy account number"
                             >
-                              <Copy size={16} className="sm:hidden" />
-                              <Copy size={18} className="hidden sm:block" />
+                              <Copy size={15} className="text-white" />
                             </button>
                           </div>
-                        </CardContent>
-                      </Card>
-                    </CarouselItem>
-                  ))}
+                        </div>
+                      </CarouselItem>
+                    );
+                  })}
                 </CarouselContent>
-                {wallets.length > 1 && (
-                  <div className="hidden sm:block">
-                    <CarouselPrevious className="absolute -left-5 top-1/2 -translate-y-1/2 bg-white/10 border-white/20 hover:bg-white/20 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <CarouselNext className="absolute -right-5 top-1/2 -translate-y-1/2 bg-white/10 border-white/20 hover:bg-white/20 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                )}
               </Carousel>
 
-              {/* Carousel Indicators */}
               {wallets.length > 1 && (
                 <div className="flex justify-center gap-1.5 mt-3">
                   {wallets.map((_, i) => (
@@ -309,12 +314,10 @@ const Dashboard = () => {
                       key={i}
                       onClick={() => api?.scrollTo(i)}
                       className={cn(
-                        "h-1.5 rounded-full transition-all duration-300",
-                        currentWalletIndex === i
-                          ? "w-6 bg-white"
-                          : "w-1.5 bg-white/30",
+                        "h-1 rounded-full transition-all duration-300",
+                        currentWalletIndex === i ? "w-6 bg-white" : "w-2 bg-white/30"
                       )}
-                      aria-label={`Go to wallet ${i + 1}`}
+                      aria-label={`Wallet ${i + 1}`}
                     />
                   ))}
                 </div>
@@ -324,145 +327,103 @@ const Dashboard = () => {
         </div>
       </header>
 
-      {/* Tier Badge Section */}
-      <div className="container mx-auto px-4 sm:px-6 -mt-3 sm:-mt-4 relative z-10 max-w-4xl">
-        <TransactionPinBanner />
-        {tierLoading ? (
-          <Card className="mb-3">
-            <CardContent className="p-3">
-              <Skeleton className="h-10 w-full" />
-            </CardContent>
-          </Card>
-        ) : tierLimits ? (
-          <>
-            <Card className="mb-3 shadow-lg">
-              <CardContent className="p-3">
-                <TierBadge
-                  currentTier={currentTier}
-                  tierLimits={tierLimits}
-                  tierProgress={getTierProgress()}
-                />
-              </CardContent>
-            </Card>
+      {/* ── Content Area ── */}
+      <div className="container mx-auto px-4 sm:px-6 max-w-2xl space-y-4 pb-8">
 
-            {/* Tier Upgrade Banner */}
-            {currentTier !== "tier_3" && (
-              <div className="mt-3">
-                <TierUpgradeBanner
-                  currentTier={currentTier}
-                  tierLimits={tierLimits}
-                />
-              </div>
-            )}
-          </>
-        ) : null}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
-        <Card className="shadow-lg">
-          <CardContent className="p-3 sm:p-4">
-            <div className="grid grid-cols-4 gap-1 sm:gap-2">
-              {[
-                {
-                  icon: Send,
-                  label: "Send",
-                  path: "/account/send",
-                  color: "bg-success/10",
-                  iconColor: "text-success",
-                },
-                {
-                  icon: QrCode,
-                  label: "Receive",
-                  path: "/account/receive",
-                  color: "bg-primary/10",
-                  iconColor: "text-primary",
-                },
-                {
-                  icon: History,
-                  label: "History",
-                  path: "/account/transactions",
-                  color: "bg-warning/10",
-                  iconColor: "text-warning",
-                },
-                {
-                  icon: CreditCard,
-                  label: "Cards",
-                  path: "/account/cards",
-                  color: "bg-muted",
-                  iconColor: "text-muted-foreground",
-                  disabled: true,
-                },
-              ].map((action) => (
-                <button
-                  key={action.path}
-                  className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-xl hover:bg-accent active:bg-accent/80 transition-colors touch-manipulation active:scale-95"
-                  onClick={() => !action.disabled && navigate(action.path)}
-                  disabled={action.disabled}
-                >
-                  <div
-                    className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full ${action.color} flex items-center justify-center`}
-                  >
-                    <action.icon
-                      size={18}
-                      className={`${action.iconColor} sm:hidden`}
-                    />
-                    <action.icon
-                      size={20}
-                      className={`${action.iconColor} hidden sm:block`}
-                    />
-                  </div>
-                  <span
-                    className={`text-[10px] sm:text-xs font-medium ${action.disabled ? "text-muted-foreground" : ""}`}
-                  >
-                    {action.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Transactions */}
-      <div className="container mx-auto px-4 sm:px-6 mt-4 sm:mt-6 max-w-4xl">
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h2 className="text-base sm:text-lg font-semibold">
-            Recent Transactions
-          </h2>
-          <Button
-            size="sm"
-            className="text-white text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
-            onClick={() => navigate("/account/transactions")}
-          >
-            See All
-            <ChevronRight size={14} className="ml-0.5" />
-          </Button>
+        {/* Banners */}
+        <div className="-mt-4 space-y-2 relative z-10">
+          <TransactionPinBanner />
         </div>
 
-        <Card>
-          <CardContent className="p-0">
+        {/* ── Quick Actions ── */}
+        <div className="bg-card border border-border rounded-3xl p-4 shadow-sm">
+          <div className="grid grid-cols-4 gap-2">
+            {quickActions.map((action) => (
+              <button
+                key={action.path}
+                className={cn(
+                  "flex flex-col items-center gap-2 p-2 rounded-2xl transition-all duration-150 touch-manipulation active:scale-95",
+                  action.disabled
+                    ? "opacity-40 cursor-not-allowed"
+                    : "hover:bg-accent active:bg-accent/70"
+                )}
+                onClick={() => !action.disabled && navigate(action.path)}
+                disabled={action.disabled}
+              >
+                <div
+                  className={cn(
+                    "w-12 h-12 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-lg",
+                    action.gradient,
+                    action.shadow
+                  )}
+                >
+                  <action.icon size={20} className="text-white" strokeWidth={2} />
+                </div>
+                <span className="text-[11px] font-medium text-foreground/80 leading-none">
+                  {action.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Tier Card ── */}
+        {statusLoading ? (
+          <div className="bg-card border border-border rounded-3xl p-4">
+            <Skeleton className="h-10 w-full rounded-xl" />
+          </div>
+        ) : tierLimits ? (
+          <div className="space-y-3">
+            <div className="bg-card border border-border rounded-3xl p-4 shadow-sm">
+              <TierBadge
+                currentTier={currentTier}
+                tierLimits={tierLimits}
+                tierProgress={getTierProgress()}
+              />
+            </div>
+            {currentTier !== "tier_3" && (
+              <TierUpgradeBanner currentTier={currentTier} tierLimits={tierLimits} />
+            )}
+          </div>
+        ) : null}
+
+        {/* ── Recent Transactions ── */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-base text-foreground">Recent Transactions</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-3 text-primary text-xs font-semibold gap-0.5 hover:bg-primary/10"
+              onClick={() => navigate("/account/transactions")}
+            >
+              See all
+              <ChevronRight size={13} />
+            </Button>
+          </div>
+
+          <div className="bg-card border border-border rounded-3xl overflow-hidden shadow-sm">
             {txLoading ? (
-              <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+              <div className="p-4 space-y-4">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <Skeleton className="w-10 h-10 rounded-full shrink-0" />
-                    <div className="flex-1">
-                      <Skeleton className="h-4 w-24 mb-1" />
-                      <Skeleton className="h-3 w-16" />
+                    <Skeleton className="w-11 h-11 rounded-2xl shrink-0" />
+                    <div className="flex-1 space-y-1.5">
+                      <Skeleton className="h-3.5 w-28 rounded-full" />
+                      <Skeleton className="h-3 w-16 rounded-full" />
                     </div>
-                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-20 rounded-full" />
                   </div>
                 ))}
               </div>
             ) : transactions.length === 0 ? (
-              <div className="p-6 sm:p-8 text-center">
-                <History className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground text-sm sm:text-base">
-                  No transactions yet
-                </p>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  Your transaction history will appear here
+              <div className="py-12 px-6 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+                  <History className="w-7 h-7 text-muted-foreground" />
+                </div>
+                <p className="font-medium text-foreground text-sm mb-1">No transactions yet</p>
+                <p className="text-xs text-muted-foreground">
+                  Send or receive money to see your history here
                 </p>
               </div>
             ) : (
@@ -472,8 +433,8 @@ const Dashboard = () => {
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </AppLayout>
   );
