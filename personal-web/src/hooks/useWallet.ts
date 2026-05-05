@@ -13,7 +13,8 @@ export const useWallet = () => {
   });
 
   return {
-    wallet: walletQuery.data?.data,
+    wallets: walletQuery.data?.data || [],
+    wallet: walletQuery.data?.data?.[0],
     isLoadingWallet: walletQuery.isLoading,
     walletError: walletQuery.error,
     refetchWallet: walletQuery.refetch,

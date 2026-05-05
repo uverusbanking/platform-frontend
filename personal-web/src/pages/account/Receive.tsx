@@ -8,6 +8,16 @@ import { toast } from "sonner";
 import { useUserProfile } from "@/hooks/queries/useUser";
 import { useWallet } from "@/hooks/useWallet";
 import { BrandConfigService } from "@shared/core";
+import { useState, useEffect } from "react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import { cn } from "@/lib/utils";
 
 const Receive = () => {
   const {
@@ -16,9 +26,29 @@ const Receive = () => {
     error: profileError,
   } = useUserProfile();
 
-  const { virtualAccount, isLoadingVirtualAccount } = useWallet();
+  const {
+    wallets,
+    wallet: initialWallet,
+    isLoadingWallet,
+    virtualAccount,
+    isLoadingVirtualAccount,
+  } = useWallet();
 
-  const isLoading = isProfileLoading || isLoadingVirtualAccount;
+  const [api, setApi] = useState<CarouselApi>();
+  const [currentWalletIndex, setCurrentWalletIndex] = useState(0);
+
+  useEffect(() => {
+    if (!api) return;
+
+    api.on("select", () => {
+      setCurrentWalletIndex(api.selectedScrollSnap());
+    });
+  }, [api]);
+
+  const activeWallet = wallets[currentWalletIndex] || initialWallet;
+
+  const isLoading =
+    isProfileLoading || isLoadingWallet || isLoadingVirtualAccount;
   const brandConfig = BrandConfigService.getConfigSync("personal");
 
   const copyToClipboard = (text: string, label: string) => {
@@ -27,9 +57,18 @@ const Receive = () => {
   };
 
   const shareDetails = async () => {
-    if (!profile) return;
+    if (!profile && !activeWallet) return;
 
-    const text = `Bank: ${virtualAccount?.bank_name || profile?.bankName}\nAccount Number: ${virtualAccount?.account_number || profile?.accountNumber}\nAccount Name: ${virtualAccount?.account_name || profile?.accountName || brandConfig.brandName + " User"}`;
+    const bankName =
+      activeWallet?.bank_name || profile?.bankName || brandConfig.brandName;
+    const accountNumber =
+      activeWallet?.account_number || profile?.accountNumber || "";
+    const accountName =
+      activeWallet?.account_name ||
+      profile?.accountName ||
+      brandConfig.brandName + " User";
+
+    const text = `Bank: ${bankName}\nAccount Number: ${accountNumber}\nAccount Name: ${accountName}`;
 
     if (navigator.share) {
       try {
@@ -51,75 +90,110 @@ const Receive = () => {
       <PageHeader title="Receive Money" />
 
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6 max-w-lg">
-        {/* Virtual Account Card */}
-        <Card className="overflow-hidden">
-          <div className="bg-gradient-hero p-4 sm:p-6 text-white">
-            <div className="flex items-center gap-3 mb-3 sm:mb-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                <span className="font-bold text-lg sm:text-xl">
-                  {brandConfig.shortBrandName.charAt(0)}
-                </span>
-              </div>
-              <div className="min-w-0">
-                <p className="text-white/70 text-xs sm:text-sm">
-                  {virtualAccount?.bank_name ||
-                    profile?.bankName ||
-                    brandConfig.brandName}
-                </p>
-                <p className="font-semibold text-sm sm:text-base truncate">
-                  {virtualAccount?.account_name ||
-                    profile?.accountName ||
-                    "Loading..."}
-                </p>
-              </div>
-            </div>
-
-            {isLoading ? (
+        {/* Virtual Account Carousel */}
+        {isLoading ? (
+          <Card className="overflow-hidden">
+            <div className="bg-gradient-hero p-4 sm:p-6 text-white">
               <div className="h-10 sm:h-12 bg-white/20 rounded-lg animate-pulse" />
-            ) : (
-              <div className="bg-white/10 backdrop-blur rounded-xl p-3 sm:p-4">
-                <p className="text-white/60 text-xs sm:text-sm mb-1">
-                  Account Number
-                </p>
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-xl sm:text-2xl font-mono font-bold tracking-wider truncate">
-                    {formatAccountNumber(
-                      virtualAccount?.account_number ||
-                        profile?.accountNumber ||
-                        "",
-                    )}
-                  </p>
-                  <button
-                    onClick={() =>
-                      copyToClipboard(
-                        virtualAccount?.account_number ||
-                          profile?.accountNumber ||
-                          "",
-                        "Account number",
-                      )
-                    }
-                    className="p-2 sm:p-2.5 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors shrink-0 touch-manipulation"
-                    aria-label="Copy account number"
+            </div>
+            <CardContent className="p-3 sm:p-4">
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="relative group">
+            <Carousel setApi={setApi} className="w-full">
+              <CarouselContent>
+                {wallets.map((w) => (
+                  <CarouselItem
+                    key={w.id}
+                    className="basis-[92%] sm:basis-full"
                   >
-                    <Copy size={16} className="sm:hidden" />
-                    <Copy size={18} className="hidden sm:block" />
-                  </button>
-                </div>
+                    <Card className="overflow-hidden border-none shadow-lg">
+                      <div className="bg-gradient-hero p-4 sm:p-6 text-white">
+                        <div className="flex items-center gap-3 mb-3 sm:mb-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                            <span className="font-bold text-lg sm:text-xl">
+                              {brandConfig.shortBrandName.charAt(0)}
+                            </span>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-white/70 text-xs sm:text-sm">
+                              {w.bank_name || brandConfig.brandName}
+                            </p>
+                            <p className="font-semibold text-sm sm:text-base truncate">
+                              {w.account_name || "Loading..."}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="bg-white/10 backdrop-blur rounded-xl p-3 sm:p-4">
+                          <p className="text-white/60 text-xs sm:text-sm mb-1">
+                            {w.name || "Account Number"}
+                          </p>
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-xl sm:text-2xl font-mono font-bold tracking-wider truncate">
+                              {formatAccountNumber(w.account_number || "")}
+                            </p>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copyToClipboard(
+                                  w.account_number,
+                                  "Account number",
+                                );
+                              }}
+                              className="p-2 sm:p-2.5 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors shrink-0 touch-manipulation"
+                              aria-label="Copy account number"
+                            >
+                              <Copy size={16} className="sm:hidden" />
+                              <Copy size={18} className="hidden sm:block" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <CardContent className="p-3 sm:p-4">
+                        <Button
+                          variant="outline"
+                          className="w-full gap-2 h-11 sm:h-10"
+                          onClick={shareDetails}
+                        >
+                          <Share2 size={16} />
+                          Share Details
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {wallets.length > 1 && (
+                <>
+                  <CarouselPrevious className="absolute -left-4 top-1/2 -translate-y-1/2 bg-white/10 border-white/20 hover:bg-white/20 text-white opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex" />
+                  <CarouselNext className="absolute -right-4 top-1/2 -translate-y-1/2 bg-white/10 border-white/20 hover:bg-white/20 text-white opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex" />
+                </>
+              )}
+            </Carousel>
+
+            {/* Carousel Indicators */}
+            {wallets.length > 1 && (
+              <div className="flex justify-center gap-1.5 mt-4">
+                {wallets.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => api?.scrollTo(i)}
+                    className={cn(
+                      "h-1.5 rounded-full transition-all duration-300",
+                      currentWalletIndex === i
+                        ? "w-6 bg-primary"
+                        : "w-1.5 bg-primary/20",
+                    )}
+                    aria-label={`Go to wallet ${i + 1}`}
+                  />
+                ))}
               </div>
             )}
           </div>
-
-          <CardContent className="p-3 sm:p-4">
-            <Button
-              variant="outline"
-              className="w-full gap-2 h-11 sm:h-10"
-              onClick={shareDetails}
-            >
-              <Share2 size={16} />
-              Share Account Details
-            </Button>
-          </CardContent>
-        </Card>
+        )}
 
         {/* QR Code Card */}
         {/* <Card>

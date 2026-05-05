@@ -18,6 +18,14 @@ import { TierBadge } from "@/components/dashboard/TierBadge";
 import { TierUpgradeBanner } from "@/components/dashboard/TierUpgradeBanner";
 import { TransactionPinBanner } from "@/components/dashboard/TransactionPinBanner";
 import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import {
   Copy,
   Bell,
   User,
@@ -37,6 +45,7 @@ import { useUserProfile } from "@/hooks/queries/useUser";
 import { useWallet } from "@/hooks/useWallet";
 import { useBalanceSocket } from "@/hooks/useBalanceSocket";
 import { TransactionCard } from "@/components/TransactionCard";
+import { cn } from "@/lib/utils";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -55,11 +64,32 @@ const Dashboard = () => {
     limit: 10,
   });
 
-  const { wallet, isLoadingWallet, virtualAccount, isLoadingVirtualAccount } =
-    useWallet();
+  const {
+    wallets,
+    wallet: initialWallet,
+    isLoadingWallet,
+    virtualAccount,
+    isLoadingVirtualAccount,
+  } = useWallet();
+
+  const [api, setApi] = useState<CarouselApi>();
+  const [currentWalletIndex, setCurrentWalletIndex] = useState(0);
+
+  useEffect(() => {
+    if (!api) return;
+
+    api.on("select", () => {
+      setCurrentWalletIndex(api.selectedScrollSnap());
+    });
+  }, [api]);
+
+  const activeWallet = wallets[currentWalletIndex] || initialWallet;
 
   // Real-time balance updates via WebSocket
-  const { socketBalance, balanceFlash } = useBalanceSocket({ showToast: true });
+  const { socketBalance, balanceFlash } = useBalanceSocket({
+    showToast: true,
+    walletId: activeWallet?.id,
+  });
 
   // Safely extract transactions array
   const transactions = transactionsResponse?.data || [];
@@ -167,79 +197,130 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Balance Card */}
-          <Card className="bg-black/40 backdrop-blur-xl border-white/20 text-white">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-white/90 text-xs sm:text-sm font-medium">
-                  Available Balance
-                </p>
-                <button
-                  onClick={() => setShowBalance(!showBalance)}
-                  className="p-1.5 hover:bg-white/10 rounded-lg touch-manipulation"
-                  aria-label={showBalance ? "Hide balance" : "Show balance"}
-                >
-                  {showBalance ? <Eye size={18} /> : <EyeOff size={18} />}
-                </button>
-              </div>
-              {isLoadingWallet ? (
-                <Skeleton className="h-8 sm:h-10 w-48 bg-white/20" />
-              ) : (
-                <p
-                  className={[
-                    "text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 transition-all duration-500",
-                    balanceFlash
-                      ? "text-emerald-300 drop-shadow-[0_0_12px_rgba(52,211,153,0.8)]"
-                      : "text-white",
-                  ].join(" ")}
-                >
-                  {showBalance
-                    ? formatCurrency(
-                        parseFloat(socketBalance ?? wallet?.balance ?? "0"),
-                      )
-                    : "₦****.**"}
-                </p>
-              )}
-
-              {/* Virtual Account Info - Prioritize platform data */}
-              {isLoadingVirtualAccount ? (
-                <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-white/10">
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-3 w-24 bg-white/20" />
-                    <Skeleton className="h-4 w-32 bg-white/20" />
-                  </div>
-                  <Skeleton className="h-8 w-8 rounded-lg bg-white/20" />
-                </div>
-              ) : (
-                (virtualAccount?.account_number || profile?.accountNumber) && (
-                  <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-white/15">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white/60 text-[10px] sm:text-xs mb-0.5 sm:mb-1">
-                        {virtualAccount?.bank_name ||
-                          profile?.bankName ||
-                          "Virtual Account"}
-                      </p>
-                      <p className="font-mono font-semibold text-sm sm:text-base truncate">
-                        {formatAccountNumber(
-                          virtualAccount?.account_number ||
-                            profile?.accountNumber ||
-                            "",
-                        )}
-                      </p>
-                    </div>
-                    <button
-                      onClick={copyAccountNumber}
-                      className="p-2 sm:p-2.5 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors shrink-0 touch-manipulation"
-                      aria-label="Copy account number"
+          {/* Balance Carousel */}
+          {isLoadingWallet ? (
+            <Card className="bg-black/40 backdrop-blur-xl border-white/20 text-white">
+              <CardContent className="p-4 sm:p-6">
+                <Skeleton className="h-8 sm:h-10 w-48 bg-white/20 mb-4" />
+                <Skeleton className="h-12 w-full bg-white/10 rounded-xl" />
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="relative group">
+              <Carousel setApi={setApi} className="w-full">
+                <CarouselContent>
+                  {wallets.map((w) => (
+                    <CarouselItem
+                      key={w.id}
+                      className="basis-[92%] sm:basis-full"
                     >
-                      <Copy size={16} className="sm:hidden" />
-                      <Copy size={18} className="hidden sm:block" />
-                    </button>
+                      <Card className="bg-black/40 backdrop-blur-xl border-white/20 text-white overflow-hidden">
+                        <CardContent className="p-4 sm:p-6">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <p className="text-white/90 text-xs sm:text-sm font-medium">
+                                {w.name || "Available Balance"}
+                              </p>
+                              <span className="px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-medium uppercase tracking-wider text-white/60">
+                                {w.currency}
+                              </span>
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowBalance(!showBalance);
+                              }}
+                              className="p-1.5 hover:bg-white/10 rounded-lg touch-manipulation"
+                              aria-label={
+                                showBalance ? "Hide balance" : "Show balance"
+                              }
+                            >
+                              {showBalance ? (
+                                <Eye size={18} />
+                              ) : (
+                                <EyeOff size={18} />
+                              )}
+                            </button>
+                          </div>
+
+                          <p
+                            className={[
+                              "text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 transition-all duration-500",
+                              balanceFlash && activeWallet?.id === w.id
+                                ? "text-emerald-300 drop-shadow-[0_0_12px_rgba(52,211,153,0.8)]"
+                                : "text-white",
+                            ].join(" ")}
+                          >
+                            {showBalance
+                              ? formatCurrency(
+                                  parseFloat(
+                                    (activeWallet?.id === w.id
+                                      ? socketBalance
+                                      : null) ??
+                                      w.balance ??
+                                      "0",
+                                  ),
+                                  w.currency,
+                                )
+                              : "****.**"}
+                          </p>
+
+                          {/* Virtual Account Info - Only show for the specific wallet if it matches the profile/virtualAccount */}
+                          <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-white/15">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white/60 text-[10px] sm:text-xs mb-0.5 sm:mb-1">
+                                {w.bank_name || "Virtual Account"}
+                              </p>
+                              <p className="font-mono font-semibold text-sm sm:text-base truncate">
+                                {formatAccountNumber(w.account_number || "")}
+                              </p>
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(w.account_number);
+                                toast.success("Account number copied!");
+                              }}
+                              className="p-2 sm:p-2.5 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors shrink-0 touch-manipulation"
+                              aria-label="Copy account number"
+                            >
+                              <Copy size={16} className="sm:hidden" />
+                              <Copy size={18} className="hidden sm:block" />
+                            </button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                {wallets.length > 1 && (
+                  <div className="hidden sm:block">
+                    <CarouselPrevious className="absolute -left-5 top-1/2 -translate-y-1/2 bg-white/10 border-white/20 hover:bg-white/20 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <CarouselNext className="absolute -right-5 top-1/2 -translate-y-1/2 bg-white/10 border-white/20 hover:bg-white/20 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                )
+                )}
+              </Carousel>
+
+              {/* Carousel Indicators */}
+              {wallets.length > 1 && (
+                <div className="flex justify-center gap-1.5 mt-3">
+                  {wallets.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => api?.scrollTo(i)}
+                      className={cn(
+                        "h-1.5 rounded-full transition-all duration-300",
+                        currentWalletIndex === i
+                          ? "w-6 bg-white"
+                          : "w-1.5 bg-white/30",
+                      )}
+                      aria-label={`Go to wallet ${i + 1}`}
+                    />
+                  ))}
+                </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          )}
         </div>
       </header>
 
