@@ -49,3 +49,23 @@ export const getCustomer = async (
   const response = await apiClient.get(`/customers/platform/${id}`);
   return response.data;
 };
+
+export const getCustomerActivity = async (
+  id: string,
+  params: any,
+): Promise<any> => {
+  const response = await apiClient.get(`/customers/platform/${id}/activity`, {
+    params,
+  });
+  return response.data;
+};
+
+export const getCustomerActivityDetail = async (
+  id: string,
+  activityId: string,
+): Promise<IApiResponse<any>> => {
+  const response = await apiClient.get(
+    `/customers/platform/${id}/activity/${activityId}`,
+  );
+  return response.data;
+};

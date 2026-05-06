@@ -18,7 +18,7 @@ export interface WalletDto {
 }
 
 export const WalletService = {
-  getWallet: () => api.get<ApiResponse<WalletDto>>("/api/v1/wallets/me"),
+  getWallet: () => api.get<ApiResponse<WalletDto[]>>("/api/v1/wallets"),
 
   getVirtualAccount: () =>
     api.get<{ status: string; data: VirtualAccountResponseDto | null }>(

@@ -306,7 +306,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const signOut = async () => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(SESSION_ID_KEY);
     setAccessToken(null);
+    setUser(null);
     setPendingCredentials(null, null);
   };
 

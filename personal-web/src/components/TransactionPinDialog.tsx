@@ -248,10 +248,11 @@ export function EnterPinDialog({
 
   const handleComplete = (value: string) => {
     setPinValue(value);
-    console.log(value.length);
-    if (value.length === 4) {
-      onSuccess(value);
-      // We don't close the dialog here, let the parent handle it after the API call
+  };
+
+  const handleConfirm = () => {
+    if (pin.length === 4) {
+      onSuccess(pin);
     }
   };
 
@@ -290,11 +291,24 @@ export function EnterPinDialog({
             </InputOTPGroup>
           </InputOTP>
         </div>
-        {loading && (
-          <div className="flex justify-center pb-4">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
-          </div>
-        )}
+
+        <DialogFooter className="sm:justify-center">
+          <Button
+            type="button"
+            className="w-full sm:w-auto min-w-[120px]"
+            disabled={pin.length !== 4 || loading}
+            onClick={handleConfirm}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              "Confirm"
+            )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

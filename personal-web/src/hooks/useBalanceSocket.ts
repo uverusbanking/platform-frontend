@@ -16,6 +16,8 @@ export interface UseBalanceSocketOptions {
   onUpdate?: (payload: BalanceUpdatedPayload) => void;
   /** Show a toast on credit/debit/transfer (default: true) */
   showToast?: boolean;
+  /** If provided, only updates socketBalance for this specific wallet */
+  walletId?: string;
 }
 
 export interface UseBalanceSocketResult {
@@ -58,19 +60,27 @@ export function useBalanceSocket(
   const handleBalanceUpdated = useCallback(
     (payload: BalanceUpdatedPayload) => {
       // 1. Store the latest socket value in local state for direct rendering
-      setSocketBalance(payload.balance);
-      setLastPayload(payload);
+      // Only update if it matches the filtered walletId or no filter is provided
+      if (!options.walletId || payload.walletId === options.walletId) {
+        setSocketBalance(payload.balance);
+        setLastPayload(payload);
 
-      // 2. Trigger a flash animation for 1 second
-      setBalanceFlash(true);
-      if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
-      flashTimerRef.current = setTimeout(() => setBalanceFlash(false), 1000);
+        // 2. Trigger a flash animation for 1 second
+        setBalanceFlash(true);
+        if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+        flashTimerRef.current = setTimeout(() => setBalanceFlash(false), 1000);
+      }
 
       // 3. Update the React Query wallet cache in-place (instant, no re-fetch flicker)
       queryClient.setQueryData(["wallet"], (old: any) => {
-        if (!old) return old;
-        // Cache shape is ApiResponse<WalletDto>: { status, message, data: { balance, ... } }
-        return { ...old, data: { ...old.data, balance: payload.balance } };
+        if (!old || !Array.isArray(old.data)) return old;
+        // Cache shape is now ApiResponse<WalletDto[]>
+        return {
+          ...old,
+          data: old.data.map((w: any) =>
+            w.id === payload.walletId ? { ...w, balance: payload.balance } : w,
+          ),
+        };
       });
 
       // 4. Invalidate to confirm server state shortly after
@@ -105,7 +115,7 @@ export function useBalanceSocket(
       // 6. User-supplied callback
       onUpdateRef.current?.(payload);
     },
-    [queryClient, showToast],
+    [queryClient, showToast, options.walletId],
   );
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -47,6 +47,7 @@ import { BrandConfigService } from "@shared/core";
 export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const collapsed = state === "collapsed";
   const brand = BrandConfigService.getConfigSync("personal");
@@ -57,7 +58,12 @@ export function AppSidebar() {
   const isAdmin = user?.user_metadata?.role === "admin";
 
   const handleSignOut = async () => {
-    await signOut();
+    try {
+      await signOut();
+      navigate("/auth/login");
+    } catch (error) {
+      console.error("Sign out failed:", error);
+    }
   };
 
   return (

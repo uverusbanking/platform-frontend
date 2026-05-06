@@ -17,17 +17,24 @@ export const QUERY_KEYS = {
     ORGANISATIONS: "platform-organisations",
     ROLES: "roles",
     USERS: "platform-users",
+    CUSTOMER_WALLETS: "platform-customer-wallets",
   },
   CUSTOMER: {
     GET_ALL: "customers",
     GET_BY_ID: "customer",
     STATS: "customer-stats",
+    ACTIVITY: "customer-activity",
+  },
+  TRANSACTION: {
+    PLATFORM_LIST: "platform-transactions",
+    GET_DETAIL: "platform-transaction-detail",
   },
   USER: {
     PROFILE: "user-profile",
   },
   WALLET: {
     GET_ALL: "wallets",
+    CUSTOMER_WALLETS: "customer-wallets",
   },
   AUTH: {
     ENCRYPTION_PUBLIC_KEY: "encryption-public-key",

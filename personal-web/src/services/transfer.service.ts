@@ -25,6 +25,18 @@ export const TransferService = {
       data,
     ),
 
+  initiateInternalTransfer: (data: {
+    recipient_account_number: string;
+    amount: number;
+    narration: string;
+    pin: string;
+    source_wallet_id: string;
+  }) =>
+    api.post<ApiResponse<TransferResponseDto>>(
+      "/api/v1/transfers/internal",
+      data,
+    ),
+
   getTransactions: (page: number = 1, limit: number = 20) =>
     api.get<TransactionsResponseDto>("/api/v1/transactions", {
       query: { page, limit },

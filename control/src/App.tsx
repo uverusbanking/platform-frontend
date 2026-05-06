@@ -29,7 +29,10 @@ import Verify from "@/app/(auth)/verify/[session_id]/page";
 // Account pages
 import DashboardPage from "@/app/account/dashboard/page";
 import CustomersPage from "@/app/account/customers/page";
+import CustomerWalletsPage from "@/app/account/customers/wallets/page";
 import CustomerDetailPage from "@/app/account/customers/[id]/page";
+import CustomerTransactionsPage from "@/app/account/customers/[id]/transactions/page";
+import TransactionDetailPage from "@/app/account/transactions/[id]/page";
 import OrganisationsPage from "@/app/account/organisations/page";
 import OrganisationDetailPage from "@/app/account/organisations/[id]/page";
 import StaffPage from "@/app/account/staff/page";
@@ -52,6 +55,8 @@ import WhatsappPage from "@/app/account/whatsapp/page";
 import SettingsProfilePage from "@/app/account/settings/profile/page";
 import SettingsSecurityPage from "@/app/account/settings/security/page";
 import SettingsDevelopersPage from "@/app/account/settings/developers_disabled/page";
+import CustomerActivityListPage from "@/app/account/customers/[id]/activity/page";
+import CustomerActivityDetailPage from "@/app/account/customers/[id]/activity/[activityId]/page";
 
 // 404
 import NotFound from "@/app/not-found";
@@ -141,8 +146,28 @@ export default function App() {
                     <Route path="dashboard" element={<DashboardPage />} />
                     <Route path="customers" element={<CustomersPage />} />
                     <Route
+                      path="customers/wallets"
+                      element={<CustomerWalletsPage />}
+                    />
+                    <Route
                       path="customers/:id"
                       element={<CustomerDetailPage />}
+                    />
+                    <Route
+                      path="customers/:id/transactions"
+                      element={<CustomerTransactionsPage />}
+                    />
+                    <Route
+                      path="customers/:id/activity"
+                      element={<CustomerActivityListPage />}
+                    />
+                    <Route
+                      path="customers/:id/activity/:activityId"
+                      element={<CustomerActivityDetailPage />}
+                    />
+                    <Route
+                      path="transactions/:id"
+                      element={<TransactionDetailPage />}
                     />
                     <Route
                       path="organisations"
