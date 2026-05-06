@@ -25,7 +25,7 @@ import {
   Copy,
   Snowflake,
 } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useGetPlatformCustomerWallets } from "@/hooks/endpoints/useWallet";
 import { useUserStore } from "@/state/userStore";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { FreezeCustomerDialog } from "@/components/features/customers/FreezeCustomerDialog";
 import { UnFreezeCustomerDialog } from "@/components/features/customers/UnFreezeCustomerDialog";
+import { TransactionDetailModal } from "@/components/features/transactions/TransactionDetailModal";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { can } from "@/auth/can";
 import { PERMISSIONS } from "@/auth/permissions";
 import { useGetCustomerById } from "@/hooks/queries/useCustomerQueries";
@@ -240,7 +248,7 @@ export default function CustomerDetailPage() {
 
       <div className="grid lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Stats and Info */}
-        <div className="lg:col-span-8 space-y-8">
+        <div className="lg:col-span-12 space-y-8">
           {/* <div className="grid sm:grid-cols-3 gap-6">
             <Card className="border-none shadow-premium bg-surface/50 backdrop-blur-md relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -301,155 +309,111 @@ export default function CustomerDetailPage() {
           </div> */}
 
           {/* Wallet Carousel */}
-          {wallets.length > 0 && (() => {
-            const gradients = [
-              "from-violet-600 via-purple-600 to-indigo-700",
-              "from-emerald-500 via-teal-600 to-cyan-700",
-              "from-rose-500 via-pink-600 to-fuchsia-700",
-              "from-amber-500 via-orange-500 to-red-600",
-              "from-sky-500 via-blue-600 to-indigo-700",
-            ];
-            const wallet = wallets[activeWalletIdx];
-            const gradient = gradients[activeWalletIdx % gradients.length];
-            const balanceNum = parseFloat(wallet.balance || "0");
-            const isFrozenWallet = wallet.is_transfer_frozen || wallet.is_funding_frozen;
-
-            return (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                    {wallets.length} Wallet{wallets.length > 1 ? "s" : ""}
-                  </div>
-                  {wallets.length > 1 && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setActiveWalletIdx((i) => (i - 1 + wallets.length) % wallets.length)}
-                        className="h-8 w-8 rounded-full border border-border/50 flex items-center justify-center text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                      <span className="text-xs font-bold text-muted-foreground tabular-nums">
-                        {activeWalletIdx + 1} / {wallets.length}
-                      </span>
-                      <button
-                        onClick={() => setActiveWalletIdx((i) => (i + 1) % wallets.length)}
-                        className="h-8 w-8 rounded-full border border-border/50 flex items-center justify-center text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
+          {wallets.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                  <Wallet className="w-3.5 h-3.5 text-primary" />
+                  {wallets.length} Wallet{wallets.length > 1 ? "s" : ""} Linked
                 </div>
-
-                <div className="relative group/card">
-                  {/* Glow */}
-                  <div className={`absolute -inset-1 bg-gradient-to-br ${gradient} rounded-3xl blur-md opacity-20 group-hover/card:opacity-30 transition-opacity duration-500`} />
-
-                  <div className={`relative bg-gradient-to-br ${gradient} rounded-2xl p-7 shadow-2xl overflow-hidden text-white`}>
-                    {/* Background circles */}
-                    <div className="absolute inset-0 pointer-events-none">
-                      <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full border-2 border-white/10" />
-                      <div className="absolute -bottom-16 -left-8 w-64 h-64 rounded-full border-2 border-white/10" />
-                      <div className="absolute top-1/2 right-8 w-24 h-24 rounded-full border border-white/10" />
-                    </div>
-
-                    {/* Top row */}
-                    <div className="relative flex items-start justify-between mb-8">
-                      <div>
-                        <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/50 mb-1">
-                          {wallet.account_type} · {wallet.environment}
-                        </div>
-                        <div className="text-lg font-black tracking-wide">
-                          {wallet.name}
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <div className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${wallet.status === "ACTIVE" ? "bg-white/20" : "bg-white/10 text-white/50"}`}>
-                          {wallet.status}
-                        </div>
-                        {isFrozenWallet && (
-                          <div className="flex items-center gap-1 bg-white/10 text-white/70 text-[9px] font-bold px-2 py-0.5 rounded-full">
-                            <Snowflake className="w-2.5 h-2.5" />
-                            FROZEN
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Chip + account number */}
-                    <div className="relative mb-7">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-9 h-7 rounded-md bg-gradient-to-br from-yellow-300/60 to-amber-400/60 shadow-inner" />
-                      </div>
-                      <div className="font-mono text-xl font-bold tracking-[0.3em] text-white/90">
-                        {wallet.account_number.replace(/(\d{4})(?=\d)/g, "$1 ")}
-                      </div>
-                      <div className="text-[11px] text-white/40 font-medium mt-1 uppercase tracking-widest">
-                        {wallet.account_name}
-                      </div>
-                    </div>
-
-                    {/* Balance + bank */}
-                    <div className="relative flex items-end justify-between">
-                      <div>
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-0.5">
-                          Available Balance
-                        </div>
-                        <div className="text-3xl font-black tracking-tight">
-                          {wallet.currency} {balanceNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </div>
-                        {parseFloat(wallet.hold_balance || "0") > 0 && (
-                          <div className="text-[10px] text-white/40 font-medium mt-0.5">
-                            + {wallet.currency} {parseFloat(wallet.hold_balance).toLocaleString(undefined, { minimumFractionDigits: 2 })} on hold
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-0.5">Bank</div>
-                        <div className="text-sm font-black text-white/80">{wallet.bank_name}</div>
-                        <div className="text-[10px] text-white/40 font-mono">{wallet.bank_code}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Actions + meta row */}
-                <div className="flex items-center justify-between px-1">
-                  <div className="flex items-center gap-3 text-[11px] font-bold">
-                    {wallet.is_transfer_frozen ? (
-                      <span className="flex items-center gap-1 text-destructive"><Snowflake className="w-3 h-3" /> Transfers frozen</span>
-                    ) : null}
-                    {wallet.is_funding_frozen ? (
-                      <span className="flex items-center gap-1 text-destructive"><Snowflake className="w-3 h-3" /> Funding frozen</span>
-                    ) : null}
-                    {!isFrozenWallet && (
-                      <span className="flex items-center gap-1 text-success"><CheckCircle2 className="w-3 h-3" /> All clear</span>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => navigator.clipboard.writeText(wallet.account_number)}
-                    className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    <Copy className="w-3 h-3" />
-                    Copy account number
-                  </button>
-                </div>
-
-                {/* Dot indicators */}
-                {wallets.length > 1 && (
-                  <div className="flex items-center justify-center gap-1.5 pt-1">
-                    {wallets.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setActiveWalletIdx(i)}
-                        className={`rounded-full transition-all duration-300 ${i === activeWalletIdx ? "w-6 h-2 bg-primary" : "w-2 h-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"}`}
-                      />
-                    ))}
-                  </div>
-                )}
               </div>
-            );
-          })()}
+
+              <Carousel
+                opts={{
+                  align: "start",
+                  loop: false,
+                }}
+                className="w-full"
+              >
+                <CarouselContent className="-ml-4">
+                  {wallets.map((wallet, idx) => {
+                    const gradients = [
+                      "from-violet-600 via-purple-600 to-indigo-700",
+                      "from-emerald-500 via-teal-600 to-cyan-700",
+                      "from-rose-500 via-pink-600 to-fuchsia-700",
+                      "from-amber-500 via-orange-500 to-red-600",
+                      "from-sky-500 via-blue-600 to-indigo-700",
+                    ];
+                    const gradient = gradients[idx % gradients.length];
+                    const balanceNum = parseFloat(wallet.balance || "0");
+                    const isFrozenWallet = wallet.is_transfer_frozen || wallet.is_funding_frozen;
+
+                    return (
+                      <CarouselItem key={wallet.id} className="pl-4 basis-[85%] md:basis-[48%]">
+                        <div className="relative group/card h-full">
+                          {/* Glow */}
+                          <div className={`absolute -inset-1 bg-gradient-to-br ${gradient} rounded-3xl blur-md opacity-20 group-hover/card:opacity-30 transition-opacity duration-500`} />
+
+                          <div className={`relative h-full bg-gradient-to-br ${gradient} rounded-2xl p-6 shadow-xl overflow-hidden text-white flex flex-col justify-between`}>
+                            {/* Background circles */}
+                            <div className="absolute inset-0 pointer-events-none">
+                              <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full border-2 border-white/10" />
+                              <div className="absolute -bottom-16 -left-8 w-52 h-52 rounded-full border-2 border-white/10" />
+                            </div>
+
+                            {/* Top row */}
+                            <div className="relative flex items-start justify-between mb-6">
+                              <div>
+                                <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">
+                                  {wallet.account_type} · {wallet.environment}
+                                </div>
+                                <div className="text-base font-black tracking-wide truncate max-w-[150px]">
+                                  {wallet.name}
+                                </div>
+                              </div>
+                              <div className="flex flex-col items-end gap-1.5">
+                                <div className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${wallet.status === "ACTIVE" ? "bg-white/20" : "bg-white/10 text-white/50"}`}>
+                                  {wallet.status}
+                                </div>
+                                {isFrozenWallet && (
+                                  <div className="flex items-center gap-1 bg-white/10 text-white/70 text-[8px] font-bold px-1.5 py-0.5 rounded-full">
+                                    <Snowflake className="w-2.5 h-2.5" />
+                                    FROZEN
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Chip + account number */}
+                            <div className="relative mb-6">
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="w-8 h-6 rounded-md bg-gradient-to-br from-yellow-300/60 to-amber-400/60 shadow-inner" />
+                              </div>
+                              <div className="font-mono text-lg font-bold tracking-[0.2em] text-white/90">
+                                {wallet.account_number.replace(/(\d{4})(?=\d)/g, "$1 ")}
+                              </div>
+                            </div>
+
+                            {/* Balance + bank */}
+                            <div className="relative flex items-end justify-between mt-auto">
+                              <div>
+                                <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-0.5">
+                                  Available Balance
+                                </div>
+                                <div className="text-2xl font-black tracking-tight">
+                                  {wallet.currency} {balanceNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-0.5">Bank</div>
+                                <div className="text-xs font-black text-white/80">{wallet.bank_name}</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CarouselItem>
+                    );
+                  })}
+                </CarouselContent>
+                {wallets.length > 1 && (
+                  <>
+                    <CarouselPrevious className="hidden md:flex -left-6 bg-background/80 backdrop-blur-sm border-border/50" />
+                    <CarouselNext className="hidden md:flex -right-6 bg-background/80 backdrop-blur-sm border-border/50" />
+                  </>
+                )}
+              </Carousel>
+            </div>
+          )}
 
           <Tabs defaultValue="history" className="w-full">
             <TabsList className="bg-muted/20 p-1.5 rounded-2xl w-full sm:w-auto h-auto grid grid-cols-3 sm:flex sm:items-center gap-1 border border-border/30 backdrop-blur-md mb-6">
@@ -749,7 +713,7 @@ export default function CustomerDetailPage() {
         </div>
 
         {/* Right Column: Mini Details Table */}
-        <div className="lg:col-span-4 space-y-6">
+        {/* <div className="lg:col-span-4 space-y-6">
           <Card className="border-none shadow-premium bg-surface border-t-4 border-t-primary overflow-hidden">
             <CardHeader className="pb-4">
               <CardTitle className="text-sm font-bold uppercase tracking-[0.2em] text-primary">
@@ -841,7 +805,7 @@ export default function CustomerDetailPage() {
               </Button>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
     </div>
   );
@@ -850,6 +814,7 @@ export default function CustomerDetailPage() {
 function HistoryTab({ customerId }: { customerId: string }) {
   const [typeFilter, setTypeFilter] = useState<"ALL" | "CREDIT" | "DEBIT">("ALL");
   const [page, setPage] = useState(1);
+  const navigate = useNavigate();
 
   const filters = {
     limit: 5,
@@ -948,7 +913,8 @@ function HistoryTab({ customerId }: { customerId: string }) {
                 return (
                   <div
                     key={tx.id}
-                    className={`flex items-center justify-between px-5 py-4 group/tx transition-all border-l-4 ${
+                    onClick={() => navigate(`/account/transactions/${tx.id}`)}
+                    className={`flex items-center justify-between px-5 py-4 group/tx transition-all border-l-4 cursor-pointer active:scale-[0.99] ${
                       isCredit
                         ? "border-l-success hover:bg-success/5"
                         : "border-l-destructive hover:bg-destructive/5"

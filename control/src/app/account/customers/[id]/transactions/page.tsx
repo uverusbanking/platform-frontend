@@ -14,7 +14,7 @@ import {
   TrendingDown,
   Activity,
 } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useGetCustomerById } from "@/hooks/queries/useCustomerQueries";
 import { useGetPlatformCustomerTransactions } from "@/hooks/queries/useTransactionQueries";
 import { IGetPlatformTransactionFilters } from "@/types/transaction.types";
@@ -40,6 +40,7 @@ import { Badge } from "@/components/ui/badge";
 const PAGE_SIZE = 20;
 
 export default function CustomerTransactionsPage() {
+  const navigate = useNavigate();
   const { id = "" } = useParams<{ id: string }>();
   const { data: customerResponse } = useGetCustomerById(id);
   const customer = customerResponse?.data;
@@ -343,7 +344,8 @@ export default function CustomerTransactionsPage() {
                 return (
                   <div
                     key={tx.id}
-                    className={`flex items-center justify-between px-5 py-4 group/tx transition-all border-l-4 ${
+                    onClick={() => navigate(`/account/transactions/${tx.id}`)}
+                    className={`flex items-center justify-between px-5 py-4 group/tx transition-all border-l-4 cursor-pointer active:scale-[0.99] ${
                       isCredit
                         ? "border-l-success hover:bg-success/5"
                         : "border-l-destructive hover:bg-destructive/5"

@@ -26,6 +26,7 @@ export const QUERY_KEYS = {
   },
   TRANSACTION: {
     PLATFORM_LIST: "platform-transactions",
+    GET_DETAIL: "platform-transaction-detail",
   },
   USER: {
     PROFILE: "user-profile",

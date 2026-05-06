@@ -4,11 +4,35 @@ export interface ITransaction {
   type: "CREDIT" | "DEBIT";
   amount: string;
   description: string;
-  status: "SUCCESSFUL" | "FAILED" | "PENDING";
+  status: "SUCCESSFUL" | "FAILED" | "PENDING" | "COMPLETED";
   currency: string;
-  customer_id: string;
+  customer_id?: string;
   wallet_id?: string;
-  createdAt: string;
+  createdAt?: string;
+  date?: string;
+  ledgerEntries?: Array<{
+    id: string;
+    type: "CREDIT" | "DEBIT";
+    amount: string;
+    balanceBefore?: string;
+    balanceAfter?: string;
+    description?: string;
+    createdAt?: string;
+    wallet: {
+      id: string;
+      accountNumber: string;
+      accountName: string;
+      bankName?: string;
+      bankCode?: string;
+    };
+  }>;
+  metadata?: any;
+  recipient?: {
+    accountName: string;
+    accountNumber: string;
+    bankName: string;
+    bankCode: string;
+  };
 }
 
 export interface ITransactionMeta {

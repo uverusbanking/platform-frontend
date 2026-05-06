@@ -32,6 +32,7 @@ import CustomersPage from "@/app/account/customers/page";
 import CustomerWalletsPage from "@/app/account/customers/wallets/page";
 import CustomerDetailPage from "@/app/account/customers/[id]/page";
 import CustomerTransactionsPage from "@/app/account/customers/[id]/transactions/page";
+import TransactionDetailPage from "@/app/account/transactions/[id]/page";
 import OrganisationsPage from "@/app/account/organisations/page";
 import OrganisationDetailPage from "@/app/account/organisations/[id]/page";
 import StaffPage from "@/app/account/staff/page";
@@ -153,6 +154,10 @@ export default function App() {
                     <Route
                       path="customers/:id/transactions"
                       element={<CustomerTransactionsPage />}
+                    />
+                    <Route
+                      path="transactions/:id"
+                      element={<TransactionDetailPage />}
                     />
                     <Route
                       path="organisations"
