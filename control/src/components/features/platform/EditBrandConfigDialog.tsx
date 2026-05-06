@@ -109,55 +109,40 @@ export function EditBrandConfigDialog({
       identifiers: clean(values.identifiers),
     } as unknown as FormValues;
 
-    try {
-      const mutations: Promise<unknown>[] = [
-        updateBrand({ id: organisation.id, brand: filteredValues.brand }),
-        updateDomains({ id: organisation.id, ...filteredValues.domains }),
-      ];
+    const mutations: Promise<unknown>[] = [
+      updateBrand({ id: organisation.id, brand: filteredValues.brand }),
+      updateDomains({ id: organisation.id, ...filteredValues.domains }),
+    ];
 
-      const { slug, prefix, short_name, short_code } =
-        filteredValues.identifiers;
-      if (slug || prefix || short_name || short_code) {
-        mutations.push(
-          updateOrg({
-            id: organisation.id,
-            slug: slug || undefined,
-            prefix: prefix || undefined,
-            short_name: short_name || undefined,
-            short_code: short_code || undefined,
-          }),
-        );
-      }
+    const { slug, prefix, short_name, short_code } = filteredValues.identifiers;
+    if (slug || prefix || short_name || short_code) {
+      mutations.push(
+        updateOrg({
+          id: organisation.id,
+          slug: slug || undefined,
+          prefix: prefix || undefined,
+          short_name: short_name || undefined,
+          short_code: short_code || undefined,
+        }),
+      );
+    }
 
-      await Promise.all(mutations);
+    const results = await Promise.allSettled(mutations);
+    const failures = results.filter(
+      (r): r is PromiseRejectedResult => r.status === "rejected",
+    );
 
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: [QUERY_KEYS.ORGANISATION.GET_BY_ID, organisation.id],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: [QUERY_KEYS.ORGANISATION.BRAND_SETTINGS, organisation.id],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: [
-            QUERY_KEYS.ORGANISATION.CONFIGURED_DOMAINS,
-            organisation.id,
-          ],
-        }),
-      ]);
-      toast.success("Brand configuration saved");
-      onOpenChange(false);
-    } catch (err) {
-      const data = axios.isAxiosError(err)
-        ? (err.response?.data as
-            | { message?: string; errors?: string[] }
-            | undefined)
-        : undefined;
-      const errors = data?.errors ?? [];
-      const items =
-        errors.length > 0
-          ? errors
-          : [data?.message ?? "Failed to save brand configuration"];
+    if (failures.length > 0) {
+      const items = failures.flatMap((r) => {
+        const err = r.reason;
+        if (!axios.isAxiosError(err)) return ["An unexpected error occurred"];
+        const body = err.response?.data as
+          | { message?: string | string[]; errors?: string[] }
+          | undefined;
+        if (body?.errors?.length) return body.errors;
+        if (Array.isArray(body?.message)) return body.message;
+        return [body?.message ?? "Failed to save configuration"];
+      });
       toast.error("Failed to save brand configuration", {
         description: (
           <ul className="mt-1 space-y-0.5">
@@ -170,7 +155,22 @@ export function EditBrandConfigDialog({
         ),
         duration: 6000,
       });
+      return;
     }
+
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.GET_BY_ID, organisation.id],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.BRAND_SETTINGS, organisation.id],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.CONFIGURED_DOMAINS, organisation.id],
+      }),
+    ]);
+    toast.success("Brand configuration saved");
+    onOpenChange(false);
   };
 
   return (

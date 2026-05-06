@@ -130,6 +130,7 @@ export default function App() {
       >
         <InactivityProvider>
           <TooltipProvider>
+            <Toaster position="top-center" richColors closeButton />
             <BrowserRouter>
               <Routes>
                 <Route element={<RootLayout />}>
