@@ -8,32 +8,30 @@ import {
   MapPin,
   ShieldCheck,
   ShieldAlert,
-  TrendingUp,
-  TrendingDown,
   Clock,
-  Download,
   Link as LinkIcon,
   CreditCard,
   User,
-  Activity,
   Shield,
   Wallet,
   CheckCircle2,
   AlertCircle,
   ChevronRight,
+  ChevronLeft,
   ExternalLink,
   History,
   Edit,
   Lock as LockIcon,
+  Copy,
+  Snowflake,
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { useGetWallets } from "@/hooks/endpoints/useWallet";
+import { useGetPlatformCustomerWallets } from "@/hooks/endpoints/useWallet";
 import { useUserStore } from "@/state/userStore";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -49,83 +47,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AnalyticsChart } from "@/components/features/dashboard/AnalyticsChart";
 import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { FreezeCustomerDialog } from "@/components/features/customers/FreezeCustomerDialog";
 import { UnFreezeCustomerDialog } from "@/components/features/customers/UnFreezeCustomerDialog";
 import { can } from "@/auth/can";
 import { PERMISSIONS } from "@/auth/permissions";
 import { useGetCustomerById } from "@/hooks/queries/useCustomerQueries";
+import { useGetPlatformCustomerTransactions } from "@/hooks/queries/useTransactionQueries";
 
-// Sample transaction data matching the dialog's style but enhanced
-const transactions = [
-  {
-    id: "TXN001",
-    type: "Credit",
-    amount: 50000,
-    desc: "Direct Deposit - Payroll",
-    date: "Mar 15, 2024",
-    time: "14:30",
-    status: "Completed",
-  },
-  {
-    id: "TXN002",
-    type: "Debit",
-    amount: 12500,
-    desc: "Amazon.com*Purchase",
-    date: "Mar 14, 2024",
-    time: "10:45",
-    status: "Completed",
-  },
-  {
-    id: "TXN003",
-    type: "Credit",
-    amount: 25000,
-    desc: "Peer Transfer from @sarah_j",
-    date: "Mar 13, 2024",
-    time: "16:20",
-    status: "Completed",
-  },
-  {
-    id: "TXN004",
-    type: "Debit",
-    amount: 2400,
-    desc: "Starbucks Coffee",
-    date: "Mar 12, 2024",
-    time: "12:15",
-    status: "Completed",
-  },
-  {
-    id: "TXN005",
-    type: "Debit",
-    amount: 8900,
-    desc: "Netflix Subscription",
-    date: "Mar 10, 2024",
-    time: "09:00",
-    status: "Completed",
-  },
-];
-
-const analyticsData = [
-  { name: "Jan", credits: 180000, debits: 120000, balance: 350000 },
-  { name: "Feb", credits: 220000, debits: 150000, balance: 420000 },
-  { name: "Mar", credits: 195000, debits: 145000, balance: 470000 },
-  { name: "Apr", credits: 240000, debits: 160000, balance: 550000 },
-  { name: "May", credits: 210000, debits: 140000, balance: 620000 },
-  { name: "Jun", credits: 250000, debits: 170000, balance: 700000 },
-];
 
 export default function CustomerDetailPage() {
   const { id = "" } = useParams<{ id: string }>();
   const [showFreezeDialog, setShowFreezeDialog] = useState(false);
   const [showUnfreezeDialog, setShowUnfreezeDialog] = useState(false);
+  const [activeWalletIdx, setActiveWalletIdx] = useState(0);
   const { data: customerResponse, isLoading } = useGetCustomerById(id);
   const customer = customerResponse?.data;
 
@@ -142,13 +77,7 @@ export default function CustomerDetailPage() {
       : "bg-muted/40 text-muted-foreground border-border/40";
 
   const userData = useUserStore((state) => state.userData);
-  const view_mode = userData?.view_mode;
-  const { data: walletsResponse } = useGetWallets({
-    customer_id: id,
-    environment: view_mode,
-  });
-  const wallets = walletsResponse?.data || [];
-  const totalBalance = wallets.reduce((acc, w) => acc + w.balance, 0);
+  const { data: wallets = [] } = useGetPlatformCustomerWallets(id);
 
   if (isLoading) return <CustomerDetailSkeleton />;
   if (!customer)
@@ -312,7 +241,7 @@ export default function CustomerDetailPage() {
       <div className="grid lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Stats and Info */}
         <div className="lg:col-span-8 space-y-8">
-          <div className="grid sm:grid-cols-3 gap-6">
+          {/* <div className="grid sm:grid-cols-3 gap-6">
             <Card className="border-none shadow-premium bg-surface/50 backdrop-blur-md relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 <Wallet className="h-16 w-16 text-primary" />
@@ -369,21 +298,166 @@ export default function CustomerDetailPage() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </div> */}
 
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="bg-muted/20 p-1.5 rounded-2xl w-full sm:w-auto h-auto grid grid-cols-2 sm:flex sm:items-center gap-1 border border-border/30 backdrop-blur-md mb-6">
+          {/* Wallet Carousel */}
+          {wallets.length > 0 && (() => {
+            const gradients = [
+              "from-violet-600 via-purple-600 to-indigo-700",
+              "from-emerald-500 via-teal-600 to-cyan-700",
+              "from-rose-500 via-pink-600 to-fuchsia-700",
+              "from-amber-500 via-orange-500 to-red-600",
+              "from-sky-500 via-blue-600 to-indigo-700",
+            ];
+            const wallet = wallets[activeWalletIdx];
+            const gradient = gradients[activeWalletIdx % gradients.length];
+            const balanceNum = parseFloat(wallet.balance || "0");
+            const isFrozenWallet = wallet.is_transfer_frozen || wallet.is_funding_frozen;
+
+            return (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    {wallets.length} Wallet{wallets.length > 1 ? "s" : ""}
+                  </div>
+                  {wallets.length > 1 && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setActiveWalletIdx((i) => (i - 1 + wallets.length) % wallets.length)}
+                        className="h-8 w-8 rounded-full border border-border/50 flex items-center justify-center text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <span className="text-xs font-bold text-muted-foreground tabular-nums">
+                        {activeWalletIdx + 1} / {wallets.length}
+                      </span>
+                      <button
+                        onClick={() => setActiveWalletIdx((i) => (i + 1) % wallets.length)}
+                        className="h-8 w-8 rounded-full border border-border/50 flex items-center justify-center text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="relative group/card">
+                  {/* Glow */}
+                  <div className={`absolute -inset-1 bg-gradient-to-br ${gradient} rounded-3xl blur-md opacity-20 group-hover/card:opacity-30 transition-opacity duration-500`} />
+
+                  <div className={`relative bg-gradient-to-br ${gradient} rounded-2xl p-7 shadow-2xl overflow-hidden text-white`}>
+                    {/* Background circles */}
+                    <div className="absolute inset-0 pointer-events-none">
+                      <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full border-2 border-white/10" />
+                      <div className="absolute -bottom-16 -left-8 w-64 h-64 rounded-full border-2 border-white/10" />
+                      <div className="absolute top-1/2 right-8 w-24 h-24 rounded-full border border-white/10" />
+                    </div>
+
+                    {/* Top row */}
+                    <div className="relative flex items-start justify-between mb-8">
+                      <div>
+                        <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/50 mb-1">
+                          {wallet.account_type} · {wallet.environment}
+                        </div>
+                        <div className="text-lg font-black tracking-wide">
+                          {wallet.name}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <div className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${wallet.status === "ACTIVE" ? "bg-white/20" : "bg-white/10 text-white/50"}`}>
+                          {wallet.status}
+                        </div>
+                        {isFrozenWallet && (
+                          <div className="flex items-center gap-1 bg-white/10 text-white/70 text-[9px] font-bold px-2 py-0.5 rounded-full">
+                            <Snowflake className="w-2.5 h-2.5" />
+                            FROZEN
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Chip + account number */}
+                    <div className="relative mb-7">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-9 h-7 rounded-md bg-gradient-to-br from-yellow-300/60 to-amber-400/60 shadow-inner" />
+                      </div>
+                      <div className="font-mono text-xl font-bold tracking-[0.3em] text-white/90">
+                        {wallet.account_number.replace(/(\d{4})(?=\d)/g, "$1 ")}
+                      </div>
+                      <div className="text-[11px] text-white/40 font-medium mt-1 uppercase tracking-widest">
+                        {wallet.account_name}
+                      </div>
+                    </div>
+
+                    {/* Balance + bank */}
+                    <div className="relative flex items-end justify-between">
+                      <div>
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-0.5">
+                          Available Balance
+                        </div>
+                        <div className="text-3xl font-black tracking-tight">
+                          {wallet.currency} {balanceNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        {parseFloat(wallet.hold_balance || "0") > 0 && (
+                          <div className="text-[10px] text-white/40 font-medium mt-0.5">
+                            + {wallet.currency} {parseFloat(wallet.hold_balance).toLocaleString(undefined, { minimumFractionDigits: 2 })} on hold
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-0.5">Bank</div>
+                        <div className="text-sm font-black text-white/80">{wallet.bank_name}</div>
+                        <div className="text-[10px] text-white/40 font-mono">{wallet.bank_code}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions + meta row */}
+                <div className="flex items-center justify-between px-1">
+                  <div className="flex items-center gap-3 text-[11px] font-bold">
+                    {wallet.is_transfer_frozen ? (
+                      <span className="flex items-center gap-1 text-destructive"><Snowflake className="w-3 h-3" /> Transfers frozen</span>
+                    ) : null}
+                    {wallet.is_funding_frozen ? (
+                      <span className="flex items-center gap-1 text-destructive"><Snowflake className="w-3 h-3" /> Funding frozen</span>
+                    ) : null}
+                    {!isFrozenWallet && (
+                      <span className="flex items-center gap-1 text-success"><CheckCircle2 className="w-3 h-3" /> All clear</span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(wallet.account_number)}
+                    className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Copy className="w-3 h-3" />
+                    Copy account number
+                  </button>
+                </div>
+
+                {/* Dot indicators */}
+                {wallets.length > 1 && (
+                  <div className="flex items-center justify-center gap-1.5 pt-1">
+                    {wallets.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setActiveWalletIdx(i)}
+                        className={`rounded-full transition-all duration-300 ${i === activeWalletIdx ? "w-6 h-2 bg-primary" : "w-2 h-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"}`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+          <Tabs defaultValue="history" className="w-full">
+            <TabsList className="bg-muted/20 p-1.5 rounded-2xl w-full sm:w-auto h-auto grid grid-cols-3 sm:flex sm:items-center gap-1 border border-border/30 backdrop-blur-md mb-6">
               <TabsTrigger
-                value="overview"
+                value="history"
                 className="rounded-xl px-6 py-2.5 font-bold data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all"
               >
-                Overview
-              </TabsTrigger>
-              <TabsTrigger
-                value="activity"
-                className="rounded-xl px-6 py-2.5 font-bold data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all"
-              >
-                Activity
+                History
               </TabsTrigger>
               <TabsTrigger
                 value="documents"
@@ -399,182 +473,8 @@ export default function CustomerDetailPage() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent
-              value="overview"
-              className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500"
-            >
-              <Card className="border-none shadow-premium bg-surface/50 overflow-hidden">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg font-bold tracking-normal flex items-center gap-2">
-                      <Activity className="w-4 h-4 text-primary" />
-                      Financial Pulse
-                    </CardTitle>
-                    <CardDescription className="text-xs font-medium uppercase tracking-wider">
-                      Cashflow analysis for last 6 months
-                    </CardDescription>
-                  </div>
-                  <Select defaultValue="6m">
-                    <SelectTrigger className="w-[100px] h-9 rounded-lg bg-muted/20 border-border/30 text-xs font-bold">
-                      <SelectValue placeholder="Range" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1m">1 Month</SelectItem>
-                      <SelectItem value="3m">3 Months</SelectItem>
-                      <SelectItem value="6m">6 Months</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </CardHeader>
-                <CardContent className="pt-4 h-[350px]">
-                  <AnalyticsChart
-                    title="Cashflow analysis"
-                    data={analyticsData}
-                    type="bar"
-                    dataKey="credits"
-                    additionalKeys={["debits"]}
-                    height={300}
-                    colors={["#10b981", "#ef4444"]}
-                  />
-                </CardContent>
-              </Card>
+            <HistoryTab customerId={id} />
 
-              <div className="grid md:grid-cols-2 gap-6">
-                <Card className="border-none shadow-premium bg-surface/50 border-t-4 border-t-success/20">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-                      Inbound (Credits)
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="text-4xl font-bold text-success tracking-normal">
-                      ₦1,245,000.00
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <div className="flex justify-between items-center text-xs font-bold">
-                        <span className="text-muted-foreground">
-                          Highest Single Credit
-                        </span>
-                        <span className="text-foreground">₦450,000</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs font-bold">
-                        <span className="text-muted-foreground">
-                          Primary Source
-                        </span>
-                        <span className="text-foreground">Bank Transfer</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-none shadow-premium bg-surface/50 border-t-4 border-t-error/20">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-                      Outbound (Debits)
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="text-4xl font-bold text-error tracking-normal">
-                      ₦890,450.00
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <div className="flex justify-between items-center text-xs font-bold">
-                        <span className="text-muted-foreground">
-                          Highest Single Debit
-                        </span>
-                        <span className="text-foreground">₦75,000</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs font-bold">
-                        <span className="text-muted-foreground">
-                          Primary Sector
-                        </span>
-                        <span className="text-foreground">Retail & Dining</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent
-              value="activity"
-              className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500"
-            >
-              <Card className="border-none shadow-premium bg-surface/50">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg font-bold tracking-normal">
-                    Ledger History
-                  </CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="font-bold text-xs text-primary hover:bg-primary/5 rounded-lg px-4 h-9 gap-2"
-                  >
-                    <Download className="w-4 h-4" />
-                    Download PDF
-                  </Button>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="grid gap-1">
-                    {transactions.map((tx, i) => (
-                      <div
-                        key={tx.id}
-                        className={`flex items-center justify-between p-5 transition-all cursor-pointer group/tx border-l-4 ${
-                          tx.type === "Credit"
-                            ? "border-l-success hover:bg-success/5"
-                            : "border-l-error hover:bg-error/5"
-                        } ${i !== transactions.length - 1 ? "border-b border-border/30" : ""}`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div
-                            className={`p-3 rounded-2xl shadow-sm ${
-                              tx.type === "Credit"
-                                ? "bg-success/10 text-success"
-                                : "bg-error/10 text-error"
-                            }`}
-                          >
-                            {tx.type === "Credit" ? (
-                              <TrendingUp className="w-5 h-5" />
-                            ) : (
-                              <TrendingDown className="w-5 h-5" />
-                            )}
-                          </div>
-                          <div className="flex flex-col gap-0.5">
-                            <div className="font-bold text-foreground group-hover/tx:text-primary transition-colors">
-                              {tx.desc}
-                            </div>
-                            <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest">
-                              <span>{tx.date}</span>
-                              <span>•</span>
-                              <span>{tx.time}</span>
-                              <span>•</span>
-                              <span className="font-mono">{tx.id}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <div
-                            className={`text-lg font-bold ${
-                              tx.type === "Credit"
-                                ? "text-success"
-                                : "text-foreground"
-                            }`}
-                          >
-                            {tx.type === "Credit" ? "+" : "-"}₦
-                            {tx.amount.toLocaleString()}
-                          </div>
-                          <Badge
-                            variant="outline"
-                            className="text-[9px] h-4 font-bold tracking-widest border-border/50 text-muted-foreground uppercase px-1"
-                          >
-                            {tx.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
 
             <TabsContent
               value="documents"
@@ -944,6 +844,213 @@ export default function CustomerDetailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function HistoryTab({ customerId }: { customerId: string }) {
+  const [typeFilter, setTypeFilter] = useState<"ALL" | "CREDIT" | "DEBIT">("ALL");
+  const [page, setPage] = useState(1);
+
+  const filters = {
+    limit: 5,
+    page,
+    ...(typeFilter !== "ALL" ? { type: typeFilter as "CREDIT" | "DEBIT" } : {}),
+  };
+
+  const { data, isLoading } = useGetPlatformCustomerTransactions(customerId, filters);
+
+  const transactions = data?.data ?? [];
+  const meta = data?.meta;
+  const total = meta?.total ?? 0;
+  const totalPages = meta?.pages ?? 1;
+
+  const statusStyles = {
+    SUCCESSFUL: "text-success bg-success/10",
+    FAILED: "text-destructive bg-destructive/10",
+    PENDING: "text-warning bg-warning/10",
+  } as const;
+
+  const filterLabels = { ALL: "All Types", CREDIT: "Credits", DEBIT: "Debits" };
+
+  return (
+    <TabsContent
+      value="history"
+      className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500"
+    >
+      <Card className="border-none shadow-premium bg-surface/50">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-lg font-bold tracking-normal flex items-center gap-2">
+            <History className="w-4 h-4 text-primary" />
+            Transaction History
+          </CardTitle>
+          <div className="flex items-center gap-3">
+            {total > 0 && (
+              <span className="text-xs font-bold text-muted-foreground">
+                {total.toLocaleString()} total
+              </span>
+            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 text-xs font-bold gap-1.5">
+                  {filterLabels[typeFilter]}
+                  <ChevronRight className="w-3 h-3 rotate-90" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36">
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground">Filter by type</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {(["ALL", "CREDIT", "DEBIT"] as const).map((t) => (
+                  <DropdownMenuItem
+                    key={t}
+                    className={`text-xs font-bold ${typeFilter === t ? "text-primary" : ""}`}
+                    onClick={() => { setTypeFilter(t); setPage(1); }}
+                  >
+                    {filterLabels[t]}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="divide-y divide-border/30">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4 p-5">
+                  <Skeleton className="h-11 w-11 rounded-2xl shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                  <Skeleton className="h-5 w-24" />
+                </div>
+              ))}
+            </div>
+          ) : transactions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+              <div className="p-4 bg-muted/30 rounded-full">
+                <History className="w-8 h-8 text-muted-foreground/30" />
+              </div>
+              <p className="font-bold text-foreground">No transactions yet</p>
+              <p className="text-sm text-muted-foreground">
+                This customer has no transaction history.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border/30">
+              {transactions.map((tx) => {
+                const isCredit = tx.type === "CREDIT";
+                const statusStyle =
+                  statusStyles[tx.status as keyof typeof statusStyles] ??
+                  "text-muted-foreground bg-muted/20";
+                const amount = parseFloat(tx.amount);
+                return (
+                  <div
+                    key={tx.id}
+                    className={`flex items-center justify-between px-5 py-4 group/tx transition-all border-l-4 ${
+                      isCredit
+                        ? "border-l-success hover:bg-success/5"
+                        : "border-l-destructive hover:bg-destructive/5"
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div
+                        className={`p-2.5 rounded-2xl shrink-0 ${
+                          isCredit
+                            ? "bg-success/10 text-success"
+                            : "bg-destructive/10 text-destructive"
+                        }`}
+                      >
+                        {isCredit ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" /></svg>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <div className="font-bold text-foreground group-hover/tx:text-primary transition-colors truncate max-w-[200px]">
+                          {tx.description || "—"}
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+                          <span className="font-mono">{tx.reference}</span>
+                          <span>·</span>
+                          <span>
+                            {new Date(tx.createdAt).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                      <div
+                        className={`text-base font-black ${
+                          isCredit ? "text-success" : "text-foreground"
+                        }`}
+                      >
+                        {isCredit ? "+" : "-"}
+                        {tx.currency}{" "}
+                        {amount.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </div>
+                      <span
+                        className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${statusStyle}`}
+                      >
+                        {tx.status}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+
+        {!isLoading && total > 0 && (
+          <div className="border-t border-border/30 p-4 space-y-3">
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs font-bold gap-1.5"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  <ChevronLeft className="w-3 h-3" />
+                  Previous
+                </Button>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  Page {page} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs font-bold gap-1.5"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  Next
+                  <ChevronRight className="w-3 h-3" />
+                </Button>
+              </div>
+            )}
+            
+          </div>
+        )}
+        <Link to={`/account/customers/${customerId}/transactions`} className="block w-full">
+              <Button className="w-full gap-2 font-bold" size="sm">
+                View More
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </Link>
+      </Card>
+    </TabsContent>
   );
 }
 

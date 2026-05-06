@@ -78,7 +78,15 @@ const getNavigationItems = (): NavSection[] => [
         url: "/account/organisations",
         icon: Building2,
       },
-      { title: "Customers", url: "/account/customers", icon: Users },
+      {
+        title: "Customers",
+        url: "/account/customers",
+        icon: Users,
+        subItems: [
+          { title: "Customer List", url: "/account/customers" },
+          { title: "All Wallets", url: "/account/customers/wallets" },
+        ],
+      },
       { title: "Platform Users", url: "/account/staff", icon: UserCog },
     ],
   },
@@ -225,9 +233,8 @@ export function DashboardSidebar() {
                               <item.icon className="w-5 h-5" />
                               <span className="flex-1">{item.title}</span>
                               <ChevronDown
-                                className={`w-4 h-4 transition-transform ${
-                                  isOpen ? "rotate-180" : ""
-                                }`}
+                                className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""
+                                  }`}
                               />
                             </SidebarMenuButton>
                           </CollapsibleTrigger>

@@ -29,7 +29,9 @@ import Verify from "@/app/(auth)/verify/[session_id]/page";
 // Account pages
 import DashboardPage from "@/app/account/dashboard/page";
 import CustomersPage from "@/app/account/customers/page";
+import CustomerWalletsPage from "@/app/account/customers/wallets/page";
 import CustomerDetailPage from "@/app/account/customers/[id]/page";
+import CustomerTransactionsPage from "@/app/account/customers/[id]/transactions/page";
 import OrganisationsPage from "@/app/account/organisations/page";
 import OrganisationDetailPage from "@/app/account/organisations/[id]/page";
 import StaffPage from "@/app/account/staff/page";
@@ -141,8 +143,16 @@ export default function App() {
                     <Route path="dashboard" element={<DashboardPage />} />
                     <Route path="customers" element={<CustomersPage />} />
                     <Route
+                      path="customers/wallets"
+                      element={<CustomerWalletsPage />}
+                    />
+                    <Route
                       path="customers/:id"
                       element={<CustomerDetailPage />}
+                    />
+                    <Route
+                      path="customers/:id/transactions"
+                      element={<CustomerTransactionsPage />}
                     />
                     <Route
                       path="organisations"

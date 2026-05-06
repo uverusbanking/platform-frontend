@@ -1,4 +1,4 @@
-import { IApiResponse } from "@/types/apiResponse.type";
+import { IApiResponse, TError } from "@/types/apiResponse.type";
 import apiClient from "@/lib/axios";
 import { useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/queryKeys";
@@ -13,10 +13,30 @@ const getWallets = async (
 
 // query is not supposed to be here
 export const useGetWallets = (params: IGetWalletsParams) => {
-  return useQuery({
+  return useQuery<IApiResponse<IWallet[]>, TError>({
     queryKey: [QUERY_KEYS.WALLET.GET_ALL, params],
     queryFn: () => getWallets(params),
-    // Platform users might want to fetch all wallets without a specific customer_id
-    // enabled: !!params.customer_id,
+  });
+};
+
+export const getPlatformCustomerWallets = async (
+  customerId: string,
+): Promise<IWallet[]> => {
+  const response = await apiClient.get(
+    `/platform/wallets/customers/${customerId}`,
+  );
+  // If the endpoint returns a customer object with a wallets array, return that array
+  if (response.data.data?.wallets) {
+    return response.data.data.wallets;
+  }
+  // Otherwise assume it's directly returning an array
+  return response.data.data || [];
+};
+
+export const useGetPlatformCustomerWallets = (customerId: string) => {
+  return useQuery<IWallet[], TError>({
+    queryKey: [QUERY_KEYS.WALLET.CUSTOMER_WALLETS, customerId],
+    queryFn: () => getPlatformCustomerWallets(customerId),
+    enabled: !!customerId,
   });
 };

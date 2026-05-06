@@ -351,7 +351,7 @@ const Send = () => {
                       >
                         {bankCode
                           ? banks.find((b) => b.bank_code === bankCode)
-                              ?.bank_name
+                            ?.bank_name
                           : "Select a bank"}
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
@@ -422,24 +422,14 @@ const Send = () => {
               )}
             </div>
 
-            <div className="space-y-3">
-              <Button
-                className="w-full h-14 text-lg"
-                disabled={!isRecipientValid}
-                onClick={handleNextStep}
-                variant="gradient"
-              >
-                Continue
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full h-12 text-muted-foreground"
-                onClick={handlePrevStep}
-              >
-                <ChevronLeft size={18} className="mr-1" />
-                Go Back
-              </Button>
-            </div>
+            <Button
+              className="w-full h-14 text-lg"
+              disabled={!isRecipientValid}
+              onClick={handleNextStep}
+              variant="gradient"
+            >
+              Continue
+            </Button>
           </div>
         )}
 
@@ -552,30 +542,20 @@ const Send = () => {
               </div>
             </div>
 
-            <div className="space-y-3">
-              <Button
-                className="w-full h-14 text-lg shadow-lg shadow-primary/20"
-                onClick={() => {
-                  const amt = parseFloat(amount);
-                  if (isNaN(amt) || amt <= 0)
-                    return toast.error("Please enter a valid amount");
-                  if (amt > parseFloat(activeWallet?.balance || "0"))
-                    return toast.error("Insufficient balance");
-                  setVerifyOpen(true);
-                }}
-                variant="gradient"
-              >
-                Send Money
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full h-12 text-muted-foreground"
-                onClick={handlePrevStep}
-              >
-                <ChevronLeft size={18} className="mr-1" />
-                Go Back
-              </Button>
-            </div>
+            <Button
+              className="w-full h-14 text-lg shadow-lg shadow-primary/20"
+              onClick={() => {
+                const amt = parseFloat(amount);
+                if (isNaN(amt) || amt <= 0)
+                  return toast.error("Please enter a valid amount");
+                if (amt > parseFloat(activeWallet?.balance || "0"))
+                  return toast.error("Insufficient balance");
+                setVerifyOpen(true);
+              }}
+              variant="gradient"
+            >
+              Send Money
+            </Button>
           </div>
         )}
 
