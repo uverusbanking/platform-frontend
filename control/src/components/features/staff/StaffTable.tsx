@@ -81,7 +81,11 @@ export function StaffTable({
               </TableRow>
             ) : (
               staffMembers.map((staff) => (
-                <TableRow key={staff.id}>
+                <TableRow 
+                  key={staff.id}
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => onView(staff)}
+                >
                   <TableCell>
                     <div>
                       <p className="font-medium">

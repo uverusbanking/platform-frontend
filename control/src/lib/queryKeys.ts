@@ -23,6 +23,7 @@ export const QUERY_KEYS = {
     GET_ALL: "customers",
     GET_BY_ID: "customer",
     STATS: "customer-stats",
+    ACTIVITY: "customer-activity",
   },
   TRANSACTION: {
     PLATFORM_LIST: "platform-transactions",

@@ -82,10 +82,6 @@ const getNavigationItems = (): NavSection[] => [
         title: "Customers",
         url: "/account/customers",
         icon: Users,
-        subItems: [
-          { title: "Customer List", url: "/account/customers" },
-          { title: "All Wallets", url: "/account/customers/wallets" },
-        ],
       },
       { title: "Platform Users", url: "/account/staff", icon: UserCog },
     ],

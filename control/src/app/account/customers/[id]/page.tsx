@@ -58,6 +58,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { CustomerActivityTab } from "./CustomerActivityTab";
 import { can } from "@/auth/can";
 import { PERMISSIONS } from "@/auth/permissions";
 import { useGetCustomerById } from "@/hooks/queries/useCustomerQueries";
@@ -416,12 +417,18 @@ export default function CustomerDetailPage() {
           )}
 
           <Tabs defaultValue="history" className="w-full">
-            <TabsList className="bg-muted/20 p-1.5 rounded-2xl w-full sm:w-auto h-auto grid grid-cols-3 sm:flex sm:items-center gap-1 border border-border/30 backdrop-blur-md mb-6">
+            <TabsList className="bg-muted/20 p-1.5 rounded-2xl w-full sm:w-auto h-auto grid grid-cols-4 sm:flex sm:items-center gap-1 border border-border/30 backdrop-blur-md mb-6">
               <TabsTrigger
                 value="history"
                 className="rounded-xl px-6 py-2.5 font-bold data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all"
               >
                 History
+              </TabsTrigger>
+              <TabsTrigger
+                value="activity"
+                className="rounded-xl px-6 py-2.5 font-bold data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all"
+              >
+                Activity
               </TabsTrigger>
               <TabsTrigger
                 value="documents"
@@ -438,6 +445,10 @@ export default function CustomerDetailPage() {
             </TabsList>
 
             <HistoryTab customerId={id} />
+
+            <TabsContent value="activity">
+              <CustomerActivityTab customerId={id} />
+            </TabsContent>
 
 
             <TabsContent

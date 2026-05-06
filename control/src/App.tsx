@@ -55,6 +55,8 @@ import WhatsappPage from "@/app/account/whatsapp/page";
 import SettingsProfilePage from "@/app/account/settings/profile/page";
 import SettingsSecurityPage from "@/app/account/settings/security/page";
 import SettingsDevelopersPage from "@/app/account/settings/developers_disabled/page";
+import CustomerActivityListPage from "@/app/account/customers/[id]/activity/page";
+import CustomerActivityDetailPage from "@/app/account/customers/[id]/activity/[activityId]/page";
 
 // 404
 import NotFound from "@/app/not-found";
@@ -154,6 +156,14 @@ export default function App() {
                     <Route
                       path="customers/:id/transactions"
                       element={<CustomerTransactionsPage />}
+                    />
+                    <Route
+                      path="customers/:id/activity"
+                      element={<CustomerActivityListPage />}
+                    />
+                    <Route
+                      path="customers/:id/activity/:activityId"
+                      element={<CustomerActivityDetailPage />}
                     />
                     <Route
                       path="transactions/:id"
