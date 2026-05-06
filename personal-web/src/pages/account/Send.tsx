@@ -215,13 +215,14 @@ const Send = () => {
         const bankName =
           banks.find((b) => b.bank_code === bankCode)?.bank_name || "";
         response = await TransferService.initiateTransfer({
-          amount: amountNum,
-          bank_code: bankCode,
+          destination_bank_code: bankCode,
+          destination_account_number: accountNumber,
           bank_name: bankName,
-          account_number: accountNumber,
           account_name: accountName,
-          narrative: narration || `Transfer to ${accountName}`,
+          amount: amountNum,
+          narration: narration || `Transfer to ${accountName}`,
           pin,
+          source_wallet_id: activeWallet?.id || "",
         });
       } else {
         response = await TransferService.initiateInternalTransfer({

@@ -247,13 +247,15 @@ export interface ResolveAccountResponseDto {
 }
 
 export interface InitiateTransferDto {
-  bank_code: string;
-  account_number: string;
+  destination_bank_code: string;
+  destination_account_number: string;
+  bank_name: string;
   account_name: string;
   amount: number;
-  narrative?: string;
+  narration?: string;
   pin: string;
-  bank_name: string;
+  save_beneficiary?: boolean;
+  source_wallet_id: string;
 }
 
 export interface TransferResponseDto {
