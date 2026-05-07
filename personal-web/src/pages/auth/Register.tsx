@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { AuthService } from "@/services";
 import { encryptPassword } from "@shared/core";
+import { usePublicKey } from "@/hooks/queries/usePublicKey";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -106,6 +106,8 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
+  const { data: publicKeyData } = usePublicKey();
+
   const { mutateAsync: validateBvnMutateAsync, isPending: isValidatingBvn } =
     usePublicValidateBvn();
 
@@ -192,10 +194,14 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const keyResponse = await AuthService.getPublicKey();
+      if (!publicKeyData?.data?.public_key) {
+        setError("Unable to retrieve encryption key. Please try again.");
+        setLoading(false);
+        return;
+      }
       const encryptedPassword = await encryptPassword(
         password,
-        keyResponse.data.public_key,
+        publicKeyData.data.public_key,
       );
 
       await registerMutateAsync(

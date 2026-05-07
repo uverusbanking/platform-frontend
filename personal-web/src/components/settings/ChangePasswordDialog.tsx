@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserService } from "@/services/user.service";
-import { AuthService } from "@/services";
 import { encryptPassword } from "@shared/core";
+import { usePublicKey } from "@/hooks/queries/usePublicKey";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +27,7 @@ export function ChangePasswordDialog({
   onOpenChange,
 }: ChangePasswordDialogProps) {
   const { user } = useAuth();
+  const { data: publicKeyData } = usePublicKey();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -49,9 +50,10 @@ export function ChangePasswordDialog({
 
     try {
       if (!user?.email) throw new Error("User email not found");
+      if (!publicKeyData?.data?.public_key)
+        throw new Error("Encryption key unavailable. Please try again.");
 
-      const keyResponse = await AuthService.getPublicKey();
-      const publicKey = keyResponse.data.public_key;
+      const publicKey = publicKeyData.data.public_key;
       const [encryptedOld, encryptedNew] = await Promise.all([
         encryptPassword(currentPassword, publicKey),
         encryptPassword(newPassword, publicKey),

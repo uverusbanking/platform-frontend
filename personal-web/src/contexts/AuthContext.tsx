@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { AuthService, UserService } from "@/services";
 import type { UserDto, AuthResponseDto, ApiResponse } from "@/types";
 import { encryptPassword } from "@shared/core";
+import { PUBLIC_KEY_QUERY_KEY } from "@/hooks/queries/usePublicKey";
 
 interface AuthContextType {
   user: UserDto | null;
@@ -45,12 +47,22 @@ const SESSION_ID_KEY = "sb-session-id";
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<UserDto | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [pendingPassword, setPendingPassword] = useState<string | null>(null);
   const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
+
+  // Pre-fetch the public key on mount so it's ready for login/register
+  useEffect(() => {
+    queryClient.prefetchQuery({
+      queryKey: PUBLIC_KEY_QUERY_KEY,
+      queryFn: () => AuthService.getPublicKey(),
+      staleTime: 10 * 60 * 1000,
+    });
+  }, [queryClient]);
 
   const setPendingCredentials = (
     email: string | null,
@@ -83,30 +95,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     if (!accessToken || !user) return;
 
-    const refreshInterval = setInterval(async () => {
-      const sessionId = localStorage.getItem(SESSION_ID_KEY);
-      if (!sessionId) return;
+    const refreshInterval = setInterval(
+      async () => {
+        const sessionId = localStorage.getItem(SESSION_ID_KEY);
+        if (!sessionId) return;
 
-      try {
-        const response = await AuthService.refreshToken({ session_id: sessionId });
-        if (response.access_token) {
-          setAccessToken(response.access_token);
-          localStorage.setItem(TOKEN_KEY, response.access_token);
-          if (response.session_id) {
-            localStorage.setItem(SESSION_ID_KEY, response.session_id);
+        try {
+          const response = await AuthService.refreshToken({
+            session_id: sessionId,
+          });
+          if (response.access_token) {
+            setAccessToken(response.access_token);
+            localStorage.setItem(TOKEN_KEY, response.access_token);
+            if (response.session_id) {
+              localStorage.setItem(SESSION_ID_KEY, response.session_id);
+            }
           }
+        } catch (error) {
+          console.error("Proactive refresh failed:", error);
         }
-      } catch (error) {
-        console.error("Proactive refresh failed:", error);
-      }
-    }, 4 * 60 * 1000); // Every 4 minutes
+      },
+      4 * 60 * 1000,
+    ); // Every 4 minutes
 
     return () => clearInterval(refreshInterval);
   }, [accessToken, user]);
 
   const signIn = async (email: string, password: string) => {
     try {
-      const keyResponse = await AuthService.getPublicKey();
+      const cached =
+        queryClient.getQueryData<
+          Awaited<ReturnType<typeof AuthService.getPublicKey>>
+        >(PUBLIC_KEY_QUERY_KEY);
+      const keyResponse = cached ?? (await AuthService.getPublicKey());
       const encryptionKey = keyResponse.data.public_key;
       const encryptedPassword = await encryptPassword(password, encryptionKey);
 
