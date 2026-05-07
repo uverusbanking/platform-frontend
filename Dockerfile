@@ -1,7 +1,7 @@
 # ─── Stage 1: Base (dependency installation) ────────────────────────────
 FROM node:20-alpine AS base
 RUN apk add --no-cache libc6-compat
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10 --activate
 WORKDIR /app
 
 # Copy dependency manifests first for cached installs
