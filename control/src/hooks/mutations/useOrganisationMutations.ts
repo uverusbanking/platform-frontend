@@ -13,6 +13,7 @@ import {
   updateOrganisationDocumentStatus,
   IUpdateDocumentStatusPayload,
   overrideDomainVerification,
+  verifyDirector,
 } from "@/hooks/endpoints/useOrganisation";
 import { IAddOrganisationUserPayload } from "@/types/organisation.types";
 import { QUERY_KEYS } from "@/lib/queryKeys";
@@ -140,6 +141,18 @@ export const useUpdateOrganisationDocumentStatus = () => {
       });
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.ORGANISATION.STATS],
+      });
+    },
+  });
+};
+
+export const useVerifyDirector = (orgId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation<IApiResponse<unknown>, TError, string>({
+    mutationFn: (directorId: string) => verifyDirector({ orgId, directorId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.GET_BY_ID],
       });
     },
   });

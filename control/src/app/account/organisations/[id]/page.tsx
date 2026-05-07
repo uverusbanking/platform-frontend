@@ -43,6 +43,7 @@ import { PaymentConfigSection } from "@/components/features/platform/PaymentConf
 import {
   useUpdateOrganisationDocumentStatus,
   useOverrideDomainVerification,
+  useVerifyDirector,
 } from "@/hooks/mutations/useOrganisationMutations";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -50,6 +51,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   IOrganisationDocument,
+  IOrganisationDirector,
   IDomainVerificationStatus,
   DomainVerificationStatus,
 } from "@/types/organisation.types";
@@ -89,6 +91,7 @@ export default function OrganisationDetailPage() {
     useGetOrgDomainVerificationStatuses(id);
   const { mutate: overrideDomain, isPending: overriding } =
     useOverrideDomainVerification(id);
+  const { mutate: verifyDir, isPending: verifyingDir } = useVerifyDirector(id);
   const organisation = organisationResponse?.data
     ? {
         ...organisationResponse.data,
@@ -108,6 +111,8 @@ export default function OrganisationDetailPage() {
   const [isDocsDialogOpen, setIsDocsDialogOpen] = useState(false);
   const [isBrandDialogOpen, setIsBrandDialogOpen] = useState(false);
   const [overrideConfirm, setOverrideConfirm] = useState<string | null>(null);
+  const [directorConfirm, setDirectorConfirm] =
+    useState<IOrganisationDirector | null>(null);
 
   const verificationMap = Object.fromEntries(
     (domainVerificationResponse?.data ?? []).map((v) => [v.type, v]),
@@ -847,6 +852,164 @@ export default function OrganisationDetailPage() {
 
           {/* Payment Providers */}
           <PaymentConfigSection organisationId={id} />
+
+          {/* Directors Section */}
+          {organisation.directors && organisation.directors.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  <Users className="w-5 h-5 text-primary" />
+                  Directors
+                </h3>
+                <Badge variant="secondary" className="font-bold">
+                  {organisation.directors.filter((d) => d.is_verified).length} /{" "}
+                  {organisation.directors.length} Verified
+                </Badge>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {organisation.directors.map((director) => (
+                  <div
+                    key={director.id}
+                    className="bg-card border border-border/40 rounded-xl p-5 space-y-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10 rounded-xl bg-primary/10 text-primary">
+                          <AvatarFallback className="text-sm font-bold rounded-xl uppercase">
+                            {director.first_name[0]}
+                            {director.last_name[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-bold text-sm">
+                            {director.first_name}{" "}
+                            {director.middle_name
+                              ? `${director.middle_name} `
+                              : ""}
+                            {director.last_name}
+                          </div>
+                          {director.ownership_percentage != null && (
+                            <div className="text-xs text-muted-foreground">
+                              {director.ownership_percentage}% ownership
+                              {director.is_owner ? " · UBO" : ""}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <Badge
+                        variant="secondary"
+                        className={`text-[10px] font-bold uppercase px-2 py-0.5 border-0 shrink-0 ${
+                          director.is_verified
+                            ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
+                            : "bg-amber-500/15 text-amber-700 dark:text-amber-400"
+                        }`}
+                      >
+                        {director.is_verified ? "Verified" : "Pending"}
+                      </Badge>
+                    </div>
+                    <div className="space-y-1 text-xs text-muted-foreground">
+                      {director.bvn && (
+                        <div className="flex gap-2">
+                          <span className="font-medium text-foreground/70 w-8">
+                            BVN
+                          </span>
+                          <span className="font-mono">
+                            {"•".repeat(7)}
+                            {director.bvn.slice(-4)}
+                          </span>
+                        </div>
+                      )}
+                      {director.id_type && (
+                        <div className="flex gap-2">
+                          <span className="font-medium text-foreground/70 w-8">
+                            ID
+                          </span>
+                          <span>{director.id_type}</span>
+                        </div>
+                      )}
+                      {director.residential_address_city && (
+                        <div className="flex gap-2">
+                          <span className="font-medium text-foreground/70 w-8">
+                            City
+                          </span>
+                          <span>
+                            {director.residential_address_city},{" "}
+                            {director.residential_address_country}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    {!director.is_verified && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full h-8 text-xs font-bold rounded-lg border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-950"
+                        onClick={() => setDirectorConfirm(director)}
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+                        Mark as Verified
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Director verification confirm dialog */}
+          <Dialog
+            open={!!directorConfirm}
+            onOpenChange={(v) => !v && setDirectorConfirm(null)}
+          >
+            <DialogContent className="max-w-sm">
+              <DialogTitle className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                Verify director
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Mark{" "}
+                <strong>
+                  {directorConfirm?.first_name} {directorConfirm?.last_name}
+                </strong>{" "}
+                as verified? This cannot be undone from the UI.
+              </p>
+              <div className="flex justify-end gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDirectorConfirm(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={verifyingDir}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                  onClick={() => {
+                    if (!directorConfirm) return;
+                    verifyDir(directorConfirm.id, {
+                      onSuccess: () => {
+                        toast.success(
+                          `${directorConfirm.first_name} ${directorConfirm.last_name} marked as verified`,
+                        );
+                        setDirectorConfirm(null);
+                      },
+                      onError: () => toast.error("Failed to verify director"),
+                    });
+                  }}
+                >
+                  {verifyingDir ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                      Verifying…
+                    </>
+                  ) : (
+                    "Confirm Verify"
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Documents Section - Grid of Cards */}
           <div className="space-y-4">

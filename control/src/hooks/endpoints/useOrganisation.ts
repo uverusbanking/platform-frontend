@@ -468,6 +468,19 @@ export const upsertOrgPaymentConfig = async ({
   return response.data;
 };
 
+export const verifyDirector = async ({
+  orgId,
+  directorId,
+}: {
+  orgId: string;
+  directorId: string;
+}): Promise<IApiResponse<unknown>> => {
+  const response = await apiClient.patch(
+    `/organisations/platform/${orgId}/directors/${directorId}/verify`,
+  );
+  return response.data;
+};
+
 export const removeOrgPaymentConfig = async ({
   id,
   providerType,
