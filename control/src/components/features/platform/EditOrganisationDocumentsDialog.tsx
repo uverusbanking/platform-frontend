@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Loader2,
@@ -29,6 +30,7 @@ import { useUploadMutation } from "@/hooks/mutations/useUploadMutation";
 import { useUpdateOrganisationDocuments } from "@/hooks/mutations/usePlatformMutations";
 import { IOrganisationDocument } from "@/types/organisation.types";
 import { organisationDocumentSchema } from "@/lib/schemas/platform/organisationDocument.schema";
+import { QUERY_KEYS } from "@/lib/queryKeys";
 
 const EditOrganisationDocumentsSchema = organisationDocumentSchema;
 
@@ -178,7 +180,6 @@ export function EditOrganisationDocumentsDialog({
                 label="CAC Certificate"
                 desc="Certificate of Incorporation"
                 organisationId={organisationId}
-                existingDocuments={existingDocuments}
                 updateDocuments={updateDocuments}
               />
               <DocumentRow
@@ -187,7 +188,6 @@ export function EditOrganisationDocumentsDialog({
                 label="Memorandum of Association"
                 desc="MEMART & Shareholder details"
                 organisationId={organisationId}
-                existingDocuments={existingDocuments}
                 updateDocuments={updateDocuments}
               />
               <DocumentRow
@@ -196,7 +196,6 @@ export function EditOrganisationDocumentsDialog({
                 label="Board Resolution"
                 desc="Signed resolution for account opening"
                 organisationId={organisationId}
-                existingDocuments={existingDocuments}
                 updateDocuments={updateDocuments}
               />
               <DocumentRow
@@ -205,7 +204,6 @@ export function EditOrganisationDocumentsDialog({
                 label="Proof of Business Address"
                 desc="Utility bill or lease agreement"
                 organisationId={organisationId}
-                existingDocuments={existingDocuments}
                 updateDocuments={updateDocuments}
               />
               <DocumentRow
@@ -214,7 +212,6 @@ export function EditOrganisationDocumentsDialog({
                 label="UBO Declaration"
                 desc="Ultimate Beneficial Owners form"
                 organisationId={organisationId}
-                existingDocuments={existingDocuments}
                 updateDocuments={updateDocuments}
               />
             </div>
@@ -247,7 +244,6 @@ interface DocumentRowProps {
   label: string;
   desc: string;
   organisationId: string;
-  existingDocuments: IOrganisationDocument[];
   updateDocuments: (payload: {
     id: string;
     documents: Partial<EditOrganisationDocumentsValues["documents"]>;
@@ -260,10 +256,10 @@ function DocumentRow({
   label,
   desc,
   organisationId,
-  existingDocuments,
   updateDocuments,
 }: DocumentRowProps) {
   const uploadMutation = useUploadMutation();
+  const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -297,29 +293,21 @@ function DocumentRow({
               fileName: file.name,
             };
 
-            // Update form state
+            // Update local form state immediately so the row shows as uploaded
             field.onChange(uploadedDoc);
 
-            // Step 2: Check if this is a new document (different from existing)
-            const existingDoc = existingDocuments.find((d) => d.type === name);
-            const isNewUpload =
-              !existingDoc || existingDoc.id !== uploadedDoc.id;
-
-            if (!isNewUpload) {
-              toast.success(`${label} uploaded (no changes detected)`, {
-                id: loadingToast,
-              });
-              setIsSubmitting(false);
-              return;
-            }
-
-            // Step 3: Submit to backend immediately
+            // Submit to backend and then force-refetch so the modal reflects
+            // the new state the next time it is opened.
             toast.loading(`Submitting ${label}...`, { id: loadingToast });
             await updateDocuments({
               id: organisationId,
-              documents: {
-                [name]: uploadedDoc,
-              },
+              documents: { [name]: uploadedDoc },
+            });
+
+            // Await the refetch so existingDocuments is fresh before the user
+            // can reopen the modal — prevents the stale-state flash on reopen.
+            await queryClient.refetchQueries({
+              queryKey: [QUERY_KEYS.ORGANISATION.DOCUMENTS],
             });
 
             toast.success(`${label} uploaded and submitted successfully`, {
