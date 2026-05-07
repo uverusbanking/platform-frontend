@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { AuthService } from "@/services";
+import { encryptPassword } from "@shared/core";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -190,10 +192,16 @@ const Register = () => {
     setLoading(true);
 
     try {
+      const keyResponse = await AuthService.getPublicKey();
+      const encryptedPassword = await encryptPassword(
+        password,
+        keyResponse.data.public_key,
+      );
+
       await registerMutateAsync(
         {
           email,
-          password,
+          password: encryptedPassword,
           phone_number: step1Data.phone_number,
           date_of_birth: step1Data.date_of_birth,
           gender,

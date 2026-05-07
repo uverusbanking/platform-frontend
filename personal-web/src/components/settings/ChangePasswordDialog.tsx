@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserService } from "@/services/user.service";
+import { AuthService } from "@/services";
+import { encryptPassword } from "@shared/core";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,10 +50,16 @@ export function ChangePasswordDialog({
     try {
       if (!user?.email) throw new Error("User email not found");
 
-      // Use UserService to change password
+      const keyResponse = await AuthService.getPublicKey();
+      const publicKey = keyResponse.data.public_key;
+      const [encryptedOld, encryptedNew] = await Promise.all([
+        encryptPassword(currentPassword, publicKey),
+        encryptPassword(newPassword, publicKey),
+      ]);
+
       await UserService.changePassword({
-        currentPassword,
-        newPassword,
+        old_password: encryptedOld,
+        new_password: encryptedNew,
       });
 
       toast.success("Password updated successfully");
