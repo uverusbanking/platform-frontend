@@ -472,6 +472,15 @@ export const upsertOrgPaymentConfig = async ({
   return response.data;
 };
 
+export const approveOrgKYB = async (
+  id: string,
+): Promise<IApiResponse<{ kyc_id: string; status: string }>> => {
+  const response = await apiClient.post(
+    `/organisations/platform/${id}/approve-kyb`,
+  );
+  return response.data;
+};
+
 export const verifyDirector = async ({
   orgId,
   directorId,
