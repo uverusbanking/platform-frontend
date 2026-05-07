@@ -172,7 +172,6 @@ export default function OrganisationDocumentsPage() {
       const uploadResponse = await uploadFile({
         file,
         documentType: key,
-        userType: "ORGANISATION",
       });
 
       // Step 2: Update organisation documents with the new file

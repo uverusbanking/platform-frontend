@@ -38,6 +38,20 @@ type EditOrganisationDocumentsValues = z.infer<
   typeof EditOrganisationDocumentsSchema
 >;
 
+type DocName =
+  | "cacCertificate"
+  | "memorandum"
+  | "boardResolution"
+  | "proofOfAddress"
+  | "uboDeclaration";
+
+type StagedDoc = {
+  id: string;
+  fileUrl: string;
+  documentType: string;
+  fileName: string;
+};
+
 interface EditOrganisationDocumentsDialogProps {
   organisationId: string;
   existingDocuments: IOrganisationDocument[];
@@ -51,7 +65,10 @@ export function EditOrganisationDocumentsDialog({
   open,
   onOpenChange,
 }: EditOrganisationDocumentsDialogProps) {
-  const { mutateAsync: updateDocuments } = useUpdateOrganisationDocuments();
+  const { mutateAsync: updateDocuments, isPending: isSaving } =
+    useUpdateOrganisationDocuments();
+  const queryClient = useQueryClient();
+  const [staged, setStaged] = useState<Partial<Record<DocName, StagedDoc>>>({});
 
   const form = useForm<EditOrganisationDocumentsValues>({
     resolver: zodResolver(EditOrganisationDocumentsSchema),
@@ -92,52 +109,75 @@ export function EditOrganisationDocumentsDialog({
   });
 
   useEffect(() => {
-    if (open && existingDocuments.length > 0) {
-      const getDoc = (type: string) =>
-        existingDocuments.find((d) => d.type === type);
+    if (open) {
+      setStaged({});
+      if (existingDocuments.length > 0) {
+        const getDoc = (type: string) =>
+          existingDocuments.find((d) => d.type === type);
 
-      const cac = getDoc("cacCertificate");
-      const mem = getDoc("memorandum");
-      const br = getDoc("boardResolution");
-      const poa = getDoc("proofOfAddress");
-      const ubo = getDoc("uboDeclaration");
+        const cac = getDoc("cacCertificate");
+        const mem = getDoc("memorandum");
+        const br = getDoc("boardResolution");
+        const poa = getDoc("proofOfAddress");
+        const ubo = getDoc("uboDeclaration");
 
-      form.reset({
-        documents: {
-          cacCertificate: {
-            id: cac?.id || "",
-            fileUrl: cac?.file_url || "",
-            documentType: "cacCertificate",
-            fileName: cac?.name || "",
+        form.reset({
+          documents: {
+            cacCertificate: {
+              id: cac?.id || "",
+              fileUrl: cac?.file_url || "",
+              documentType: "cacCertificate",
+              fileName: cac?.name || "",
+            },
+            memorandum: {
+              id: mem?.id || "",
+              fileUrl: mem?.file_url || "",
+              documentType: "memorandum",
+              fileName: mem?.name || "",
+            },
+            boardResolution: {
+              id: br?.id || "",
+              fileUrl: br?.file_url || "",
+              documentType: "boardResolution",
+              fileName: br?.name || "",
+            },
+            proofOfAddress: {
+              id: poa?.id || "",
+              fileUrl: poa?.file_url || "",
+              documentType: "proofOfAddress",
+              fileName: poa?.name || "",
+            },
+            uboDeclaration: {
+              id: ubo?.id || "",
+              fileUrl: ubo?.file_url || "",
+              documentType: "uboDeclaration",
+              fileName: ubo?.name || "",
+            },
           },
-          memorandum: {
-            id: mem?.id || "",
-            fileUrl: mem?.file_url || "",
-            documentType: "memorandum",
-            fileName: mem?.name || "",
-          },
-          boardResolution: {
-            id: br?.id || "",
-            fileUrl: br?.file_url || "",
-            documentType: "boardResolution",
-            fileName: br?.name || "",
-          },
-          proofOfAddress: {
-            id: poa?.id || "",
-            fileUrl: poa?.file_url || "",
-            documentType: "proofOfAddress",
-            fileName: poa?.name || "",
-          },
-          uboDeclaration: {
-            id: ubo?.id || "",
-            fileUrl: ubo?.file_url || "",
-            documentType: "uboDeclaration",
-            fileName: ubo?.name || "",
-          },
-        },
-      });
+        });
+      }
     }
   }, [open, existingDocuments, form]);
+
+  const stagedCount = Object.keys(staged).length;
+
+  const handleStage = (name: DocName, doc: StagedDoc) => {
+    setStaged((prev) => ({ ...prev, [name]: doc }));
+  };
+
+  const handleSave = async () => {
+    try {
+      await updateDocuments({ id: organisationId, documents: staged });
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.DOCUMENTS],
+      });
+      setStaged({});
+      toast.success("Documents saved successfully");
+      onOpenChange(false);
+    } catch {
+      toast.error("Failed to save documents");
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -152,8 +192,7 @@ export function EditOrganisationDocumentsDialog({
                 Update Compliance Documents
               </DialogTitle>
               <DialogDescription className="font-medium">
-                Upload and update compliance documents individually. Each
-                document will be submitted immediately upon upload.
+                Upload files, then click Save to submit all changes at once.
               </DialogDescription>
             </div>
           </div>
@@ -161,17 +200,19 @@ export function EditOrganisationDocumentsDialog({
 
         <Form {...form}>
           <div className="p-8 space-y-8">
-            <div className="bg-blue-500/5 border border-blue-500/20 p-4 rounded-xl flex gap-3 text-blue-700 dark:text-blue-400">
-              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-              <div className="text-sm">
-                <p className="font-bold">Individual Upload Mode</p>
-                <p className="font-medium opacity-80">
-                  Each document is uploaded and submitted immediately. Updated
-                  documents will have their status reset to PENDING for
-                  compliance review.
-                </p>
+            {stagedCount > 0 && (
+              <div className="bg-amber-500/5 border border-amber-500/20 p-4 rounded-xl flex gap-3 text-amber-700 dark:text-amber-400">
+                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-bold">Unsaved changes</p>
+                  <p className="font-medium opacity-80">
+                    {stagedCount} document{stagedCount > 1 ? "s" : ""} uploaded
+                    and ready to save. Click &ldquo;Save Changes&rdquo; below to
+                    submit.
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="space-y-4">
               <DocumentRow
@@ -179,51 +220,62 @@ export function EditOrganisationDocumentsDialog({
                 name="cacCertificate"
                 label="CAC Certificate"
                 desc="Certificate of Incorporation"
-                organisationId={organisationId}
-                updateDocuments={updateDocuments}
+                onStage={handleStage}
               />
               <DocumentRow
                 control={form.control}
                 name="memorandum"
                 label="Memorandum of Association"
                 desc="MEMART & Shareholder details"
-                organisationId={organisationId}
-                updateDocuments={updateDocuments}
+                onStage={handleStage}
               />
               <DocumentRow
                 control={form.control}
                 name="boardResolution"
                 label="Board Resolution"
                 desc="Signed resolution for account opening"
-                organisationId={organisationId}
-                updateDocuments={updateDocuments}
+                onStage={handleStage}
               />
               <DocumentRow
                 control={form.control}
                 name="proofOfAddress"
                 label="Proof of Business Address"
                 desc="Utility bill or lease agreement"
-                organisationId={organisationId}
-                updateDocuments={updateDocuments}
+                onStage={handleStage}
               />
               <DocumentRow
                 control={form.control}
                 name="uboDeclaration"
                 label="UBO Declaration"
                 desc="Ultimate Beneficial Owners form"
-                organisationId={organisationId}
-                updateDocuments={updateDocuments}
+                onStage={handleStage}
               />
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-border/40">
+            <div className="flex justify-end gap-3 pt-4 border-t border-border/40">
               <Button
                 type="button"
                 variant="ghost"
                 onClick={() => onOpenChange(false)}
+                disabled={isSaving}
                 className="px-6 h-12 rounded-xl font-bold"
               >
-                Close
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleSave}
+                disabled={stagedCount === 0 || isSaving}
+                className="px-6 h-12 rounded-xl font-bold bg-primary shadow-md shadow-primary/20"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving…
+                  </>
+                ) : (
+                  `Save Changes${stagedCount > 0 ? ` (${stagedCount})` : ""}`
+                )}
               </Button>
             </div>
           </div>
@@ -235,19 +287,10 @@ export function EditOrganisationDocumentsDialog({
 
 interface DocumentRowProps {
   control: Control<EditOrganisationDocumentsValues>;
-  name:
-    | "cacCertificate"
-    | "memorandum"
-    | "boardResolution"
-    | "proofOfAddress"
-    | "uboDeclaration";
+  name: DocName;
   label: string;
   desc: string;
-  organisationId: string;
-  updateDocuments: (payload: {
-    id: string;
-    documents: Partial<EditOrganisationDocumentsValues["documents"]>;
-  }) => Promise<unknown>;
+  onStage: (name: DocName, doc: StagedDoc) => void;
 }
 
 function DocumentRow({
@@ -255,13 +298,10 @@ function DocumentRow({
   name,
   label,
   desc,
-  organisationId,
-  updateDocuments,
+  onStage,
 }: DocumentRowProps) {
   const uploadMutation = useUploadMutation();
-  const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   return (
     <FormField
@@ -277,46 +317,25 @@ function DocumentRow({
           const file = e.target.files?.[0];
           if (!file) return;
 
-          const loadingToast = toast.loading(`Uploading ${label}...`);
-          setIsSubmitting(true);
+          const loadingToast = toast.loading(`Uploading ${label}…`);
 
           try {
-            // Step 1: Upload the file
-            const response = await uploadMutation.mutateAsync({
-              file,
-              userType: "PLATFORM",
-            });
-            const uploadedDoc = {
+            const response = await uploadMutation.mutateAsync({ file });
+            const uploadedDoc: StagedDoc = {
               id: response.data.id,
               fileUrl: response.data.file_url,
               documentType: name,
               fileName: file.name,
             };
 
-            // Update local form state immediately so the row shows as uploaded
             field.onChange(uploadedDoc);
+            onStage(name, uploadedDoc);
 
-            // Submit to backend and then force-refetch so the modal reflects
-            // the new state the next time it is opened.
-            toast.loading(`Submitting ${label}...`, { id: loadingToast });
-            await updateDocuments({
-              id: organisationId,
-              documents: { [name]: uploadedDoc },
-            });
-
-            // Await the refetch so existingDocuments is fresh before the user
-            // can reopen the modal — prevents the stale-state flash on reopen.
-            await queryClient.refetchQueries({
-              queryKey: [QUERY_KEYS.ORGANISATION.DOCUMENTS],
-            });
-
-            toast.success(`${label} uploaded and submitted successfully`, {
-              id: loadingToast,
-            });
+            toast.success(`${label} ready`, { id: loadingToast });
           } catch {
             toast.error(`Failed to upload ${label}`, { id: loadingToast });
           } finally {
-            setIsSubmitting(false);
+            if (fileInputRef.current) fileInputRef.current.value = "";
           }
         };
 
@@ -363,15 +382,13 @@ function DocumentRow({
                     variant={isUploaded ? "outline" : "default"}
                     size="sm"
                     onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadMutation.isPending || isSubmitting}
+                    disabled={uploadMutation.isPending}
                     className={`h-9 font-bold rounded-lg ${!isUploaded ? "bg-primary shadow-md shadow-primary/20" : "border-success/30 text-success hover:bg-success/10"}`}
                   >
-                    {uploadMutation.isPending || isSubmitting ? (
+                    {uploadMutation.isPending ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                        {uploadMutation.isPending
-                          ? "Uploading..."
-                          : "Submitting..."}
+                        Uploading…
                       </>
                     ) : isUploaded ? (
                       "Replace"
@@ -385,7 +402,7 @@ function DocumentRow({
                     className="hidden"
                     accept=".pdf,.jpg,.jpeg,.png"
                     onChange={handleFileUpload}
-                    disabled={uploadMutation.isPending || isSubmitting}
+                    disabled={uploadMutation.isPending}
                   />
                 </div>
               </CardContent>

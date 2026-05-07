@@ -180,7 +180,6 @@ export function DocumentsStep({
       const response = await uploadFile({
         file,
         documentType: key,
-        userType: "ORGANISATION",
       });
       console.log(response);
 

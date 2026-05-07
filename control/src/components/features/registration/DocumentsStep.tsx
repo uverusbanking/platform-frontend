@@ -201,7 +201,6 @@ export function DocumentsStep({
       const formData = new FormData();
       formData.append("file", file);
       formData.append("documentType", key);
-      formData.append("userType", "ORGANISATION");
 
       const response = (
         await apiClient.post("/files/upload", formData, {
