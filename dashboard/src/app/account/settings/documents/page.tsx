@@ -179,7 +179,7 @@ export default function OrganisationDocumentsPage() {
       const updatePayload = {
         documents: [
           {
-            type: key,
+            document_type: key,
             file_id: uploadResponse.data.id,
             file_url: uploadResponse.data.file_url,
           },

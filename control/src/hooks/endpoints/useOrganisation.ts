@@ -40,7 +40,11 @@ function toSnakeDoc(doc: {
   fileUrl?: string;
   documentType: string;
 }) {
-  return { id: doc.id, fileUrl: doc.fileUrl, documentType: doc.documentType };
+  return {
+    file_id: doc.id,
+    file_url: doc.fileUrl,
+    document_type: doc.documentType,
+  };
 }
 
 function toSnakeDirector(d: IRegisterOrganisationDirector) {

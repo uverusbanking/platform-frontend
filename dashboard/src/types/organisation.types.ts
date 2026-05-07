@@ -136,7 +136,7 @@ export type OrganisationDocumentType =
   | "UBO_DECLARATION";
 
 export interface IUpdateDocumentPayload {
-  type: OrganisationDocumentType;
+  document_type: OrganisationDocumentType;
   file_id: string;
   file_url: string;
 }
