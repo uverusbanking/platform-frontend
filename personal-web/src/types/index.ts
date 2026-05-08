@@ -187,6 +187,12 @@ export interface VirtualAccountResponseDto {
   bank_name: string;
 }
 
+export interface CreateWalletDto {
+  name: string;
+  currency: string;
+  account_type: string;
+}
+
 // ============================================================================
 // Security Module Types
 // ============================================================================

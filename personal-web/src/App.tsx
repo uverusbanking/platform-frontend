@@ -31,6 +31,7 @@ import Notifications from "./pages/account/Notifications";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import KYCVerification from "./pages/account/KYCVerification";
+import CreateWallet from "./pages/account/CreateWallet";
 
 // Admin Pages
 import {
@@ -135,6 +136,7 @@ function AppContent() {
                     path="kyc-verification"
                     element={<KYCVerification />}
                   />
+                  <Route path="create-wallet" element={<CreateWallet />} />
                 </Route>
 
                 {/* Admin Dashboard Routes */}

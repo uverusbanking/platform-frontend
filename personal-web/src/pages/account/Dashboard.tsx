@@ -30,6 +30,7 @@ import {
   Eye,
   EyeOff,
   Wifi,
+  Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useUserProfile } from "@/hooks/queries/useUser";
@@ -51,11 +52,7 @@ const Dashboard = () => {
     limit: 10,
   });
 
-  const {
-    wallets,
-    wallet: initialWallet,
-    isLoadingWallet,
-  } = useWallet();
+  const { wallets, wallet: initialWallet, isLoadingWallet } = useWallet();
 
   const [api, setApi] = useState<CarouselApi>();
   const [currentWalletIndex, setCurrentWalletIndex] = useState(0);
@@ -121,7 +118,9 @@ const Dashboard = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-3">
           <div className="w-12 h-12 border-[3px] border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-muted-foreground text-sm">Loading your dashboard…</p>
+          <p className="text-muted-foreground text-sm">
+            Loading your dashboard…
+          </p>
         </div>
       </div>
     );
@@ -157,6 +156,13 @@ const Dashboard = () => {
       shadow: "shadow-slate-400/20",
       disabled: true,
     },
+    {
+      icon: Plus,
+      label: "New Wallet",
+      path: "/account/create-wallet",
+      gradient: "from-purple-500 to-fuchsia-600",
+      shadow: "shadow-purple-500/30",
+    },
   ];
 
   return (
@@ -177,7 +183,9 @@ const Dashboard = () => {
                 <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full ring-2 ring-white/20" />
               </div>
               <div>
-                <p className="text-white/60 text-xs leading-none mb-1">Good day,</p>
+                <p className="text-white/60 text-xs leading-none mb-1">
+                  Good day,
+                </p>
                 <p className="text-white font-semibold text-sm leading-tight line-clamp-1 max-w-[150px]">
                   {displayName}
                 </p>
@@ -222,11 +230,14 @@ const Dashboard = () => {
                   {wallets.map((w) => {
                     const isActive = activeWallet?.id === w.id;
                     const displayBalance = parseFloat(
-                      (isActive ? socketBalance : null) ?? w.balance ?? "0"
+                      (isActive ? socketBalance : null) ?? w.balance ?? "0",
                     );
 
                     return (
-                      <CarouselItem key={w.id} className="pl-2 basis-[93%] sm:basis-full">
+                      <CarouselItem
+                        key={w.id}
+                        className="pl-2 basis-[93%] sm:basis-full"
+                      >
                         <div className="rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 p-5 space-y-4 overflow-hidden relative">
                           {/* Decorative blobs */}
                           <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/5 pointer-events-none" />
@@ -248,11 +259,15 @@ const Dashboard = () => {
                                 setShowBalance(!showBalance);
                               }}
                               className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors touch-manipulation"
-                              aria-label={showBalance ? "Hide balance" : "Show balance"}
+                              aria-label={
+                                showBalance ? "Hide balance" : "Show balance"
+                              }
                             >
-                              {showBalance
-                                ? <Eye size={14} className="text-white/80" />
-                                : <EyeOff size={14} className="text-white/80" />}
+                              {showBalance ? (
+                                <Eye size={14} className="text-white/80" />
+                              ) : (
+                                <EyeOff size={14} className="text-white/80" />
+                              )}
                             </button>
                           </div>
 
@@ -263,7 +278,7 @@ const Dashboard = () => {
                                 "text-3xl sm:text-4xl font-extrabold tracking-tight transition-all duration-500 leading-none",
                                 balanceFlash && isActive
                                   ? "text-emerald-300 drop-shadow-[0_0_16px_rgba(52,211,153,0.9)]"
-                                  : "text-white"
+                                  : "text-white",
                               )}
                             >
                               {showBalance
@@ -304,18 +319,35 @@ const Dashboard = () => {
                       </CarouselItem>
                     );
                   })}
+
+                  {/* Add New Wallet Slide */}
+                  <CarouselItem className="pl-2 basis-[93%] sm:basis-full">
+                    <div
+                      className="rounded-3xl bg-white/5 backdrop-blur-xl border border-dashed border-white/30 p-5 h-[164px] flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-white/10 transition-colors group"
+                      onClick={() => navigate("/account/create-wallet")}
+                    >
+                      <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Plus className="text-white w-6 h-6" />
+                      </div>
+                      <p className="text-white font-semibold text-sm">
+                        Add New Wallet
+                      </p>
+                    </div>
+                  </CarouselItem>
                 </CarouselContent>
               </Carousel>
 
-              {wallets.length > 1 && (
+              {wallets.length + 1 > 1 && (
                 <div className="flex justify-center gap-1.5 mt-3">
-                  {wallets.map((_, i) => (
+                  {[...Array(wallets.length + 1)].map((_, i) => (
                     <button
                       key={i}
                       onClick={() => api?.scrollTo(i)}
                       className={cn(
                         "h-1 rounded-full transition-all duration-300",
-                        currentWalletIndex === i ? "w-6 bg-white" : "w-2 bg-white/30"
+                        currentWalletIndex === i
+                          ? "w-6 bg-white"
+                          : "w-2 bg-white/30",
                       )}
                       aria-label={`Wallet ${i + 1}`}
                     />
@@ -329,7 +361,6 @@ const Dashboard = () => {
 
       {/* ── Content Area ── */}
       <div className="container mx-auto px-4 sm:px-6 max-w-2xl space-y-4 pb-8">
-
         {/* Banners */}
         <div className="-mt-4 space-y-2 relative z-10">
           <TransactionPinBanner />
@@ -337,7 +368,7 @@ const Dashboard = () => {
 
         {/* ── Quick Actions ── */}
         <div className="bg-card border border-border rounded-3xl p-4 shadow-sm">
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-5 gap-1 sm:gap-2">
             {quickActions.map((action) => (
               <button
                 key={action.path}
@@ -345,7 +376,7 @@ const Dashboard = () => {
                   "flex flex-col items-center gap-2 p-2 rounded-2xl transition-all duration-150 touch-manipulation active:scale-95",
                   action.disabled
                     ? "opacity-40 cursor-not-allowed"
-                    : "hover:bg-accent active:bg-accent/70"
+                    : "hover:bg-accent active:bg-accent/70",
                 )}
                 onClick={() => !action.disabled && navigate(action.path)}
                 disabled={action.disabled}
@@ -354,10 +385,14 @@ const Dashboard = () => {
                   className={cn(
                     "w-12 h-12 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-lg",
                     action.gradient,
-                    action.shadow
+                    action.shadow,
                   )}
                 >
-                  <action.icon size={20} className="text-white" strokeWidth={2} />
+                  <action.icon
+                    size={20}
+                    className="text-white"
+                    strokeWidth={2}
+                  />
                 </div>
                 <span className="text-[11px] font-medium text-foreground/80 leading-none">
                   {action.label}
@@ -382,7 +417,10 @@ const Dashboard = () => {
               />
             </div>
             {currentTier !== "tier_3" && (
-              <TierUpgradeBanner currentTier={currentTier} tierLimits={tierLimits} />
+              <TierUpgradeBanner
+                currentTier={currentTier}
+                tierLimits={tierLimits}
+              />
             )}
           </div>
         ) : null}
@@ -390,7 +428,9 @@ const Dashboard = () => {
         {/* ── Recent Transactions ── */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold text-base text-foreground">Recent Transactions</h2>
+            <h2 className="font-semibold text-base text-foreground">
+              Recent Transactions
+            </h2>
             <Button
               variant="ghost"
               size="sm"
@@ -421,7 +461,9 @@ const Dashboard = () => {
                 <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
                   <History className="w-7 h-7 text-muted-foreground" />
                 </div>
-                <p className="font-medium text-foreground text-sm mb-1">No transactions yet</p>
+                <p className="font-medium text-foreground text-sm mb-1">
+                  No transactions yet
+                </p>
                 <p className="text-xs text-muted-foreground">
                   Send or receive money to see your history here
                 </p>
