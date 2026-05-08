@@ -179,9 +179,9 @@ const Index = () => {
               onClick={() => navigate("/")}
             >
               <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shadow-lg backdrop-blur-sm border border-white/20">
-                {brand.brandLogoUrl ? (
+                {brand.brandIconUrl ? (
                   <img
-                    src={brand.brandLogoUrl}
+                    src={brand.brandIconUrl}
                     alt={brand.brandName}
                     className="w-6 h-6 object-contain"
                   />

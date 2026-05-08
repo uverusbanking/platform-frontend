@@ -143,9 +143,9 @@ export default function LoginPage() {
           {/* Mobile brand (hidden on lg+) */}
           <div className="flex items-center gap-3 lg:hidden">
             <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              {brand.brandLogoUrl ? (
+              {brand.brandIconUrl ? (
                 <img
-                  src={brand.brandLogoUrl}
+                  src={brand.brandIconUrl}
                   alt={brand.brandName}
                   className="w-5 h-5 object-contain"
                 />
