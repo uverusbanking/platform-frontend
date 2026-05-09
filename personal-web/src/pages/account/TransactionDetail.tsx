@@ -2,7 +2,6 @@ import { useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTransactionDetails } from "@/hooks/queries/useTransactions";
 import { formatCurrency, formatDateTime } from "@/lib/currency";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { TransactionDetailsResponseDto } from "@/types";
 import {
@@ -21,16 +20,24 @@ import {
 import { toast } from "sonner";
 import { toPng } from "html-to-image";
 import jsPDF from "jspdf";
+import { AppLayout } from "@/components/AppLayout";
 import { cn } from "@/lib/utils";
 
 const TransactionDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const receiptRef = useRef<HTMLDivElement>(null);
-  const [isExporting, setIsExporting] = useState<"dl-image" | "dl-pdf" | "share" | null>(null);
+  const [isExporting, setIsExporting] = useState<
+    "dl-image" | "dl-pdf" | "share" | null
+  >(null);
 
-  const { data: txData, isLoading, error: fetchError } = useTransactionDetails(id || "");
-  const transactionData: TransactionDetailsResponseDto | undefined = txData?.data;
+  const {
+    data: txData,
+    isLoading,
+    error: fetchError,
+  } = useTransactionDetails(id || "");
+  const transactionData: TransactionDetailsResponseDto | undefined =
+    txData?.data;
 
   const copyReference = () => {
     if (transactionData?.reference) {
@@ -41,57 +48,92 @@ const TransactionDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <header className="bg-gradient-hero safe-top">
-          <div className="container mx-auto px-4 py-4 max-w-2xl">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-white/10" />
-              <Skeleton className="h-6 w-48 bg-white/20 rounded-xl" />
-            </div>
+      <AppLayout>
+        <div className="max-w-2xl mx-auto space-y-5">
+          <div className="flex items-center gap-3 mb-7">
+            <Skeleton className="w-10 h-10 rounded-pill shrink-0" />
+            <Skeleton className="h-5 w-48 rounded-pill" />
           </div>
-        </header>
-        <div className="container mx-auto px-4 py-6 space-y-4 max-w-2xl">
-          <div className="bg-card border border-border rounded-3xl p-8 flex flex-col items-center gap-4">
-            <Skeleton className="w-16 h-16 rounded-2xl" />
-            <Skeleton className="h-9 w-40 rounded-xl" />
-            <Skeleton className="h-7 w-28 rounded-full" />
+          <div
+            className="rounded-2xl p-7 space-y-4"
+            style={{
+              background: "rgb(var(--surface-highest))",
+              border: "1px solid rgb(var(--surface-high))",
+            }}
+          >
+            <Skeleton className="w-16 h-16 rounded-pill mx-auto" />
+            <Skeleton className="h-10 w-40 rounded-xl mx-auto" />
+            <Skeleton className="h-7 w-28 rounded-pill mx-auto" />
           </div>
-          <div className="bg-card border border-border rounded-3xl p-4 space-y-1">
-            {["w-10", "w-16", "w-24", "w-20", "w-28", "w-32", "w-36"].map((w, i) => (
-              <div key={i} className="flex justify-between items-center py-3.5 border-b border-border last:border-0">
-                <Skeleton className={`h-4 ${w} rounded-full`} />
-                <Skeleton className="h-4 w-28 rounded-full" />
+          <div
+            className="rounded-2xl overflow-hidden"
+            style={{
+              background: "rgb(var(--surface-highest))",
+              border: "1px solid rgb(var(--surface-high))",
+            }}
+          >
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="flex justify-between items-center px-5 py-3.5"
+                style={{ borderBottom: "1px solid rgb(var(--surface-high))" }}
+              >
+                <Skeleton className="h-3.5 w-20 rounded-pill" />
+                <Skeleton className="h-3.5 w-32 rounded-pill" />
               </div>
             ))}
           </div>
           <div className="grid grid-cols-3 gap-2">
-            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-11 rounded-2xl" />)}
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-11 rounded-pill" />
+            ))}
           </div>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   if (fetchError || !txData || !transactionData) {
     return (
-      <div className="min-h-screen bg-background">
-        <header className="bg-gradient-hero safe-top">
-          <div className="container mx-auto px-4 py-4 max-w-2xl">
-            <div className="flex items-center gap-3">
-              <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white">
-                <ArrowLeft size={18} />
-              </button>
-              <h1 className="text-lg font-semibold text-white">Transaction Details</h1>
+      <AppLayout>
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center gap-3 mb-7">
+            <button
+              onClick={() => navigate(-1)}
+              className="w-10 h-10 rounded-pill flex items-center justify-center transition-colors"
+              style={{
+                background: "rgb(var(--surface-highest))",
+                border: "1px solid rgb(var(--surface-high))",
+              }}
+            >
+              <ArrowLeft size={16} />
+            </button>
+            <div>
+              <p className="eyebrow mb-0.5">Transaction</p>
+              <h1 className="display text-2xl m-0 leading-none">Details</h1>
             </div>
           </div>
-        </header>
-        <div className="container mx-auto px-4 py-12 text-center max-w-2xl">
-          <p className="text-muted-foreground">{fetchError instanceof Error ? fetchError.message : "Transaction not found"}</p>
-          <Button variant="outline" className="mt-4" onClick={() => navigate("/account/transactions")}>
-            View All Transactions
-          </Button>
+          <div
+            className="rounded-2xl py-16 px-6 text-center"
+            style={{
+              background: "rgb(var(--surface-highest))",
+              border: "1px solid rgb(var(--surface-high))",
+            }}
+          >
+            <p className="text-sm text-foreground-subtle mb-4">
+              {fetchError instanceof Error
+                ? fetchError.message
+                : "Transaction not found"}
+            </p>
+            <button
+              onClick={() => navigate("/account/transactions")}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-pill text-sm font-semibold bg-foreground text-surface-highest"
+            >
+              View All Transactions
+            </button>
+          </div>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
@@ -99,9 +141,14 @@ const TransactionDetail = () => {
   const amount = parseFloat(transactionData.amount || "0");
   const isCredit = type.toLowerCase() === "credit";
 
-  let mappedStatus: "successful" | "pending" | "failed" | "reversed" = "pending";
+  let mappedStatus: "successful" | "pending" | "failed" | "reversed" =
+    "pending";
   const rawStatus = transactionData.status?.toLowerCase();
-  if (rawStatus === "completed" || rawStatus === "success" || rawStatus === "successful") {
+  if (
+    rawStatus === "completed" ||
+    rawStatus === "success" ||
+    rawStatus === "successful"
+  ) {
     mappedStatus = "successful";
   } else if (rawStatus === "failed") {
     mappedStatus = "failed";
@@ -113,22 +160,30 @@ const TransactionDetail = () => {
   const fee = 0;
   const channel = "Transfer";
   const counterpartyName = transactionData.recipient?.accountName || "Unknown";
-  const counterpartyBank = transactionData.recipient?.bankName || "Unknown Bank";
+  const counterpartyBank =
+    transactionData.recipient?.bankName || "Unknown Bank";
   const counterpartyAccount = transactionData.recipient?.accountNumber;
 
-  const StatusIcon = { successful: CheckCircle, pending: Clock, failed: XCircle, reversed: RotateCcw }[mappedStatus];
-  const statusColorClass = {
-    successful: "text-success bg-success/10 border-success/20",
-    pending: "text-warning bg-warning/10 border-warning/20",
-    failed: "text-destructive bg-destructive/10 border-destructive/20",
-    reversed: "text-muted-foreground bg-muted border-border",
+  const StatusIcon = {
+    successful: CheckCircle,
+    pending: Clock,
+    failed: XCircle,
+    reversed: RotateCcw,
+  }[mappedStatus];
+  const statusColor = {
+    successful: "rgb(var(--mint-deep))",
+    pending: "rgb(var(--warning))",
+    failed: "rgb(var(--error))",
+    reversed: "rgb(var(--foreground-subtle))",
   }[mappedStatus];
 
   const receiptRows = [
     { label: "Type", value: isCredit ? "Credit" : "Debit" },
     { label: isCredit ? "From" : "To", value: counterpartyName },
     { label: "Bank", value: counterpartyBank },
-    ...(counterpartyAccount ? [{ label: "Account", value: counterpartyAccount }] : []),
+    ...(counterpartyAccount
+      ? [{ label: "Account", value: counterpartyAccount }]
+      : []),
     { label: "Narration", value: narration },
     { label: "Date", value: formatDateTime(transactionData.date) },
     { label: "Reference", value: transactionData.reference },
@@ -162,7 +217,9 @@ const TransactionDetail = () => {
       const dataUrl = await captureReceiptPng();
       const img = new Image();
       img.src = dataUrl;
-      await new Promise<void>((res) => { img.onload = () => res(); });
+      await new Promise<void>((res) => {
+        img.onload = () => res();
+      });
       const pxRatio = 3;
       const widthPt = (img.naturalWidth / pxRatio) * 0.75;
       const heightPt = (img.naturalHeight / pxRatio) * 0.75;
@@ -194,12 +251,19 @@ const TransactionDetail = () => {
     try {
       const dataUrl = await captureReceiptPng();
       const blob = await (await fetch(dataUrl)).blob();
-      const file = new File([blob], `receipt-${transactionData.reference}.png`, { type: "image/png" });
+      const file = new File(
+        [blob],
+        `receipt-${transactionData.reference}.png`,
+        { type: "image/png" },
+      );
 
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: "Transaction Receipt" });
       } else if (navigator.share) {
-        await navigator.share({ title: "Transaction Receipt", text: receiptText });
+        await navigator.share({
+          title: "Transaction Receipt",
+          text: receiptText,
+        });
       } else {
         navigator.clipboard.writeText(receiptText);
         toast.success("Receipt copied to clipboard!");
@@ -214,138 +278,351 @@ const TransactionDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hidden receipt for export */}
-      <div style={{ position: "absolute", overflow: "hidden", width: 0, height: 0, top: 0, left: 0 }}>
-        <div ref={receiptRef} style={{ width: "360px", background: "#ffffff", fontFamily: "'Inter', 'Segoe UI', sans-serif", borderRadius: "16px", overflow: "hidden" }}>
-          <div style={{ background: "linear-gradient(135deg, #0052FF 0%, #0040CC 100%)", padding: "24px 24px 40px", textAlign: "center" }}>
-            <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "13px", margin: "0 0 8px" }}>Transaction Receipt</p>
-            <p style={{ color: "#ffffff", fontSize: "32px", fontWeight: "700", margin: "0 0 12px", letterSpacing: "-0.5px" }}>
-              {isCredit ? "+" : "-"}{formatCurrency(amount)}
+    <AppLayout>
+      {/* Hidden receipt div — used by html-to-image export; must stay mounted */}
+      <div
+        style={{
+          position: "absolute",
+          overflow: "hidden",
+          width: 0,
+          height: 0,
+          top: 0,
+          left: 0,
+        }}
+      >
+        <div
+          ref={receiptRef}
+          style={{
+            width: "360px",
+            background: "#ffffff",
+            fontFamily: "'Inter', 'Segoe UI', sans-serif",
+            borderRadius: "16px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              background: "#1a1512",
+              padding: "24px 24px 40px",
+              textAlign: "center",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                right: "-40px",
+                top: "-40px",
+                width: "140px",
+                height: "140px",
+                borderRadius: "50%",
+                background: "#FF3B30",
+                opacity: 0.4,
+                filter: "blur(50px)",
+              }}
+            />
+            <p
+              style={{
+                color: "rgba(255,255,255,0.6)",
+                fontSize: "13px",
+                margin: "0 0 8px",
+                position: "relative",
+              }}
+            >
+              Transaction Receipt
             </p>
-            <span style={{ display: "inline-block", background: "rgba(255,255,255,0.2)", color: "#ffffff", fontSize: "12px", fontWeight: "600", padding: "4px 12px", borderRadius: "20px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+            <p
+              style={{
+                color: "#ffffff",
+                fontSize: "32px",
+                fontWeight: "700",
+                margin: "0 0 12px",
+                letterSpacing: "-0.5px",
+                position: "relative",
+              }}
+            >
+              {isCredit ? "+" : "-"}
+              {formatCurrency(amount)}
+            </p>
+            <span
+              style={{
+                display: "inline-block",
+                background: "rgba(255,255,255,0.15)",
+                color: "#ffffff",
+                fontSize: "12px",
+                fontWeight: "600",
+                padding: "4px 12px",
+                borderRadius: "999px",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+                position: "relative",
+              }}
+            >
               {mappedStatus}
             </span>
           </div>
           <div style={{ background: "#ffffff", padding: "20px 24px 8px" }}>
             {receiptRows.map(({ label, value }) => (
-              <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "10px 0", borderBottom: "1px solid #f1f5f9" }}>
-                <span style={{ color: "#94a3b8", fontSize: "13px", flexShrink: 0 }}>{label}</span>
-                <span style={{ color: "#1e293b", fontSize: "13px", fontWeight: "500", textAlign: "right", maxWidth: "60%", wordBreak: "break-all" }}>{value}</span>
+              <div
+                key={label}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  padding: "10px 0",
+                  borderBottom: "1px solid #f4efe8",
+                }}
+              >
+                <span
+                  style={{ color: "#9e9287", fontSize: "13px", flexShrink: 0 }}
+                >
+                  {label}
+                </span>
+                <span
+                  style={{
+                    color: "#1a1512",
+                    fontSize: "13px",
+                    fontWeight: "500",
+                    textAlign: "right",
+                    maxWidth: "60%",
+                    wordBreak: "break-all",
+                  }}
+                >
+                  {value}
+                </span>
               </div>
             ))}
           </div>
-          <div style={{ background: "#f8fafc", padding: "16px 24px", textAlign: "center", borderTop: "1px dashed #e2e8f0" }}>
-            <p style={{ color: "#94a3b8", fontSize: "11px", margin: 0 }}>
-              Generated from Personal Banking · {new Date().toLocaleDateString()}
+          <div
+            style={{
+              background: "#f9f5f0",
+              padding: "16px 24px",
+              textAlign: "center",
+              borderTop: "1px dashed #e2d9cc",
+            }}
+          >
+            <p style={{ color: "#9e9287", fontSize: "11px", margin: 0 }}>
+              Generated · {new Date().toLocaleDateString()}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Header */}
-      <header className="bg-gradient-hero safe-top">
-        <div className="container mx-auto px-4 py-4 max-w-2xl">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate(-1)}
-              className="w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 active:bg-white/30 flex items-center justify-center text-white transition-colors"
+      <div className="max-w-2xl mx-auto space-y-5">
+        {/* Back + heading */}
+        <div className="flex items-center gap-3 mb-7">
+          <button
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 rounded-pill flex items-center justify-center transition-colors hover:bg-surface shrink-0"
+            style={{
+              background: "rgb(var(--surface-highest))",
+              border: "1px solid rgb(var(--surface-high))",
+            }}
+          >
+            <ArrowLeft size={16} />
+          </button>
+          <div>
+            <p className="eyebrow mb-0.5">Transaction</p>
+            <h1 className="display text-[clamp(22px,3vw,36px)] m-0 leading-none">
+              Details
+            </h1>
+          </div>
+        </div>
+
+        {/* Amount hero — dark ink card */}
+        <div
+          className="rounded-2xl p-7 relative overflow-hidden text-center"
+          style={{ background: "rgb(var(--foreground))", color: "#fff" }}
+        >
+          <div
+            className="absolute -right-16 -top-16 w-52 h-52 rounded-pill pointer-events-none"
+            style={{
+              background: "rgb(var(--brand-primary))",
+              opacity: 0.4,
+              filter: "blur(60px)",
+            }}
+          />
+          <div className="relative">
+            <div
+              className="w-14 h-14 rounded-pill flex items-center justify-center mx-auto mb-4"
+              style={{
+                background: isCredit
+                  ? "rgba(184,239,193,0.15)"
+                  : "rgba(255,59,48,0.15)",
+              }}
             >
-              <ArrowLeft size={18} />
-            </button>
-            <h1 className="text-lg font-semibold text-white">Transaction Details</h1>
+              {isCredit ? (
+                <ArrowDownLeft
+                  size={24}
+                  style={{ color: "rgb(var(--mint))" }}
+                />
+              ) : (
+                <ArrowUpRight
+                  size={24}
+                  style={{ color: "rgb(var(--brand-primary))" }}
+                />
+              )}
+            </div>
+            <p
+              className="num font-bold text-4xl leading-none mb-3"
+              style={{ color: isCredit ? "rgb(var(--mint))" : "#ffffff" }}
+            >
+              {isCredit ? "+" : "-"}
+              {formatCurrency(amount)}
+            </p>
+            <div
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-pill text-sm font-semibold"
+              style={{
+                background: "rgba(255,255,255,0.12)",
+                color: statusColor,
+              }}
+            >
+              <StatusIcon size={13} />
+              <span className="capitalize">{mappedStatus}</span>
+            </div>
           </div>
         </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-6 space-y-4 max-w-2xl">
-        {/* Amount & Status Hero */}
-        <div className="bg-card border border-border rounded-3xl py-8 px-6 text-center">
-          <div className={cn(
-            "w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4",
-            isCredit ? "bg-success/10" : "bg-destructive/10"
-          )}>
-            {isCredit
-              ? <ArrowDownLeft size={28} className="text-success" />
-              : <ArrowUpRight size={28} className="text-destructive" />}
-          </div>
-          <p className={cn(
-            "text-3xl font-extrabold mb-3 tracking-tight",
-            isCredit ? "text-success" : "text-foreground"
-          )}>
-            {isCredit ? "+" : "-"}{formatCurrency(amount)}
-          </p>
-          <div className={cn(
-            "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-sm font-medium",
-            statusColorClass
-          )}>
-            <StatusIcon size={14} />
-            <span className="capitalize">{mappedStatus}</span>
-          </div>
-        </div>
-
-        {/* Detail Rows */}
-        <div className="bg-card border border-border rounded-3xl overflow-hidden divide-y divide-border">
+        {/* Detail rows */}
+        <div
+          className="rounded-2xl overflow-hidden shadow-card"
+          style={{
+            background: "rgb(var(--surface-highest))",
+            border: "1px solid rgb(var(--surface-high))",
+          }}
+        >
           {[
             { label: "Type", value: isCredit ? "Credit" : "Debit" },
             { label: "Channel", value: channel },
-            ...(counterpartyName ? [{ label: isCredit ? "From" : "To", value: counterpartyName }] : []),
-            ...(counterpartyBank ? [{ label: "Bank", value: counterpartyBank }] : []),
-            ...(counterpartyAccount ? [{ label: "Account", value: counterpartyAccount, mono: true }] : []),
+            ...(counterpartyName
+              ? [{ label: isCredit ? "From" : "To", value: counterpartyName }]
+              : []),
+            ...(counterpartyBank
+              ? [{ label: "Bank", value: counterpartyBank }]
+              : []),
+            ...(counterpartyAccount
+              ? [{ label: "Account", value: counterpartyAccount, mono: true }]
+              : []),
             ...(narration ? [{ label: "Narration", value: narration }] : []),
             ...(fee > 0 ? [{ label: "Fee", value: formatCurrency(fee) }] : []),
             { label: "Date", value: formatDateTime(transactionData.date) },
           ].map(({ label, value, mono }) => (
-            <div key={label} className="flex justify-between items-start gap-4 px-4 py-3.5">
-              <span className="text-muted-foreground text-sm shrink-0">{label}</span>
-              <span className={cn("text-sm font-medium text-right", mono && "font-mono")}>{value}</span>
+            <div
+              key={label}
+              className="flex justify-between items-start gap-4 px-5 py-3.5"
+              style={{ borderBottom: "1px solid rgb(var(--surface-high))" }}
+            >
+              <span className="text-foreground-subtle text-sm shrink-0">
+                {label}
+              </span>
+              <span
+                className={cn(
+                  "text-sm font-medium text-right",
+                  mono && "font-mono text-xs",
+                )}
+              >
+                {value}
+              </span>
             </div>
           ))}
 
           {/* Reference row with copy */}
-          <div className="flex justify-between items-center gap-4 px-4 py-3.5">
-            <span className="text-muted-foreground text-sm shrink-0">Reference</span>
+          <div className="flex justify-between items-center gap-4 px-5 py-3.5">
+            <span className="text-foreground-subtle text-sm shrink-0">
+              Reference
+            </span>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs text-right">{transactionData.reference}</span>
+              <span className="font-mono text-xs text-right text-foreground-subtle">
+                {transactionData.reference}
+              </span>
               <button
                 onClick={copyReference}
-                className="w-7 h-7 rounded-xl hover:bg-muted flex items-center justify-center transition-colors"
+                className="w-7 h-7 rounded-xl flex items-center justify-center transition-colors hover:bg-surface"
               >
-                <Copy size={13} className="text-muted-foreground" />
+                <Copy size={12} className="text-foreground-subtle" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Actions */}
+        {/* Export actions */}
         <div className="space-y-2">
           <div className="grid grid-cols-3 gap-2">
             {[
-              { label: "Image", key: "dl-image" as const, icon: ImageDown, onClick: downloadImage, variant: "gradient" as const },
-              { label: "PDF", key: "dl-pdf" as const, icon: FileDown, onClick: downloadPdf, variant: "outline" as const },
-              { label: "Share", key: "share" as const, icon: Share2, onClick: shareReceipt, variant: "outline" as const },
-            ].map(({ label, key, icon: Icon, onClick, variant }) => (
-              <Button key={key} variant={variant} className="w-full rounded-2xl" onClick={onClick} disabled={!!isExporting}>
-                {isExporting === key
-                  ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5" />
-                  : <Icon size={16} className="mr-1.5" />}
+              {
+                label: "Image",
+                key: "dl-image" as const,
+                icon: ImageDown,
+                onClick: downloadImage,
+                primary: true,
+              },
+              {
+                label: "PDF",
+                key: "dl-pdf" as const,
+                icon: FileDown,
+                onClick: downloadPdf,
+                primary: false,
+              },
+              {
+                label: "Share",
+                key: "share" as const,
+                icon: Share2,
+                onClick: shareReceipt,
+                primary: false,
+              },
+            ].map(({ label, key, icon: Icon, onClick, primary }) => (
+              <button
+                key={key}
+                onClick={onClick}
+                disabled={!!isExporting}
+                className={cn(
+                  "flex items-center justify-center gap-2 py-3 rounded-pill text-sm font-semibold transition-colors",
+                  primary
+                    ? "bg-foreground text-surface-highest hover:opacity-90"
+                    : "hover:bg-surface",
+                )}
+                style={
+                  !primary
+                    ? {
+                        background: "rgb(var(--surface-highest))",
+                        border: "1px solid rgb(var(--surface-high))",
+                      }
+                    : undefined
+                }
+              >
+                {isExporting === key ? (
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-pill animate-spin" />
+                ) : (
+                  <Icon size={15} />
+                )}
                 {label}
-              </Button>
+              </button>
             ))}
           </div>
 
-          <Button variant="outline" className="w-full rounded-2xl" onClick={() => navigate("/account/transactions")}>
+          <button
+            onClick={() => navigate("/account/transactions")}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-pill text-sm font-semibold transition-colors hover:bg-surface"
+            style={{
+              background: "rgb(var(--surface-highest))",
+              border: "1px solid rgb(var(--surface-high))",
+            }}
+          >
             Back to History
-          </Button>
+          </button>
 
           {!isCredit && mappedStatus === "successful" && (
-            <Button variant="gradient" className="w-full rounded-2xl" onClick={() => navigate("/account/send")}>
+            <button
+              onClick={() => navigate("/account/send")}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-pill text-sm font-semibold bg-foreground text-surface-highest hover:opacity-90 transition-opacity"
+            >
               Send Again
-            </Button>
+            </button>
           )}
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 
