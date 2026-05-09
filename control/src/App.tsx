@@ -55,6 +55,7 @@ import WhatsappPage from "@/app/account/whatsapp/page";
 import SettingsProfilePage from "@/app/account/settings/profile/page";
 import SettingsSecurityPage from "@/app/account/settings/security/page";
 import SettingsDevelopersPage from "@/app/account/settings/developers_disabled/page";
+import NotificationSettingsPage from "@/app/account/settings/notifications/page";
 import CustomerActivityListPage from "@/app/account/customers/[id]/activity/page";
 import CustomerActivityDetailPage from "@/app/account/customers/[id]/activity/[activityId]/page";
 import FrozenFundsPage from "@/app/account/wallets/frozen-funds/page";
@@ -234,6 +235,10 @@ export default function App() {
                       <Route
                         path="developers"
                         element={<SettingsDevelopersPage />}
+                      />
+                      <Route
+                        path="notifications"
+                        element={<NotificationSettingsPage />}
                       />
                     </Route>
                   </Route>

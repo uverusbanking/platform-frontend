@@ -40,6 +40,7 @@ import {
 } from "@/hooks/queries/useOrganisationQueries";
 import { GoLiveChecklist } from "@/components/features/platform/GoLiveChecklist";
 import { PaymentConfigSection } from "@/components/features/platform/PaymentConfigSection";
+import { NotificationConfigSection } from "@/components/features/platform/NotificationConfigSection";
 import {
   useUpdateOrganisationDocumentStatus,
   useOverrideDomainVerification,
@@ -852,6 +853,9 @@ export default function OrganisationDetailPage() {
 
           {/* Payment Providers */}
           <PaymentConfigSection organisationId={id} />
+
+          {/* Notification Overrides */}
+          <NotificationConfigSection organisationId={id} />
 
           {/* Directors Section */}
           {organisation.directors && organisation.directors.length > 0 && (

@@ -506,3 +506,41 @@ export const removeOrgPaymentConfig = async ({
   );
   return response.data;
 };
+
+export const getOrgNotificationConfigs = async (
+  id: string,
+): Promise<IApiResponse<import("./usePlatform").INotificationConfig[]>> => {
+  const response = await apiClient.get(
+    `/organisations/platform/${id}/notification-config`,
+  );
+  return response.data;
+};
+
+export const upsertOrgNotificationConfig = async ({
+  id,
+  channel,
+  payload,
+}: {
+  id: string;
+  channel: import("./usePlatform").NotificationChannel;
+  payload: import("./usePlatform").IUpsertNotificationConfigPayload;
+}): Promise<IApiResponse<import("./usePlatform").INotificationConfig>> => {
+  const response = await apiClient.put(
+    `/organisations/platform/${id}/notification-config/${channel}`,
+    payload,
+  );
+  return response.data;
+};
+
+export const removeOrgNotificationConfig = async ({
+  id,
+  channel,
+}: {
+  id: string;
+  channel: import("./usePlatform").NotificationChannel;
+}): Promise<IApiResponse<unknown>> => {
+  const response = await apiClient.delete(
+    `/organisations/platform/${id}/notification-config/${channel}`,
+  );
+  return response.data;
+};

@@ -37,10 +37,18 @@ import {
   getOrgPaymentConfigs,
   upsertOrgPaymentConfig,
   removeOrgPaymentConfig,
+  getOrgNotificationConfigs,
+  upsertOrgNotificationConfig,
+  removeOrgNotificationConfig,
   IPaymentConfig,
   IUpsertPaymentConfigPayload,
   PaymentProviderType,
 } from "@/hooks/endpoints/useOrganisation";
+import type {
+  NotificationChannel,
+  INotificationConfig,
+  IUpsertNotificationConfigPayload,
+} from "@/hooks/endpoints/usePlatform";
 import {
   IGetOrganisationStatsParams,
   IOrganisationStats,
@@ -190,6 +198,46 @@ export const useRemoveOrgPaymentConfig = (id: string) => {
       });
       void queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.ORGANISATION.GO_LIVE_CHECKLIST, id],
+      });
+    },
+  });
+};
+
+export const useGetOrgNotificationConfigs = (id: string) => {
+  return useQuery<IApiResponse<INotificationConfig[]>, TError>({
+    queryKey: [QUERY_KEYS.ORGANISATION.NOTIFICATION_CONFIG, id],
+    queryFn: () => getOrgNotificationConfigs(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useUpsertOrgNotificationConfig = (id: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      channel,
+      payload,
+    }: {
+      channel: NotificationChannel;
+      payload: IUpsertNotificationConfigPayload;
+    }) => upsertOrgNotificationConfig({ id, channel, payload }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.NOTIFICATION_CONFIG, id],
+      });
+    },
+  });
+};
+
+export const useRemoveOrgNotificationConfig = (id: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (channel: NotificationChannel) =>
+      removeOrgNotificationConfig({ id, channel }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.NOTIFICATION_CONFIG, id],
       });
     },
   });
