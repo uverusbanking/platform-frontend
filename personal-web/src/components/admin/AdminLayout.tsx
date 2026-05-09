@@ -1,24 +1,35 @@
-import { useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { useAdmin } from '@/contexts/AdminContext';
-import { AdminSidebar } from './AdminSidebar';
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
-import { Separator } from '@/components/ui/separator';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { useLocation } from 'react-router-dom';
+import { useEffect } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
+import { useAdmin } from "@/contexts/AdminContext";
+import { AdminSidebar } from "./AdminSidebar";
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { useLocation } from "react-router-dom";
 
 const ROUTE_TITLES: Record<string, string> = {
-  '/admin-dashboard': 'Dashboard',
-  '/admin-dashboard/users': 'User Management',
-  '/admin-dashboard/kyc': 'KYC Review',
-  '/admin-dashboard/tiers': 'Tiers & Limits',
-  '/admin-dashboard/wallets': 'Wallets',
-  '/admin-dashboard/transactions': 'Transactions',
-  '/admin-dashboard/disputes': 'Disputes',
-  '/admin-dashboard/reports': 'Reports',
-  '/admin-dashboard/audit-logs': 'Audit Logs',
-  '/admin-dashboard/admins': 'Admin Users',
-  '/admin-dashboard/settings': 'Settings',
+  "/admin-dashboard": "Dashboard",
+  "/admin-dashboard/users": "User Management",
+  "/admin-dashboard/kyc": "KYC Review",
+  "/admin-dashboard/tiers": "Tiers & Limits",
+  "/admin-dashboard/wallets": "Wallets",
+  "/admin-dashboard/transactions": "Transactions",
+  "/admin-dashboard/disputes": "Disputes",
+  "/admin-dashboard/reports": "Reports",
+  "/admin-dashboard/audit-logs": "Audit Logs",
+  "/admin-dashboard/admins": "Admin Users",
+  "/admin-dashboard/settings": "Settings",
 };
 
 export function AdminLayout() {
@@ -28,7 +39,7 @@ export function AdminLayout() {
 
   useEffect(() => {
     if (!loading && !isAdminAuthenticated) {
-      navigate('/admin-login');
+      navigate("/admin-login");
     }
   }, [isAdminAuthenticated, loading, navigate]);
 
@@ -36,8 +47,14 @@ export function AdminLayout() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-destructive border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading admin panel...</p>
+          <div
+            className="w-12 h-12 border-4 border-t-transparent rounded-pill animate-spin mx-auto mb-4"
+            style={{
+              borderColor: "rgb(var(--brand-primary))",
+              borderTopColor: "transparent",
+            }}
+          />
+          <p className="text-foreground-subtle">Loading admin panel...</p>
         </div>
       </div>
     );
@@ -48,8 +65,8 @@ export function AdminLayout() {
   }
 
   const currentPath = location.pathname;
-  const pageTitle = ROUTE_TITLES[currentPath] || 'Admin';
-  const isSubPage = currentPath !== '/admin-dashboard';
+  const pageTitle = ROUTE_TITLES[currentPath] || "Admin";
+  const isSubPage = currentPath !== "/admin-dashboard";
 
   return (
     <SidebarProvider>

@@ -1,20 +1,20 @@
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useAdmin, AdminPermission } from '@/contexts/AdminContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { 
-  Users, 
-  ShieldCheck, 
-  Wallet, 
-  History, 
-  FileCheck, 
-  Settings2, 
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAdmin, AdminPermission } from "@/contexts/AdminContext";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  Users,
+  ShieldCheck,
+  Wallet,
+  History,
+  FileCheck,
+  Settings2,
   LogOut,
   LayoutDashboard,
   ClipboardList,
   AlertTriangle,
   BarChart3,
-  UserCog
-} from 'lucide-react';
+  UserCog,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -28,8 +28,8 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
   useSidebar,
-} from '@/components/ui/sidebar';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
 
 interface NavItem {
   title: string;
@@ -40,31 +40,87 @@ interface NavItem {
 }
 
 const mainNavItems: NavItem[] = [
-  { title: 'Dashboard', url: '/admin-dashboard', icon: LayoutDashboard },
-  { title: 'Users', url: '/admin-dashboard/users', icon: Users, permission: 'view_users' },
-  { title: 'KYC Review', url: '/admin-dashboard/kyc', icon: FileCheck, permission: 'view_kyc' },
-  { title: 'Tiers & Limits', url: '/admin-dashboard/tiers', icon: ShieldCheck, permission: 'view_tiers' },
+  { title: "Dashboard", url: "/admin-dashboard", icon: LayoutDashboard },
+  {
+    title: "Users",
+    url: "/admin-dashboard/users",
+    icon: Users,
+    permission: "view_users",
+  },
+  {
+    title: "KYC Review",
+    url: "/admin-dashboard/kyc",
+    icon: FileCheck,
+    permission: "view_kyc",
+  },
+  {
+    title: "Tiers & Limits",
+    url: "/admin-dashboard/tiers",
+    icon: ShieldCheck,
+    permission: "view_tiers",
+  },
 ];
 
 const operationsNavItems: NavItem[] = [
-  { title: 'Wallets', url: '/admin-dashboard/wallets', icon: Wallet, permission: 'view_wallets' },
-  { title: 'Transactions', url: '/admin-dashboard/transactions', icon: History, permission: 'view_transactions' },
-  { title: 'Disputes', url: '/admin-dashboard/disputes', icon: AlertTriangle, permission: 'view_users' },
+  {
+    title: "Wallets",
+    url: "/admin-dashboard/wallets",
+    icon: Wallet,
+    permission: "view_wallets",
+  },
+  {
+    title: "Transactions",
+    url: "/admin-dashboard/transactions",
+    icon: History,
+    permission: "view_transactions",
+  },
+  {
+    title: "Disputes",
+    url: "/admin-dashboard/disputes",
+    icon: AlertTriangle,
+    permission: "view_users",
+  },
 ];
 
 const systemNavItems: NavItem[] = [
-  { title: 'Reports', url: '/admin-dashboard/reports', icon: BarChart3, permission: 'view_logs' },
-  { title: 'Audit Logs', url: '/admin-dashboard/audit-logs', icon: ClipboardList, permission: 'view_logs' },
-  { title: 'Admin Users', url: '/admin-dashboard/admins', icon: UserCog, permission: 'manage_admins' },
-  { title: 'Settings', url: '/admin-dashboard/settings', icon: Settings2, permission: 'manage_admins' },
+  {
+    title: "Reports",
+    url: "/admin-dashboard/reports",
+    icon: BarChart3,
+    permission: "view_logs",
+  },
+  {
+    title: "Audit Logs",
+    url: "/admin-dashboard/audit-logs",
+    icon: ClipboardList,
+    permission: "view_logs",
+  },
+  {
+    title: "Admin Users",
+    url: "/admin-dashboard/admins",
+    icon: UserCog,
+    permission: "manage_admins",
+  },
+  {
+    title: "Settings",
+    url: "/admin-dashboard/settings",
+    icon: Settings2,
+    permission: "manage_admins",
+  },
 ];
 
-const ROLE_LABELS: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  super_admin: { label: 'Super Admin', variant: 'destructive' },
-  operations_admin: { label: 'Operations', variant: 'default' },
-  compliance_admin: { label: 'Compliance', variant: 'secondary' },
-  support_admin: { label: 'Support', variant: 'outline' },
-  read_only_admin: { label: 'Read Only', variant: 'outline' },
+const ROLE_LABELS: Record<
+  string,
+  {
+    label: string;
+    variant: "default" | "secondary" | "destructive" | "outline";
+  }
+> = {
+  super_admin: { label: "Super Admin", variant: "destructive" },
+  operations_admin: { label: "Operations", variant: "default" },
+  compliance_admin: { label: "Compliance", variant: "secondary" },
+  support_admin: { label: "Support", variant: "outline" },
+  read_only_admin: { label: "Read Only", variant: "outline" },
 };
 
 export function AdminSidebar() {
@@ -73,10 +129,10 @@ export function AdminSidebar() {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { adminUser, hasPermission } = useAdmin();
-  const collapsed = state === 'collapsed';
+  const collapsed = state === "collapsed";
 
   const isActive = (path: string) => {
-    if (path === '/admin-dashboard') {
+    if (path === "/admin-dashboard") {
       return location.pathname === path;
     }
     return location.pathname.startsWith(path);
@@ -84,19 +140,22 @@ export function AdminSidebar() {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/admin-login');
+    navigate("/admin-login");
   };
 
-  const filterByPermission = (items: NavItem[]) => 
-    items.filter(item => !item.permission || hasPermission(item.permission));
+  const filterByPermission = (items: NavItem[]) =>
+    items.filter((item) => !item.permission || hasPermission(item.permission));
 
   const roleInfo = adminUser?.role ? ROLE_LABELS[adminUser.role] : null;
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border bg-card">
+    <Sidebar collapsible="icon" className="border-r border-border">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-destructive flex items-center justify-center shrink-0">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: "rgb(var(--foreground))" }}
+          >
             <ShieldCheck className="text-white h-5 w-5" />
           </div>
           {!collapsed && (
@@ -214,8 +273,12 @@ export function AdminSidebar() {
       <SidebarFooter className="p-2">
         {!collapsed && adminUser && (
           <div className="px-3 py-2 mb-2 text-sm">
-            <p className="font-medium truncate">{adminUser.full_name || adminUser.email}</p>
-            <p className="text-xs text-muted-foreground truncate">{adminUser.email}</p>
+            <p className="font-medium truncate">
+              {adminUser.full_name || adminUser.email}
+            </p>
+            <p className="text-xs text-foreground-subtle truncate">
+              {adminUser.email}
+            </p>
           </div>
         )}
         <SidebarMenu>
