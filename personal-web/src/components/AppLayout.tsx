@@ -1,9 +1,15 @@
-import { ReactNode } from 'react';
-import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
-import BottomNav from '@/components/BottomNav';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Menu } from 'lucide-react';
+import { ReactNode } from "react";
+import {
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarInset,
+} from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import BottomNav from "@/components/BottomNav";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
+import { Menu, Bell, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -11,53 +17,62 @@ interface AppLayoutProps {
   headerContent?: ReactNode;
 }
 
-export function AppLayout({ children, showHeader = true, headerContent }: AppLayoutProps) {
+export function AppLayout({ children }: AppLayoutProps) {
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const initials = user?.email?.charAt(0).toUpperCase() ?? "U";
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="min-h-screen flex w-full">
-        {/* Sidebar (hidden by default on mobile, shown via toggle) */}
+      <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
 
-        <SidebarInset className="flex-1">
-          {/* Header with Sidebar Trigger */}
-          {showHeader && (
-            <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
-              <SidebarTrigger className="-ml-1">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle sidebar</span>
+        <SidebarInset className="flex-1 flex flex-col min-w-0">
+          {/* Topbar */}
+          <header className="sticky top-0 z-40 flex items-center justify-between px-5 py-3 bg-background border-b border-border">
+            <div className="flex items-center gap-3">
+              {/* Mobile: hamburger trigger */}
+              <SidebarTrigger className="lg:hidden h-9 w-9 rounded-xl flex items-center justify-center hover:bg-surface transition-colors">
+                <Menu className="h-5 w-5 text-foreground" />
+                <span className="sr-only">Toggle menu</span>
               </SidebarTrigger>
-              {headerContent}
-            </header>
-          )}
 
-          {/* Mobile-only floating toggle when header is hidden */}
-          {!showHeader && isMobile && (
-            <div className="fixed top-4 left-4 z-50">
-              <SidebarTrigger className="h-10 w-10 rounded-full bg-background/95 backdrop-blur border border-border shadow-lg flex items-center justify-center">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle sidebar</span>
-              </SidebarTrigger>
+              {/* Search pill — desktop only */}
+              <div className="hidden md:flex items-center gap-2 bg-surface border border-border rounded-pill px-4 py-2 w-64 text-foreground-subtle text-sm cursor-text">
+                <Search size={14} className="shrink-0" />
+                <span>Search...</span>
+              </div>
             </div>
-          )}
 
-          {/* Desktop-only floating toggle when header is hidden */}
-          {!showHeader && !isMobile && (
-            <div className="fixed top-4 left-4 z-50">
-              <SidebarTrigger className="h-9 w-9 rounded-lg bg-background/95 backdrop-blur border border-border shadow-md flex items-center justify-center hover:bg-accent transition-colors">
-                <Menu className="h-4 w-4" />
-                <span className="sr-only">Toggle sidebar</span>
-              </SidebarTrigger>
+            <div className="flex items-center gap-2">
+              {/* Notification bell */}
+              <button
+                className="relative h-9 w-9 rounded-xl flex items-center justify-center hover:bg-surface transition-colors"
+                onClick={() => navigate("/account/notifications")}
+              >
+                <Bell size={18} className="text-foreground" />
+              </button>
+
+              {/* Avatar */}
+              <button
+                className="h-9 w-9 rounded-pill bg-foreground text-surface-highest flex items-center justify-center font-bold text-sm shrink-0 hover:opacity-80 transition-opacity"
+                onClick={() => navigate("/account/profile")}
+              >
+                {initials}
+              </button>
             </div>
-          )}
+          </header>
 
-          {/* Main Content with padding for mobile bottom nav */}
-          <main className={`flex-1 ${isMobile ? 'pb-20' : ''}`}>
+          {/* Main content */}
+          <main
+            className={`flex-1 p-5 md:p-7 lg:px-9 ${isMobile ? "pb-24" : "pb-12"}`}
+          >
             {children}
           </main>
 
-          {/* Mobile Bottom Navigation */}
+          {/* Mobile bottom nav */}
           {isMobile && <BottomNav />}
         </SidebarInset>
       </div>
