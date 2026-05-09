@@ -19,7 +19,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "DM Sans", "system-ui", "sans-serif"],
+        sans: ["Inter", "system-ui", "sans-serif"],
+        serif: ["Instrument Serif", "Times New Roman", "serif"],
       },
       colors: {
         // ── Unified tokens — use these in new code ─────────────────────
@@ -42,6 +43,15 @@ export default {
           DEFAULT: "rgb(var(--error) / <alpha-value>)",
           foreground: "rgb(var(--on-error) / <alpha-value>)",
         },
+        soft: "rgb(var(--soft) / <alpha-value>)",
+        mint: {
+          DEFAULT: "rgb(var(--mint) / <alpha-value>)",
+          deep: "rgb(var(--mint-deep) / <alpha-value>)",
+        },
+        lemon: "rgb(var(--lemon) / <alpha-value>)",
+        sky: "rgb(var(--sky) / <alpha-value>)",
+        plum: "rgb(var(--plum) / <alpha-value>)",
+        ink: "rgb(var(--foreground) / <alpha-value>)",
 
         // ── Shadcn/ui compat — kept so existing components don't break ─
         border: "rgb(var(--border) / <alpha-value>)",
@@ -99,12 +109,13 @@ export default {
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-        xl: "calc(var(--radius) + 4px)",
-        "2xl": "calc(var(--radius) + 8px)",
-        "3xl": "calc(var(--radius) + 16px)",
+        sm: "calc(var(--radius) - 4px)" /* 10px */,
+        md: "calc(var(--radius) - 2px)" /* 12px */,
+        lg: "var(--radius)" /* 14px */,
+        xl: "calc(var(--radius) + 6px)" /* 20px */,
+        "2xl": "calc(var(--radius) + 14px)" /* 28px */,
+        "3xl": "calc(var(--radius) + 22px)" /* 36px */,
+        pill: "999px",
       },
       keyframes: {
         "accordion-down": {
