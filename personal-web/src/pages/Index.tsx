@@ -1,40 +1,20 @@
 import { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  ArrowRight,
-  Shield,
-  Zap,
-  Lock,
-  Sparkles,
-  Activity,
-  Smartphone,
   Eye,
   EyeOff,
   Loader2,
   Mail,
   CheckCircle,
-  CreditCard,
+  ArrowRight,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { z } from "zod";
 import { BrandConfigService } from "@shared/core";
-
-const fadeInUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
-};
+import { useEffect } from "react";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -44,21 +24,45 @@ const loginSchema = z.object({
 const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, setPendingCredentials } = useAuth();
+  const {
+    user,
+    loading: authLoading,
+    signIn,
+    setPendingCredentials,
+  } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [verificationRequired, setVerificationRequired] = useState(false);
 
-  const [email, setEmail] = useState((location.state as any)?.email || "");
+  const [email, setEmail] = useState(
+    (location.state as { email?: string })?.email || "",
+  );
   const [password, setPassword] = useState("");
   const brand = BrandConfigService.getConfigSync("personal");
-  const isRegistered = (location.state as any)?.registered;
+  const isRegistered = (location.state as { registered?: boolean })?.registered;
+
+  useEffect(() => {
+    if (!authLoading && user) navigate("/account/dashboard", { replace: true });
+  }, [user, authLoading, navigate]);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div
+          className="w-12 h-12 border-4 border-t-transparent rounded-pill animate-spin"
+          style={{
+            borderColor: "rgb(var(--brand-primary))",
+            borderTopColor: "transparent",
+          }}
+        />
+      </div>
+    );
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
     try {
       loginSchema.parse({ email, password });
     } catch (err) {
@@ -67,18 +71,17 @@ const Index = () => {
         return;
       }
     }
-
     setLoading(true);
-
-    const { error, needsVerification } = (await signIn(email, password)) as any;
-
+    const { error, needsVerification } = (await signIn(email, password)) as {
+      error?: { message: string };
+      needsVerification?: boolean;
+    };
     if (needsVerification) {
       setPendingCredentials(email, password);
       setVerificationRequired(true);
       setLoading(false);
       return;
     }
-
     if (error) {
       setError(
         error.message === "Invalid login credentials"
@@ -88,384 +91,297 @@ const Index = () => {
       setLoading(false);
       return;
     }
-
     navigate("/account/dashboard");
   };
 
-  const handleContinueToVerify = () => {
-    navigate("/auth/verify-otp", { state: { email, fromLogin: true } });
-  };
-
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-hidden selection:bg-white/30">
+    <div className="min-h-screen bg-background flex">
       <Helmet>
-        <title>Login - {brand.brandName}</title>
+        <title>Login — {brand.brandName}</title>
         <meta
           name="description"
-          content={`Login to your ${brand.brandName} account. Access secure digital banking and instant transfers.`}
+          content={`Login to your ${brand.brandName} account.`}
         />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
-      {/* Hero / Background Section */}
-      <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-hero">
-        {/* Animated Background Gradients */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.5, 0.3],
-            }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-[10%] -right-[10%] w-[500px] h-[500px] rounded-full bg-white/10 blur-[120px]"
-          />
-          <motion.div
-            animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.2, 0.4, 0.2],
-            }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 2,
-            }}
-            className="absolute -bottom-[20%] -left-[10%] w-[600px] h-[600px] rounded-full bg-purple-500/20 blur-[120px]"
-          />
+      {/* Left branding panel */}
+      <div
+        className="hidden lg:flex lg:w-[440px] shrink-0 flex-col justify-between p-10 relative overflow-hidden"
+        style={{ background: "rgb(var(--foreground))", color: "#fff" }}
+      >
+        <div
+          className="absolute -right-24 -top-24 w-80 h-80 rounded-pill opacity-50 pointer-events-none"
+          style={{
+            background: "rgb(var(--brand-primary))",
+            filter: "blur(80px)",
+          }}
+        />
+        <div
+          className="absolute -left-16 bottom-0 w-64 h-64 rounded-pill opacity-30 pointer-events-none"
+          style={{
+            background: "rgb(var(--brand-primary))",
+            filter: "blur(60px)",
+          }}
+        />
 
-          {/* Floating Shapes */}
-          <motion.div
-            animate={{ y: [0, -30, 0], rotate: [0, 10, -10, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-[15%] left-[5%] md:left-[10%] w-16 h-16 rounded-full bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center shadow-lg"
+        {/* Logo */}
+        <div className="relative flex items-center gap-3">
+          <div
+            className="w-9 h-9 rounded-xl flex items-center justify-center"
+            style={{ background: "rgba(255,255,255,0.1)" }}
           >
-            <Zap className="w-8 h-8 text-white/50" />
-          </motion.div>
-
-          <motion.div
-            animate={{ y: [0, 40, 0], rotate: [0, -15, 10, 0] }}
-            transition={{
-              duration: 7,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1,
-            }}
-            className="absolute top-[25%] right-[5%] md:right-[15%] w-20 h-20 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center shadow-lg"
-          >
-            <Shield className="w-10 h-10 text-white/40" />
-          </motion.div>
-
-          <motion.div
-            animate={{ y: [0, -20, 0], x: [0, 15, 0], rotate: [-10, 5, -10] }}
-            transition={{
-              duration: 6,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 2,
-            }}
-            className="absolute bottom-[15%] left-[10%] md:left-[25%] w-24 h-16 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center shadow-lg"
-          >
-            <CreditCard className="w-8 h-8 text-white/50" />
-          </motion.div>
+            {brand.brandLogoUrl ? (
+              <img
+                src={brand.brandLogoUrl}
+                alt={brand.brandName}
+                className="w-5 h-5 object-contain"
+              />
+            ) : (
+              <span
+                className="font-extrabold text-base"
+                style={{ color: "#fff" }}
+              >
+                {brand.brandName.charAt(0)}
+              </span>
+            )}
+          </div>
+          <span className="font-extrabold text-xl tracking-[-0.04em]">
+            {brand.brandName}
+          </span>
         </div>
 
-        {/* Header - Simple Logo Only */}
-        <header className="fixed top-0 left-0 right-0 z-50 bg-transparent">
-          <div className="container mx-auto px-6 h-20 flex items-center justify-between max-w-7xl">
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-3 cursor-pointer text-white"
-              onClick={() => navigate("/")}
+        {/* Tagline */}
+        <div className="relative">
+          <p
+            className="eyebrow mb-4"
+            style={{ color: "rgba(255,255,255,0.45)" }}
+          >
+            {brand.brandName}
+          </p>
+          <h2
+            className="display text-[40px] leading-[1] mb-5"
+            style={{ color: "#fff" }}
+          >
+            Banking
+            <br />
+            built for{" "}
+            <span
+              className="serif-italic"
+              style={{ color: "rgb(var(--brand-primary))" }}
             >
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shadow-lg backdrop-blur-sm border border-white/20">
-                {brand.brandIconUrl ? (
-                  <img
-                    src={brand.brandIconUrl}
-                    alt={brand.brandName}
-                    className="w-6 h-6 object-contain"
+              you.
+            </span>
+          </h2>
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+            Secure, instant, and always at your fingertips.
+          </p>
+        </div>
+      </div>
+
+      {/* Right form panel */}
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10">
+        <div className="w-full max-w-md">
+          {verificationRequired ? (
+            <div>
+              <div className="text-center mb-6">
+                <div
+                  className="w-14 h-14 rounded-pill flex items-center justify-center mx-auto mb-4"
+                  style={{ background: "rgb(var(--lemon) / 0.3)" }}
+                >
+                  <Mail size={24} style={{ color: "rgb(var(--foreground))" }} />
+                </div>
+                <h1 className="display text-2xl mb-1">Verification required</h1>
+                <p className="text-foreground-subtle text-sm">
+                  Your email hasn't been verified yet
+                </p>
+              </div>
+
+              <div
+                className="rounded-2xl p-5 mb-5"
+                style={{
+                  background: "rgb(var(--surface-highest))",
+                  border: "1px solid rgb(var(--surface-high))",
+                }}
+              >
+                <p className="font-semibold text-sm text-center mb-3 break-all">
+                  {email}
+                </p>
+                <div className="flex items-start gap-3">
+                  <CheckCircle
+                    size={16}
+                    className="shrink-0 mt-0.5"
+                    style={{ color: "rgb(var(--mint-deep))" }}
                   />
-                ) : (
-                  <span className="text-white font-bold text-xl">
-                    {brand.brandName.charAt(0)}
+                  <div className="text-sm">
+                    <p className="font-semibold mb-0.5">We've sent a code</p>
+                    <p className="text-foreground-subtle text-xs leading-relaxed">
+                      Check your inbox for the 6-digit code to continue.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() =>
+                  navigate("/auth/verify-otp", {
+                    state: { email, fromLogin: true },
+                  })
+                }
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-pill text-sm font-semibold bg-foreground text-surface-highest hover:opacity-90 transition-opacity mb-3"
+              >
+                Enter Verification Code <ArrowRight size={14} />
+              </button>
+              <button
+                onClick={() => setVerificationRequired(false)}
+                className="w-full text-center text-sm text-foreground-subtle hover:text-foreground transition-colors py-2"
+              >
+                Back to Login
+              </button>
+            </div>
+          ) : (
+            <div>
+              <div className="mb-7">
+                <p className="eyebrow mb-2">Welcome back</p>
+                <h1 className="display text-[clamp(28px,4vw,40px)] m-0 leading-none">
+                  Sign in to{" "}
+                  <span
+                    className="serif-italic"
+                    style={{ color: "rgb(var(--brand-primary))" }}
+                  >
+                    {brand.shortBrandName}.
                   </span>
-                )}
+                </h1>
               </div>
-              <span className="font-bold text-xl tracking-tight text-white">
-                {brand.brandName}
-              </span>
-            </motion.div>
-          </div>
-        </header>
 
-        {/* Login Container - Two Column Layout */}
-        <div className="container mx-auto px-6 relative z-10 max-w-7xl flex flex-col lg:flex-row items-center justify-center min-h-[calc(100vh-80px)] mt-20 gap-12 lg:gap-20">
-          {/* Left Column: Login Form */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="w-full max-w-md order-2 lg:order-1"
-          >
-            {verificationRequired ? (
-              <Card className="w-full shadow-2xl border-0 bg-white/95 backdrop-blur-xl">
-                <CardHeader className="text-center pb-2">
-                  <div className="mx-auto mb-4">
-                    <div className="w-16 h-16 rounded-full bg-warning/10 flex items-center justify-center">
-                      <Mail className="text-warning" size={28} />
-                    </div>
+              {error && (
+                <div
+                  className="p-4 rounded-2xl text-sm mb-5"
+                  style={{
+                    background: "rgb(var(--soft))",
+                    border: "1px solid rgb(var(--brand-primary) / 0.2)",
+                    color: "rgb(var(--brand-primary))",
+                  }}
+                >
+                  {error}
+                </div>
+              )}
+
+              {isRegistered && (
+                <div
+                  className="p-4 rounded-2xl mb-5 flex items-start gap-3"
+                  style={{
+                    background: "rgb(var(--mint))",
+                    border: "1px solid rgb(var(--mint-deep) / 0.3)",
+                  }}
+                >
+                  <CheckCircle
+                    size={16}
+                    className="shrink-0 mt-0.5"
+                    style={{ color: "rgb(var(--mint-deep))" }}
+                  />
+                  <div className="text-sm">
+                    <p
+                      className="font-semibold mb-0.5"
+                      style={{ color: "rgb(var(--mint-deep))" }}
+                    >
+                      Registration Successful!
+                    </p>
+                    <p
+                      className="text-xs leading-relaxed"
+                      style={{ color: "rgb(var(--mint-deep) / 0.8)" }}
+                    >
+                      Welcome to {brand.brandName}. Please sign in with your
+                      password.
+                    </p>
                   </div>
-                  <CardTitle className="text-2xl">
-                    Verification required
-                  </CardTitle>
-                  <CardDescription className="text-sm mt-2">
-                    Your email hasn't been verified yet
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <p className="font-medium text-foreground mb-4 break-all">
-                    {email}
-                  </p>
-                  <div className="bg-muted/50 rounded-lg p-4 mb-6 text-left">
-                    <div className="flex items-start gap-3">
-                      <CheckCircle
-                        className="text-success mt-0.5 flex-shrink-0"
-                        size={18}
-                      />
-                      <div className="text-sm text-muted-foreground">
-                        <p className="font-medium text-foreground mb-1">
-                          We've sent a code
-                        </p>
-                        <p>
-                          Check your inbox for the 6-digit code to continue.
-                        </p>
-                      </div>
-                    </div>
+                </div>
+              )}
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="email"
+                    className="text-xs font-semibold text-foreground-subtle uppercase tracking-wide"
+                  >
+                    Email
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={loading}
+                    className="h-12 rounded-xl"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center">
+                    <Label
+                      htmlFor="password"
+                      className="text-xs font-semibold text-foreground-subtle uppercase tracking-wide"
+                    >
+                      Password
+                    </Label>
+                    <Link
+                      to="/auth/forgot-password"
+                      className="text-xs font-semibold text-foreground-subtle hover:text-foreground transition-colors"
+                    >
+                      Forgot password?
+                    </Link>
                   </div>
-                  <Button
-                    onClick={handleContinueToVerify}
-                    className="w-full h-11"
-                    variant="gradient"
-                  >
-                    Enter Verification Code
-                  </Button>
-                  <button
-                    onClick={() => setVerificationRequired(false)}
-                    className="mt-4 text-sm text-primary hover:underline font-medium"
-                  >
-                    Back to Login
-                  </button>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="w-full shadow-2xl border-0 bg-white/95 backdrop-blur-xl">
-                <CardHeader className="text-center pb-2">
-                  <CardTitle className="text-3xl font-bold tracking-tight">
-                    Welcome back
-                  </CardTitle>
-                  <CardDescription className="text-sm">
-                    Sign in to your {brand.shortBrandName} banking portal
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {error && (
-                    <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm animate-in fade-in slide-in-from-top-1">
-                      {error}
-                    </div>
-                  )}
-
-                  {isRegistered && (
-                    <div className="mb-6 p-4 rounded-xl bg-success/10 border border-success/20 flex items-start gap-3">
-                      <CheckCircle
-                        className="text-success shrink-0"
-                        size={20}
-                      />
-                      <div className="text-sm">
-                        <p className="font-semibold text-success mb-1">
-                          Registration Successful!
-                        </p>
-                        <p className="text-success/80">
-                          Welcome to {brand.brandName}. Please sign in with your
-                          password to access your dashboard.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  <form onSubmit={handleLogin} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        disabled={loading}
-                        className="h-11 border-border/50 focus:border-primary/50 transition-colors"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <Label htmlFor="password">Password</Label>
-                        <Link
-                          to="/auth/forgot-password"
-                          className="text-xs text-primary hover:underline"
-                        >
-                          Forgot password?
-                        </Link>
-                      </div>
-                      <div className="relative">
-                        <Input
-                          id="password"
-                          type={showPassword ? "text" : "password"}
-                          placeholder="••••••••"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                          disabled={loading}
-                          className="h-11 pr-10 border-border/50 focus:border-primary/50 transition-colors"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                        >
-                          {showPassword ? (
-                            <EyeOff size={18} />
-                          ) : (
-                            <Eye size={18} />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-
-                    <Button
-                      type="submit"
-                      className="w-full h-11 text-base font-semibold shadow-lg shadow-primary/20"
-                      variant="gradient"
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
                       disabled={loading}
+                      className="h-12 rounded-xl pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-subtle hover:text-foreground transition-colors"
                     >
-                      {loading ? (
-                        <Loader2 className="animate-spin" />
-                      ) : (
-                        `Sign In to ${brand.shortBrandName}`
-                      )}
-                    </Button>
-                  </form>
-
-                  <div className="mt-8 text-center pt-6 border-t border-border/50">
-                    <p className="text-sm text-muted-foreground">
-                      Don't have an account?{" "}
-                      <Link
-                        to="/auth/register"
-                        className="text-primary hover:underline font-bold"
-                      >
-                        Create your account
-                      </Link>
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </motion.div>
-
-          {/* Right Column: Recent Activity Preview */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="hidden lg:block flex-1 w-full max-w-[500px] perspective-1000 order-1 lg:order-2"
-          >
-            <motion.div
-              animate={{ y: [-10, 10, -10] }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="relative z-10 p-1 rounded-3xl bg-gradient-to-br from-white/30 via-white/5 to-success/30 shadow-2xl backdrop-blur-2xl border border-white/20"
-            >
-              <div className="bg-primary/80 backdrop-blur-3xl rounded-[1.4rem] p-6 lg:p-8 shadow-inner border border-white/10 text-white">
-                <div className="flex justify-between items-start mb-8">
-                  <div>
-                    <p className="text-sm text-white/70 font-medium mb-1">
-                      Total Balance
-                    </p>
-                    <h3 className="text-4xl font-bold tracking-tight">
-                      ₦2,456,300
-                      <span className="text-white/50 text-2xl">.00</span>
-                    </h3>
-                  </div>
-                  <div className="p-3 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-sm">
-                    <Activity className="w-6 h-6 text-white" />
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  <div className="bg-success/20 p-4 rounded-2xl border border-success/30 transition-colors hover:bg-success/30 cursor-pointer backdrop-blur-sm">
-                    <div className="w-8 h-8 rounded-full bg-success/30 flex items-center justify-center mb-3">
-                      <ArrowRight className="w-4 h-4 text-white -rotate-45" />
-                    </div>
-                    <p className="font-semibold text-sm">Receive</p>
-                  </div>
-                  <div className="bg-white/15 p-4 rounded-2xl border border-white/20 transition-colors hover:bg-white/25 cursor-pointer backdrop-blur-sm">
-                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center mb-3">
-                      <ArrowRight className="w-4 h-4 text-white" />
-                    </div>
-                    <p className="font-semibold text-sm">Send</p>
-                  </div>
-                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-pill text-sm font-semibold bg-foreground text-surface-highest hover:opacity-90 transition-opacity disabled:opacity-60 mt-2"
+                >
+                  {loading ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : null}
+                  {loading
+                    ? "Signing in…"
+                    : `Sign In to ${brand.shortBrandName}`}
+                </button>
+              </form>
 
-                <div className="space-y-4">
-                  <p className="text-sm font-semibold text-white/50 uppercase tracking-wider">
-                    Recent Activity
-                  </p>
-                  {[
-                    {
-                      name: "Spotify Premium",
-                      amount: "-₦4,500.00",
-                      date: "Today, 2:45 PM",
-                      icon: Smartphone,
-                      color: "text-white",
-                      bg: "bg-white/15",
-                    },
-                    {
-                      name: "Salary Deposit",
-                      amount: "+₦850,000.00",
-                      date: "Yesterday",
-                      icon: Zap,
-                      color: "text-success",
-                      bg: "bg-success/20",
-                    },
-                  ].map((tx, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`p-2.5 rounded-xl border border-white/5 ${tx.bg}`}
-                        >
-                          <tx.icon className={`w-5 h-5 ${tx.color}`} />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-sm">{tx.name}</p>
-                          <p className="text-xs text-white/60">{tx.date}</p>
-                        </div>
-                      </div>
-                      <p
-                        className={`font-semibold text-sm ${tx.amount.startsWith("+") ? "text-success" : "text-white/90"}`}
-                      >
-                        {tx.amount}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
+              <p
+                className="text-sm text-foreground-subtle text-center mt-7 pt-5"
+                style={{ borderTop: "1px solid rgb(var(--surface-high))" }}
+              >
+                Don't have an account?{" "}
+                <Link
+                  to="/auth/register"
+                  className="font-bold text-foreground hover:text-brand-primary transition-colors"
+                >
+                  Create your account
+                </Link>
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
