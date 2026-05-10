@@ -10,10 +10,9 @@ import {
   ArrowRight,
   Shield,
   ChevronDown,
-  ChevronRight,
   Wrench,
 } from "lucide-react";
-import { NavLink } from "@/components/NavLink";
+import { NavLink as RouterNavLink } from "react-router-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -22,14 +21,11 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 import { BrandConfigService } from "@shared/core";
+import { cn } from "@/lib/utils";
 import type { PermissionCategory } from "@/types/roles";
 import type { LucideIcon } from "lucide-react";
 
@@ -37,9 +33,7 @@ interface NavItem {
   title: string;
   url: string;
   icon: LucideIcon;
-  /** Required permission category — item hidden if user has no access */
   requiredCategory?: PermissionCategory;
-  /** Required specific action id */
   requiredAction?: string;
 }
 
@@ -112,16 +106,28 @@ export function AppSidebar() {
   );
   const [adminOpen, setAdminOpen] = useState(isAdminActive);
 
+  const navItemClass = (isActive: boolean) =>
+    cn(
+      "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors w-full",
+      isActive ? "text-white" : "hover:bg-surface-high",
+    );
+
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar
+      collapsible="icon"
+      style={{ borderRight: "1px solid rgb(var(--border))" }}
+    >
       <SidebarContent>
-        {/* Brand + User + Onboarding */}
+        {/* Brand header */}
         <SidebarGroup>
           <SidebarGroupContent>
             <div className="flex flex-col px-2 py-4 gap-4">
               {!collapsed ? (
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <div
+                    className="logo-mark h-10 w-10 rounded-xl shrink-0"
+                    style={{ background: "rgb(var(--brand-primary) / 0.12)" }}
+                  >
                     {brand.brandLogoUrl ? (
                       <img
                         src={brand.brandLogoUrl}
@@ -129,27 +135,42 @@ export function AppSidebar() {
                         className="w-6 h-6 object-contain"
                       />
                     ) : (
-                      <Building2 className="h-5 w-5 text-primary" />
+                      <Building2
+                        className="h-5 w-5"
+                        style={{ color: "rgb(var(--brand-primary))" }}
+                      />
                     )}
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1">
                       <span
-                        className="font-semibold text-sm text-sidebar-foreground truncate"
-                        style={{ fontFamily: "Manrope, sans-serif" }}
+                        className="font-bold text-sm truncate"
+                        style={{
+                          fontFamily: "Manrope, sans-serif",
+                          color: "rgb(var(--foreground))",
+                        }}
                       >
                         {brand.brandName}
                       </span>
-                      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <ChevronDown
+                        className="h-3.5 w-3.5 shrink-0"
+                        style={{ color: "rgb(var(--foreground-subtle))" }}
+                      />
                     </div>
-                    <span className="text-xs text-muted-foreground truncate block">
+                    <span
+                      className="text-xs truncate block"
+                      style={{ color: "rgb(var(--foreground-subtle))" }}
+                    >
                       {user?.full_name ?? "User"}
                     </span>
                   </div>
                 </div>
               ) : (
                 <div className="flex justify-center">
-                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <div
+                    className="logo-mark h-9 w-9 rounded-xl flex items-center justify-center"
+                    style={{ background: "rgb(var(--brand-primary) / 0.12)" }}
+                  >
                     {brand.brandLogoUrl ? (
                       <img
                         src={brand.brandLogoUrl}
@@ -157,101 +178,128 @@ export function AppSidebar() {
                         className="w-5 h-5 object-contain"
                       />
                     ) : (
-                      <Building2 className="h-5 w-5 text-primary" />
+                      <Building2
+                        className="h-5 w-5"
+                        style={{ color: "rgb(var(--brand-primary))" }}
+                      />
                     )}
                   </div>
                 </div>
               )}
+
               {!collapsed && role === "owner" && (
-                <Button
-                  size="sm"
+                <button
                   onClick={() => navigate("/onboarding/new")}
-                  className="w-full h-9 rounded-sm text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5"
+                  className="btn-pill btn-primary w-full justify-center text-xs"
                 >
                   Complete Onboarding
                   <ArrowRight className="h-3.5 w-3.5" />
-                </Button>
+                </button>
               )}
             </div>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Main Navigation */}
+        {/* Main navigation */}
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {visibleMain.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/dashboard"}
-                      className="hover:bg-sidebar-accent/50"
-                      activeClassName="text-sidebar-primary font-medium"
-                    >
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && (
-                        <span className="flex-1">{item.title}</span>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-
-              {/* Administration group — only show if user has any admin items */}
-              {visibleAdmin.length > 0 && (
-                <>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      onClick={() => setAdminOpen(!adminOpen)}
-                      className={`hover:bg-sidebar-accent/50 cursor-pointer ${isAdminActive ? "text-sidebar-primary font-medium" : ""}`}
-                    >
-                      <Wrench className="mr-2 h-4 w-4" />
-                      {!collapsed && (
-                        <>
-                          <span className="flex-1">Administration</span>
-                          <ChevronRight
-                            className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${adminOpen ? "rotate-90" : ""}`}
-                          />
-                        </>
-                      )}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-
-                  {adminOpen &&
-                    !collapsed &&
-                    visibleAdmin.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild>
-                          <NavLink
-                            to={item.url}
-                            className="hover:bg-sidebar-accent/50 pl-8"
-                            activeClassName="text-sidebar-primary font-medium"
-                          >
-                            <item.icon className="mr-2 h-4 w-4" />
-                            <span className="flex-1">{item.title}</span>
-                          </NavLink>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                </>
-              )}
-            </SidebarMenu>
+            {!collapsed && <p className="eyebrow px-3 pb-2">Overview</p>}
+            <nav className="flex flex-col gap-0.5 px-2">
+              {visibleMain.map((item) => {
+                const isActive =
+                  item.url === "/dashboard"
+                    ? location.pathname === "/dashboard"
+                    : location.pathname.startsWith(item.url);
+                return (
+                  <RouterNavLink
+                    key={item.url}
+                    to={item.url}
+                    end={item.url === "/dashboard"}
+                    className={navItemClass(isActive)}
+                    style={
+                      isActive
+                        ? { background: "rgb(var(--foreground))" }
+                        : undefined
+                    }
+                  >
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    {!collapsed && <span>{item.title}</span>}
+                  </RouterNavLink>
+                );
+              })}
+            </nav>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Administration */}
+        {visibleAdmin.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              {!collapsed ? (
+                <button
+                  onClick={() => setAdminOpen(!adminOpen)}
+                  className="eyebrow px-3 pb-2 flex items-center justify-between w-full hover:opacity-70 transition-opacity"
+                >
+                  Administration
+                  <Wrench
+                    className="h-3 w-3"
+                    style={{ color: "rgb(var(--foreground-subtle))" }}
+                  />
+                </button>
+              ) : null}
+              {(adminOpen || collapsed) && (
+                <nav className="flex flex-col gap-0.5 px-2">
+                  {visibleAdmin.map((item) => {
+                    const isActive = location.pathname.startsWith(item.url);
+                    return (
+                      <RouterNavLink
+                        key={item.url}
+                        to={item.url}
+                        className={navItemClass(isActive)}
+                        style={
+                          isActive
+                            ? { background: "rgb(var(--foreground))" }
+                            : undefined
+                        }
+                      >
+                        <item.icon className="h-4 w-4 shrink-0" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </RouterNavLink>
+                    );
+                  })}
+                </nav>
+              )}
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
-      <SidebarFooter>
-        <div className="flex flex-col gap-2 p-2">
-          <Button
-            variant="ghost"
-            size={collapsed ? "icon" : "sm"}
+      <SidebarFooter style={{ borderTop: "1px solid rgb(var(--border))" }}>
+        <div className="p-3">
+          {!collapsed && user && (
+            <div className="px-1 py-2 mb-2">
+              <p
+                className="text-sm font-semibold truncate"
+                style={{ color: "rgb(var(--foreground))" }}
+              >
+                {user.full_name ?? user.email}
+              </p>
+              <p
+                className="text-xs truncate"
+                style={{ color: "rgb(var(--foreground-subtle))" }}
+              >
+                {user.email}
+              </p>
+            </div>
+          )}
+          <button
             onClick={logout}
-            className="text-sidebar-foreground hover:bg-sidebar-accent justify-start"
+            className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm w-full transition-colors hover:bg-surface"
+            style={{ color: "rgb(var(--foreground-subtle))" }}
           >
-            <LogOut className="h-4 w-4" />
-            {!collapsed && <span className="ml-2">Sign out</span>}
-          </Button>
+            <LogOut className="h-4 w-4 shrink-0" />
+            {!collapsed && <span>Sign out</span>}
+          </button>
         </div>
       </SidebarFooter>
     </Sidebar>
