@@ -2,8 +2,6 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getApplicationById } from "@/services/mockData";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import {
   Building2,
   Users,
@@ -322,9 +320,18 @@ export default function OnboardingWizard() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Top header */}
-      <header className="h-14 flex items-center justify-between border-b border-surface-high bg-surface-container px-6 shrink-0">
+      <header
+        className="h-14 flex items-center justify-between px-6 shrink-0"
+        style={{
+          background: "rgb(var(--background))",
+          borderBottom: "1px solid rgb(var(--border))",
+        }}
+      >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <div
+            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: "rgb(var(--soft))" }}
+          >
             {brand.brandLogoUrl ? (
               <img
                 src={brand.brandLogoUrl}
@@ -332,56 +339,71 @@ export default function OnboardingWizard() {
                 className="w-5 h-5 object-contain"
               />
             ) : (
-              <Building2 className="h-5 w-5 text-primary" />
+              <Building2
+                className="h-5 w-5"
+                style={{ color: "rgb(var(--brand-primary))" }}
+              />
             )}
           </div>
           <span
-            className="font-bold text-base text-foreground"
-            style={{ fontFamily: "Manrope, sans-serif" }}
+            className="font-bold text-base"
+            style={{
+              fontFamily: "Manrope, sans-serif",
+              color: "rgb(var(--foreground))",
+            }}
           >
             {brand.brandName}
           </span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {currentStep < 5 && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 border-dashed border-primary/40 text-primary hover:bg-primary/5"
+            <button
+              className="btn-pill btn-outline text-xs gap-1.5"
+              style={{
+                borderStyle: "dashed",
+                color: "rgb(var(--brand-primary))",
+              }}
               onClick={fillMockData}
             >
               <Wand2 className="h-3.5 w-3.5" /> Fill Mock Data
-            </Button>
+            </button>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2 border-border text-foreground hover:bg-surface-low"
+          <button
+            className="btn-pill btn-outline text-xs gap-1.5"
             onClick={() => navigate("/dashboard")}
           >
             <Save className="h-3.5 w-3.5" /> Save & Exit
-          </Button>
-          <Button
-            size="sm"
-            className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground border-0"
-          >
+          </button>
+          <button className="btn-pill btn-primary text-xs gap-1.5">
             Continue Application
-          </Button>
+          </button>
         </div>
       </header>
 
       <div className="flex flex-1 min-h-0">
         {/* Left sidebar — step navigation */}
-        <aside className="w-56 shrink-0 border-r border-surface-high bg-surface-container p-6 flex flex-col justify-between">
+        <aside
+          className="w-56 shrink-0 p-6 flex flex-col justify-between"
+          style={{
+            background: "rgb(var(--surface))",
+            borderRight: "1px solid rgb(var(--border))",
+          }}
+        >
           <div>
             <div className="mb-6">
               <p
-                className="text-xs font-bold tracking-[0.08em] text-primary uppercase"
-                style={{ fontFamily: "Manrope, sans-serif" }}
+                className="text-xs font-bold tracking-[0.08em] uppercase"
+                style={{
+                  fontFamily: "Manrope, sans-serif",
+                  color: "rgb(var(--brand-primary))",
+                }}
               >
                 Onboarding
               </p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
+              <p
+                className="text-[11px] mt-0.5"
+                style={{ color: "rgb(var(--foreground-subtle))" }}
+              >
                 Institutional Setup
               </p>
             </div>
@@ -399,20 +421,43 @@ export default function OnboardingWizard() {
                     onClick={() => {
                       if (completed || active) setCurrentStep(stepNum);
                     }}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm transition-all duration-150 text-left",
-                      active &&
-                        "bg-primary/10 text-primary font-semibold border-l-2 border-primary",
-                      completed &&
-                        !active &&
-                        "text-foreground hover:bg-surface-low cursor-pointer",
-                      !active &&
-                        !completed &&
-                        "text-muted-foreground cursor-default",
-                    )}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 text-left"
+                    style={
+                      active
+                        ? {
+                            background: "rgb(var(--foreground))",
+                            color: "white",
+                            fontWeight: 600,
+                          }
+                        : completed
+                          ? {
+                              color: "rgb(var(--foreground))",
+                              cursor: "pointer",
+                            }
+                          : {
+                              color: "rgb(var(--foreground-subtle))",
+                              cursor: "default",
+                            }
+                    }
+                    onMouseEnter={(e) => {
+                      if (!active && completed)
+                        e.currentTarget.style.background =
+                          "rgb(var(--surface-high))";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!active)
+                        e.currentTarget.style.background = "transparent";
+                    }}
                   >
                     {completed ? (
-                      <Check className="h-4 w-4 text-success shrink-0" />
+                      <Check
+                        className="h-4 w-4 shrink-0"
+                        style={
+                          active
+                            ? { color: "white" }
+                            : { color: "rgb(var(--mint-deep))" }
+                        }
+                      />
                     ) : (
                       <Icon className="h-4 w-4 shrink-0" />
                     )}
@@ -424,7 +469,16 @@ export default function OnboardingWizard() {
           </div>
 
           {/* Help button */}
-          <button className="flex items-center gap-2 text-sm text-primary font-medium px-3 py-2 hover:bg-surface-low rounded-sm transition-colors">
+          <button
+            className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-xl transition-colors"
+            style={{ color: "rgb(var(--brand-primary))" }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background = "rgb(var(--soft))")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background = "transparent")
+            }
+          >
             <HelpCircle className="h-4 w-4" />
             Need Help?
           </button>
@@ -437,17 +491,21 @@ export default function OnboardingWizard() {
             <div className="flex items-start justify-between mb-8">
               <div>
                 <h1
-                  className="text-[1.75rem] font-extrabold text-foreground leading-tight"
+                  className="text-[1.75rem] font-extrabold leading-tight"
                   style={{
                     fontFamily: "Manrope, sans-serif",
                     letterSpacing: "-0.02em",
+                    color: "rgb(var(--foreground))",
                   }}
                 >
                   {STEPS[currentStep - 1].label === "Company Info"
                     ? "Company Information"
                     : STEPS[currentStep - 1].label}
                 </h1>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p
+                  className="text-sm mt-1"
+                  style={{ color: "rgb(var(--foreground-subtle))" }}
+                >
                   {currentStep === 1 &&
                     "Please provide the legal registration details for your institution."}
                   {currentStep === 2 &&
@@ -461,23 +519,35 @@ export default function OnboardingWizard() {
                 </p>
               </div>
               <div className="text-right shrink-0 ml-8">
-                <p className="text-sm text-foreground">
+                <p
+                  className="text-sm"
+                  style={{ color: "rgb(var(--foreground))" }}
+                >
                   <span
-                    className="text-primary font-bold text-lg"
-                    style={{ fontFamily: "Manrope, sans-serif" }}
+                    className="font-bold text-lg"
+                    style={{
+                      fontFamily: "Manrope, sans-serif",
+                      color: "rgb(var(--brand-primary))",
+                    }}
                   >
                     {String(currentStep).padStart(2, "0")}
                   </span>
-                  <span className="text-muted-foreground">
+                  <span style={{ color: "rgb(var(--foreground-subtle))" }}>
                     {" "}
                     / {String(STEPS.length).padStart(2, "0")}
                   </span>
                 </p>
                 {/* Progress bar */}
-                <div className="w-24 h-1 bg-surface-high rounded-full mt-2 overflow-hidden">
+                <div
+                  className="w-24 h-1 rounded-full mt-2 overflow-hidden"
+                  style={{ background: "rgb(var(--surface-high))" }}
+                >
                   <div
-                    className="h-full bg-primary rounded-full transition-all duration-300"
-                    style={{ width: `${progressPercent}%` }}
+                    className="h-full rounded-full transition-all duration-300"
+                    style={{
+                      width: `${progressPercent}%`,
+                      background: "rgb(var(--brand-primary))",
+                    }}
                   />
                 </div>
               </div>
@@ -541,29 +611,53 @@ export default function OnboardingWizard() {
             {/* Bottom info cards */}
             {currentStep < 5 && (
               <div className="grid grid-cols-2 gap-4 mt-12">
-                <div className="border border-surface-high rounded-sm p-5">
-                  <Info className="h-5 w-5 text-primary mb-3" />
+                <div
+                  className="rounded-2xl p-5"
+                  style={{ background: "rgb(var(--surface-highest))" }}
+                >
+                  <Info
+                    className="h-5 w-5 mb-3"
+                    style={{ color: "rgb(var(--brand-primary))" }}
+                  />
                   <h4
-                    className="text-sm font-bold text-foreground mb-1"
-                    style={{ fontFamily: "Manrope, sans-serif" }}
+                    className="text-sm font-bold mb-1"
+                    style={{
+                      fontFamily: "Manrope, sans-serif",
+                      color: "rgb(var(--foreground))",
+                    }}
                   >
                     Required Documents
                   </h4>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
+                  <p
+                    className="text-xs leading-relaxed"
+                    style={{ color: "rgb(var(--foreground-subtle))" }}
+                  >
                     In the next step, you will be required to upload your
                     Certificate of Incorporation, Form CAC 1.1, and Memart.
                     Ensure you have high-resolution PDF scans ready.
                   </p>
                 </div>
-                <div className="border border-surface-high rounded-sm p-5">
-                  <Shield className="h-5 w-5 text-success mb-3" />
+                <div
+                  className="rounded-2xl p-5"
+                  style={{ background: "rgb(var(--surface-highest))" }}
+                >
+                  <Shield
+                    className="h-5 w-5 mb-3"
+                    style={{ color: "rgb(var(--mint-deep))" }}
+                  />
                   <h4
-                    className="text-sm font-bold text-foreground mb-1"
-                    style={{ fontFamily: "Manrope, sans-serif" }}
+                    className="text-sm font-bold mb-1"
+                    style={{
+                      fontFamily: "Manrope, sans-serif",
+                      color: "rgb(var(--foreground))",
+                    }}
                   >
                     Secure Vaulting
                   </h4>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
+                  <p
+                    className="text-xs leading-relaxed"
+                    style={{ color: "rgb(var(--foreground-subtle))" }}
+                  >
                     {brand.brandName} utilizes hardware security modules (HSM)
                     to protect your institutional identity. Your registration
                     data is stored in air-gapped environments.

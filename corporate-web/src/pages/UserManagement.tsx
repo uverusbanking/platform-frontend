@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -255,24 +254,22 @@ export default function UserManagement() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1
-            className="text-xl sm:text-2xl font-bold"
-            style={{ fontFamily: "Manrope, sans-serif" }}
+          <p className="eyebrow mb-1">Administration</p>
+          <h1 className="display">User Management</h1>
+          <p
+            className="text-sm mt-1"
+            style={{ color: "rgb(var(--foreground-subtle))" }}
           >
-            User Management
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
             {users.length} corporate users
           </p>
         </div>
-        <Button
-          size="sm"
+        <button
+          className="btn-pill btn-primary gap-1.5 text-sm w-full sm:w-auto justify-center"
           onClick={() => setInviteOpen(true)}
-          className="gap-1.5 w-full sm:w-auto"
         >
           <Plus className="h-4 w-4" />
           Invite User
-        </Button>
+        </button>
       </div>
 
       {/* Filters */}
@@ -310,10 +307,9 @@ export default function UserManagement() {
             <SelectItem value="suspended">Suspended</SelectItem>
           </SelectContent>
         </Select>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-xs sm:ml-auto"
+        <button
+          className="btn-pill text-xs sm:ml-auto"
+          style={{ color: "rgb(var(--foreground-subtle))" }}
           onClick={() => {
             setSearch("");
             setRoleFilter("all");
@@ -321,7 +317,7 @@ export default function UserManagement() {
           }}
         >
           Clear
-        </Button>
+        </button>
       </div>
 
       {/* Mobile cards */}
@@ -334,11 +330,21 @@ export default function UserManagement() {
           filtered.map((user) => {
             const roleDef = ROLE_DEFINITIONS.find((r) => r.id === user.role)!;
             return (
-              <Card key={user.id} className="p-4 space-y-3">
+              <div
+                key={user.id}
+                className="rounded-2xl p-4 space-y-3 shadow-card"
+                style={{ background: "rgb(var(--surface-highest))" }}
+              >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center shrink-0">
-                      <span className="text-xs font-bold text-primary">
+                    <div
+                      className="h-9 w-9 rounded-pill flex items-center justify-center shrink-0"
+                      style={{ background: "rgb(var(--soft))" }}
+                    >
+                      <span
+                        className="text-xs font-bold"
+                        style={{ color: "rgb(var(--brand-primary))" }}
+                      >
                         {user.name
                           .split(" ")
                           .map((w) => w[0])
@@ -405,42 +411,54 @@ export default function UserManagement() {
                     {user.status}
                   </Badge>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                <div
+                  className="grid grid-cols-2 gap-2 text-xs"
+                  style={{ color: "rgb(var(--foreground-subtle))" }}
+                >
                   <div>
                     Daily:{" "}
-                    <span className="font-medium text-foreground">
+                    <span
+                      className="font-medium"
+                      style={{ color: "rgb(var(--foreground))" }}
+                    >
                       {fmt(user.dailyLimit)}
                     </span>
                   </div>
                   <div>
                     Per tx:{" "}
-                    <span className="font-medium text-foreground">
+                    <span
+                      className="font-medium"
+                      style={{ color: "rgb(var(--foreground))" }}
+                    >
                       {fmt(user.perTxLimit)}
                     </span>
                   </div>
                 </div>
-              </Card>
+              </div>
             );
           })
         )}
       </div>
 
       {/* Desktop table */}
-      <Card className="hidden sm:block">
+      <div
+        className="hidden sm:block rounded-2xl overflow-hidden shadow-card"
+        style={{ background: "rgb(var(--surface-highest))" }}
+      >
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="text-xs">User</TableHead>
-                <TableHead className="text-xs">Role</TableHead>
-                <TableHead className="text-xs">Status</TableHead>
-                <TableHead className="text-xs text-right">
+              <TableRow style={{ background: "rgb(var(--surface))" }}>
+                <TableHead className="eyebrow py-3">User</TableHead>
+                <TableHead className="eyebrow py-3">Role</TableHead>
+                <TableHead className="eyebrow py-3">Status</TableHead>
+                <TableHead className="eyebrow py-3 text-right">
                   Daily Limit
                 </TableHead>
-                <TableHead className="text-xs text-right">
+                <TableHead className="eyebrow py-3 text-right">
                   Per Tx Limit
                 </TableHead>
-                <TableHead className="text-xs">Last Login</TableHead>
+                <TableHead className="eyebrow py-3">Last Login</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -460,11 +478,20 @@ export default function UserManagement() {
                     (r) => r.id === user.role,
                   )!;
                   return (
-                    <TableRow key={user.id}>
+                    <TableRow
+                      key={user.id}
+                      className="hover:bg-surface transition-colors"
+                    >
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                            <span className="text-[10px] font-bold text-primary">
+                          <div
+                            className="h-8 w-8 rounded-pill flex items-center justify-center shrink-0"
+                            style={{ background: "rgb(var(--soft))" }}
+                          >
+                            <span
+                              className="text-[10px] font-bold"
+                              style={{ color: "rgb(var(--brand-primary))" }}
+                            >
                               {user.name
                                 .split(" ")
                                 .map((w) => w[0])
@@ -553,7 +580,7 @@ export default function UserManagement() {
             </TableBody>
           </Table>
         </div>
-      </Card>
+      </div>
 
       {/* Invite Dialog */}
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
