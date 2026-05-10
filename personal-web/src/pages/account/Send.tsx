@@ -5,19 +5,15 @@ import { formatCurrency } from "@/lib/currency";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Command, CommandInput, CommandItem } from "@/components/ui/command";
+import Select from "react-select";
+import PageHeader from "@/components/PageHeader";
 import { AppLayout } from "@/components/AppLayout";
 import {
   Loader2,
   User,
   Building2,
   Check,
-  ChevronsUpDown,
+  AlertCircle,
   ArrowRight,
   ArrowLeft,
   Shield,
@@ -26,7 +22,6 @@ import {
   Send as SendIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { cn } from "@/lib/utils";
 import { EnterPinDialog } from "@/components/TransactionPinDialog";
 import { useUserProfile } from "@/hooks/queries/useUser";
@@ -37,80 +32,6 @@ import { TransferService } from "@/services/transfer.service";
 import { useBanks } from "@/hooks/queries/useTransfers";
 import { BankListResponseDto } from "@/types";
 import { BrandConfigService } from "@shared/core";
-
-// Virtualised bank list — logic unchanged
-const BankList = ({
-  banks,
-  loading,
-  selectedCode,
-  onSelect,
-}: {
-  banks: BankListResponseDto[];
-  loading: boolean;
-  selectedCode: string;
-  onSelect: (code: string) => void;
-}) => {
-  const [searchBank, setSearchBank] = useState("");
-  const parentRef = useRef<HTMLDivElement>(null);
-  const filteredBanks = banks.filter((bank) =>
-    bank.bank_name.toLowerCase().includes(searchBank.toLowerCase()),
-  );
-  const rowVirtualizer = useVirtualizer({
-    count: filteredBanks.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 40,
-    overscan: 5,
-  });
-  return (
-    <Command shouldFilter={false}>
-      <CommandInput
-        placeholder="Search bank..."
-        value={searchBank}
-        onValueChange={setSearchBank}
-      />
-      <div ref={parentRef} className="h-[300px] overflow-y-auto">
-        <div
-          style={{
-            height: `${rowVirtualizer.getTotalSize()}px`,
-            width: "100%",
-            position: "relative",
-          }}
-        >
-          {rowVirtualizer.getVirtualItems().length === 0 && !loading && (
-            <div className="p-4 text-sm text-center text-foreground-subtle w-full absolute top-0">
-              No bank found.
-            </div>
-          )}
-          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-            const bank = filteredBanks[virtualRow.index];
-            return (
-              <CommandItem
-                key={bank.bank_code}
-                value={bank.bank_name}
-                onSelect={() => onSelect(bank.bank_code)}
-                className="absolute top-0 left-0 w-full"
-                style={{
-                  height: `${virtualRow.size}px`,
-                  transform: `translateY(${virtualRow.start}px)`,
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    selectedCode === bank.bank_code
-                      ? "opacity-100"
-                      : "opacity-0",
-                  )}
-                />
-                {bank.bank_name}
-              </CommandItem>
-            );
-          })}
-        </div>
-      </div>
-    </Command>
-  );
-};
 
 type WizardStep = "type" | "recipient" | "amount" | "success";
 
@@ -143,7 +64,7 @@ const Send = () => {
   const [transactionDetails, setTransactionDetails] = useState<{
     reference?: string;
   } | null>(null);
-  const [openBankSelect, setOpenBankSelect] = useState(false);
+
   const [currentWalletIndex, setCurrentWalletIndex] = useState(0);
 
   const activeWallet = wallets[currentWalletIndex] || initialWallet;
@@ -408,48 +329,60 @@ const Send = () => {
               {transferType === "bank" && (
                 <div className="space-y-1.5">
                   <Label className="eyebrow">Select Bank</Label>
-                  <Popover
-                    open={openBankSelect}
-                    onOpenChange={setOpenBankSelect}
-                  >
-                    <PopoverTrigger asChild>
-                      <button
-                        className="w-full h-12 flex items-center justify-between px-4 rounded-xl border text-sm font-medium text-left transition-colors hover:bg-surface"
-                        style={{ borderColor: "rgb(var(--border))" }}
-                      >
-                        <span
-                          className={
-                            bankCode
-                              ? "text-foreground"
-                              : "text-foreground-subtle"
+                  <Select
+                    isLoading={loadingBanks}
+                    options={banks.map((b) => ({
+                      value: b.bank_code,
+                      label: b.bank_name,
+                    }))}
+                    value={
+                      bankCode
+                        ? {
+                            value: bankCode,
+                            label:
+                              banks.find((b) => b.bank_code === bankCode)
+                                ?.bank_name || "",
                           }
-                        >
-                          {bankCode
-                            ? banks.find((b) => b.bank_code === bankCode)
-                                ?.bank_name
-                            : "Select a bank"}
-                        </span>
-                        <ChevronsUpDown className="h-4 w-4 text-foreground-subtle" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[var(--radix-popover-trigger-width)] p-0"
-                      align="start"
-                    >
-                      <BankList
-                        banks={banks}
-                        loading={loadingBanks}
-                        selectedCode={bankCode}
-                        onSelect={(code) => {
-                          setBankCode(code);
-                          setOpenBankSelect(false);
-                          setAccountName("");
-                          if (accountNumber.length === 10)
-                            lookupAccountName(accountNumber, code);
-                        }}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                        : null
+                    }
+                    onChange={(option) => {
+                      if (option) {
+                        setBankCode(option.value);
+                        setAccountName("");
+                        if (accountNumber.length === 10)
+                          lookupAccountName(accountNumber, option.value);
+                      }
+                    }}
+                    placeholder="Select a bank"
+                    isSearchable
+                    classNames={{
+                      control: ({ isFocused }) =>
+                        cn(
+                          "flex h-12 w-full rounded-xl border bg-background px-3 py-1 text-sm transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+                          isFocused
+                            ? "ring-2 ring-primary ring-offset-2 border-primary"
+                            : "border-border",
+                        ),
+                      menu: () =>
+                        "mt-2 rounded-xl border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 z-50",
+                      option: ({ isFocused, isSelected }) =>
+                        cn(
+                          "relative flex w-full cursor-default select-none items-center rounded-lg py-2.5 px-3 text-sm outline-none transition-colors",
+                          isSelected
+                            ? "bg-primary text-primary-foreground"
+                            : isFocused
+                              ? "bg-accent text-accent-foreground"
+                              : "text-foreground",
+                        ),
+                      noOptionsMessage: () =>
+                        "py-6 text-center text-sm text-muted-foreground",
+                      loadingIndicator: () => "text-primary",
+                      placeholder: () => "text-muted-foreground",
+                      singleValue: () => "text-foreground",
+                      input: () => "text-foreground",
+                    }}
+                    unstyled
+                  />
                 </div>
               )}
 
@@ -720,116 +653,63 @@ const Send = () => {
                 ))}
               </div>
 
-              <div className="flex gap-3">
-                <button
-                  onClick={() => {
-                    setStep("type");
-                    setAmount("");
-                    setAccountNumber("");
-                    setAccountName("");
-                    setNarration("");
-                    setTransactionDetails(null);
-                  }}
-                  className="flex-1 py-3 rounded-pill text-sm font-semibold transition-colors"
-                  style={{ background: "rgb(var(--surface))" }}
-                >
-                  Send another
-                </button>
+              <div className="flex flex-col gap-2 pt-4">
                 <button
                   onClick={() => navigate("/account/dashboard")}
-                  className="flex-1 py-3 rounded-pill text-sm font-semibold bg-foreground text-surface-highest hover:opacity-90 transition-opacity"
+                  className="w-full py-3 rounded-pill font-bold text-sm bg-foreground text-surface-highest transition-opacity hover:opacity-90"
                 >
-                  Back to dashboard
+                  Return to Home
                 </button>
               </div>
             </div>
           )}
         </div>
 
-        {/* ── Sidebar ── */}
-        <div className="space-y-4">
-          {/* Balance card */}
+        {/* ── Info column ── */}
+        <div className="space-y-5">
           <div
-            className="rounded-2xl p-5"
-            style={{ background: "rgb(var(--foreground))", color: "#fff" }}
-          >
-            <p
-              className="text-xs font-semibold uppercase tracking-[0.14em] mb-1"
-              style={{ opacity: 0.55 }}
-            >
-              Sending from
-            </p>
-            <p className="num text-3xl font-bold mt-1">
-              {formatCurrency(
-                parseFloat(activeWallet?.balance ?? "0"),
-                activeWallet?.currency ?? "NGN",
-              )}
-            </p>
-            <p className="text-sm mt-1" style={{ opacity: 0.6 }}>
-              {activeWallet?.currency ?? "NGN"} wallet ·{" "}
-              {activeWallet?.account_number ?? ""}
-            </p>
-          </div>
-
-          {/* Info card */}
-          <div
-            className="rounded-2xl p-5 shadow-card"
+            className="rounded-2xl p-6 shadow-card"
             style={{
               background: "rgb(var(--surface-highest))",
               border: "1px solid rgb(var(--surface-high))",
             }}
           >
-            <p className="eyebrow mb-2">Why {brand.shortBrandName} is faster</p>
-            <h3 className="font-bold text-base tracking-tight mb-4">
-              Direct rail to NIBSS
-            </h3>
-            {[
-              {
-                icon: <Zap size={13} />,
-                label: "~8s median to other Nigerian banks",
-              },
-              {
-                icon: <Check size={13} />,
-                label: `Free to ${brand.shortBrandName} accounts`,
-              },
-              {
-                icon: <Shield size={13} />,
-                label: "PIN-protected every transfer",
-              },
-            ].map((r) => (
+            <div className="flex items-center gap-3 mb-5">
               <div
-                key={r.label}
-                className="flex items-center gap-3 py-2 text-sm"
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ background: "rgb(var(--surface))" }}
               >
-                <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: "rgb(var(--surface))" }}
-                >
-                  {r.icon}
-                </div>
-                <span>{r.label}</span>
+                <Shield size={20} className="text-brand-primary" />
               </div>
-            ))}
-          </div>
-
-          {/* Tip card */}
-          <div
-            className="rounded-2xl p-5"
-            style={{ background: "rgb(var(--mint))" }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles size={15} />
-              <span className="text-sm font-semibold">Save the ₦25 fee</span>
+              <p className="font-bold text-lg">Safe & Secure</p>
             </div>
-            <p className="text-xs text-foreground/70 leading-relaxed">
-              Ask your recipient if they have a {brand.shortBrandName} account —
-              internal transfers are always free.
-            </p>
+            <ul className="space-y-3">
+              {[
+                {
+                  icon: <Zap size={14} />,
+                  text: "Instant settlement to all banks",
+                },
+                { icon: <Sparkles size={14} />, text: "Zero fees on all internal transfers" },
+                {
+                  icon: <AlertCircle size={14} />,
+                  text: "CBN insured and regulated",
+                },
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-3 text-sm">
+                  <span
+                    className="mt-0.5 shrink-0"
+                    style={{ color: "rgb(var(--brand-primary))" }}
+                  >
+                    {item.icon}
+                  </span>
+                  <span className="text-foreground-subtle">{item.text}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
 
-      {/* PIN dialog — unchanged */}
       <EnterPinDialog
         open={verifyOpen}
         onOpenChange={setVerifyOpen}

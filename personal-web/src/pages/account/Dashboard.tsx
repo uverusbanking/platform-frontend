@@ -116,9 +116,9 @@ const Dashboard = () => {
     <AppLayout>
       {/* ── Header row ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-7">
-        <div>
+        <div className="min-w-0">
           <p className="eyebrow mb-2">{dateLabel}</p>
-          <h1 className="display text-[clamp(26px,3.5vw,44px)] m-0 leading-none">
+          <h1 className="display text-[clamp(26px,3.5vw,44px)] m-0 leading-none truncate">
             {hourGreeting},{" "}
             <span
               className="serif-italic"
@@ -157,7 +157,7 @@ const Dashboard = () => {
             </div>
           ) : (
             <div
-              className="rounded-2xl p-7 relative overflow-hidden"
+              className="rounded-2xl p-7 relative overflow-hidden shadow-card"
               style={{ background: "rgb(var(--foreground))", color: "#fff" }}
             >
               {/* Red radial blur */}
@@ -199,17 +199,17 @@ const Dashboard = () => {
 
               {/* Balance */}
               <div className="relative flex items-start justify-between mb-6">
-                <div>
+                <div className="min-w-0">
                   <p
                     className="text-xs font-semibold uppercase tracking-[0.14em] mb-2"
                     style={{ opacity: 0.55 }}
                   >
                     Available balance
                   </p>
-                  <div className="flex items-baseline gap-2">
+                  <div className="flex items-baseline gap-2 flex-wrap">
                     <p
                       className={cn(
-                        "num text-5xl sm:text-6xl font-bold leading-none transition-all duration-500",
+                        "num text-[clamp(32px,6vw,60px)] font-bold leading-none transition-all duration-500",
                         balanceFlash ? "text-mint" : "text-white",
                       )}
                     >
@@ -231,13 +231,13 @@ const Dashboard = () => {
                   {/* Account number chip */}
                   {activeWallet?.account_number && (
                     <div
-                      className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-pill text-xs font-medium"
+                      className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-pill text-xs font-medium max-w-full"
                       style={{ background: "rgba(255,255,255,0.1)" }}
                     >
-                      <span style={{ opacity: 0.6 }}>
+                      <span className="truncate opacity-60">
                         {activeWallet.bank_name || "Virtual"}
                       </span>
-                      <span className="num font-semibold">
+                      <span className="num font-semibold shrink-0">
                         {formatAccountNumber(activeWallet.account_number)}
                       </span>
                       <button
@@ -247,7 +247,7 @@ const Dashboard = () => {
                           );
                           toast.success("Account number copied!");
                         }}
-                        className="hover:opacity-70 transition-opacity"
+                        className="hover:opacity-70 transition-opacity shrink-0"
                       >
                         <Copy size={12} />
                       </button>
@@ -283,7 +283,7 @@ const Dashboard = () => {
                   <button
                     key={a.path}
                     onClick={() => navigate(a.path)}
-                    className="flex flex-col items-start gap-3 p-3 rounded-[18px] transition-colors text-left"
+                    className="flex flex-col items-start gap-3 p-3 rounded-[18px] transition-colors text-left group"
                     style={{ background: "rgba(255,255,255,0.08)" }}
                     onMouseEnter={(e) =>
                       (e.currentTarget.style.background =
@@ -295,7 +295,7 @@ const Dashboard = () => {
                     }
                   >
                     <div
-                      className="w-8 h-8 rounded-pill flex items-center justify-center"
+                      className="w-8 h-8 rounded-pill flex items-center justify-center transition-transform group-active:scale-90"
                       style={{
                         background: "#fff",
                         color: "rgb(var(--foreground))",
@@ -303,7 +303,7 @@ const Dashboard = () => {
                     >
                       <a.icon size={14} strokeWidth={2.5} />
                     </div>
-                    <span className="text-[12px] font-semibold leading-tight">
+                    <span className="text-[12px] font-semibold leading-tight truncate w-full">
                       {a.label}
                     </span>
                   </button>
