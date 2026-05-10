@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShieldAlert } from "lucide-react";
 
 export default function ChangePasswordPage() {
@@ -31,44 +29,128 @@ export default function ChangePasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="h-14 w-14 rounded-xl bg-warning flex items-center justify-center">
-              <ShieldAlert className="h-8 w-8 text-warning-foreground" />
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ background: "rgb(var(--background))" }}
+    >
+      <div className="w-full max-w-md space-y-8">
+        <div
+          className="rounded-2xl p-8 shadow-card space-y-6"
+          style={{ background: "rgb(var(--surface-highest))" }}
+        >
+          {/* Icon + heading */}
+          <div className="text-center space-y-4">
+            <div
+              className="h-14 w-14 rounded-2xl flex items-center justify-center mx-auto"
+              style={{ background: "rgb(var(--lemon) / 0.4)" }}
+            >
+              <ShieldAlert
+                className="h-7 w-7"
+                style={{ color: "rgb(var(--foreground))" }}
+              />
+            </div>
+            <div>
+              <h2
+                style={{
+                  fontFamily: "Manrope, sans-serif",
+                  fontSize: "1.5rem",
+                  fontWeight: 800,
+                  letterSpacing: "-0.02em",
+                  color: "rgb(var(--foreground))",
+                }}
+              >
+                Change your password
+              </h2>
+              <p
+                className="text-sm mt-1"
+                style={{ color: "rgb(var(--foreground-subtle))" }}
+              >
+                {user?.force_password_change
+                  ? "You must change your temporary password before continuing"
+                  : "Update your password"}
+              </p>
             </div>
           </div>
-          <CardTitle className="text-2xl">Change your password</CardTitle>
-          <CardDescription>
-            {user?.force_password_change
-              ? "You must change your temporary password before continuing"
-              : "Update your password"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 text-sm bg-destructive/10 text-destructive rounded-md">{error}</div>
+              <div
+                className="p-3 text-sm rounded-xl"
+                style={{
+                  background: "rgb(var(--destructive) / 0.1)",
+                  color: "rgb(var(--destructive))",
+                }}
+              >
+                {error}
+              </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="current">Current Password</Label>
-              <Input id="current" type="password" value={current} onChange={(e) => setCurrent(e.target.value)} required />
+              <Label
+                htmlFor="current"
+                className="eyebrow"
+                style={{ color: "rgb(var(--foreground-subtle))" }}
+              >
+                Current Password
+              </Label>
+              <Input
+                id="current"
+                type="password"
+                value={current}
+                onChange={(e) => setCurrent(e.target.value)}
+                required
+                className="h-12 rounded-xl border-0 focus-visible:ring-2"
+                style={{ background: "rgb(var(--surface))" }}
+              />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="new">New Password</Label>
-              <Input id="new" type="password" value={newPass} onChange={(e) => setNewPass(e.target.value)} required minLength={8} />
+              <Label
+                htmlFor="new"
+                className="eyebrow"
+                style={{ color: "rgb(var(--foreground-subtle))" }}
+              >
+                New Password
+              </Label>
+              <Input
+                id="new"
+                type="password"
+                value={newPass}
+                onChange={(e) => setNewPass(e.target.value)}
+                required
+                minLength={8}
+                className="h-12 rounded-xl border-0 focus-visible:ring-2"
+                style={{ background: "rgb(var(--surface))" }}
+              />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirm">Confirm New Password</Label>
-              <Input id="confirm" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required minLength={8} />
+              <Label
+                htmlFor="confirm"
+                className="eyebrow"
+                style={{ color: "rgb(var(--foreground-subtle))" }}
+              >
+                Confirm New Password
+              </Label>
+              <Input
+                id="confirm"
+                type="password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                required
+                minLength={8}
+                className="h-12 rounded-xl border-0 focus-visible:ring-2"
+                style={{ background: "rgb(var(--surface))" }}
+              />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-pill btn-primary w-full h-12 justify-center text-sm disabled:opacity-50"
+            >
               {loading ? "Updating…" : "Update password"}
-            </Button>
+            </button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

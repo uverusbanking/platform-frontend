@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -65,30 +64,43 @@ export default function LoginPage() {
     setError("");
     const result = await login(email, password);
     setLoading(false);
-    if (result.success) {
-      navigate("/dashboard");
-    } else {
-      setError(result.error ?? "Login failed");
-    }
+    if (result.success) navigate("/dashboard");
+    else setError(result.error ?? "Login failed");
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left panel — brand / editorial */}
-      <div className="hidden lg:flex lg:w-[45%] bg-[hsl(215,30%,15%)] relative overflow-hidden flex-col justify-between p-12">
-        {/* Subtle geometric texture */}
+    <div
+      className="min-h-screen flex"
+      style={{ background: "rgb(var(--background))" }}
+    >
+      {/* Left panel — dark ink with blue glow */}
+      <div
+        className="hidden lg:flex lg:w-[45%] relative overflow-hidden flex-col justify-between p-12"
+        style={{ background: "rgb(var(--foreground))" }}
+      >
+        {/* Dot grid texture */}
+        <div className="absolute inset-0 dot-grid opacity-40" />
+
+        {/* Blue radial glow */}
         <div
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute pointer-events-none"
           style={{
-            backgroundImage: `linear-gradient(135deg, transparent 40%, hsl(210 60% 55% / 0.3) 40%, hsl(210 60% 55% / 0.3) 41%, transparent 41%),
-                            linear-gradient(225deg, transparent 60%, hsl(210 60% 55% / 0.15) 60%, hsl(210 60% 55% / 0.15) 61%, transparent 61%)`,
-            backgroundSize: "80px 80px",
+            top: "-20%",
+            right: "-10%",
+            width: "60%",
+            height: "60%",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgb(var(--brand-primary) / 0.3) 0%, transparent 70%)",
           }}
         />
 
         <div className="relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[hsl(210,60%,55%)]/10 flex items-center justify-center shrink-0">
+          <div className="logo-mark flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: "rgb(var(--brand-primary) / 0.15)" }}
+            >
               {brand.brandLogoUrl ? (
                 <img
                   src={brand.brandLogoUrl}
@@ -96,53 +108,76 @@ export default function LoginPage() {
                   className="w-6 h-6 object-contain"
                 />
               ) : (
-                <Building2 className="h-6 w-6 text-[hsl(210,60%,55%)]" />
+                <Building2
+                  className="h-6 w-6"
+                  style={{ color: "rgb(var(--brand-primary))" }}
+                />
               )}
             </div>
             <span
-              className="font-bold text-xl text-[hsl(210,20%,90%)]"
-              style={{ fontFamily: "Manrope, sans-serif" }}
+              className="font-bold text-xl"
+              style={{
+                fontFamily: "Manrope, sans-serif",
+                color: "rgba(255,255,255,0.9)",
+              }}
             >
               {brand.brandName}
             </span>
           </div>
         </div>
 
-        {/* Hero copy */}
-        <div className="relative z-10 space-y-6">
+        <div className="relative z-10 space-y-5">
           <h1
-            className="text-[3rem] leading-[1.05] font-extrabold text-[hsl(210,20%,92%)]"
             style={{
               fontFamily: "Manrope, sans-serif",
+              fontSize: "clamp(2.25rem, 4vw, 3rem)",
+              fontWeight: 800,
               letterSpacing: "-0.03em",
+              lineHeight: 1.05,
+              color: "rgba(255,255,255,0.95)",
             }}
           >
             Corporate
             <br />
-            onboarding,
-            <br />
-            simplified.
+            onboarding,{" "}
+            <span
+              className="serif-italic"
+              style={{ color: "rgba(255,255,255,0.7)" }}
+            >
+              simplified.
+            </span>
           </h1>
-          <p className="text-[hsl(215,15%,60%)] text-base max-w-sm leading-relaxed">
+          <p
+            className="text-base max-w-sm leading-relaxed"
+            style={{ color: "rgba(255,255,255,0.45)" }}
+          >
             Open accounts, manage compliance, and track approvals — all from one
             powerful portal.
           </p>
         </div>
 
-        {/* Bottom trust line */}
         <div className="relative z-10">
-          <p className="text-[hsl(215,15%,45%)] text-xs tracking-[0.05em] uppercase">
+          <p
+            className="text-xs tracking-widest uppercase"
+            style={{ color: "rgba(255,255,255,0.25)" }}
+          >
             Trusted by 2,400+ businesses
           </p>
         </div>
       </div>
 
-      {/* Right panel — form */}
-      <div className="flex-1 flex items-center justify-center bg-background p-6 sm:p-12">
-        <div className="w-full max-w-[400px] space-y-10">
-          {/* Mobile brand (hidden on lg+) */}
+      {/* Right panel — warm form */}
+      <div
+        className="flex-1 flex items-center justify-center p-6 sm:p-12"
+        style={{ background: "rgb(var(--background))" }}
+      >
+        <div className="w-full max-w-[400px] space-y-8">
+          {/* Mobile brand */}
           <div className="flex items-center gap-3 lg:hidden">
-            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: "rgb(var(--soft))" }}
+            >
               {brand.brandIconUrl ? (
                 <img
                   src={brand.brandIconUrl}
@@ -150,113 +185,134 @@ export default function LoginPage() {
                   className="w-5 h-5 object-contain"
                 />
               ) : (
-                <Building2 className="h-5 w-5 text-primary" />
+                <Building2
+                  className="h-5 w-5"
+                  style={{ color: "rgb(var(--brand-primary))" }}
+                />
               )}
             </div>
             <span
-              className="font-bold text-lg text-foreground"
-              style={{ fontFamily: "Manrope, sans-serif" }}
+              className="font-bold text-lg"
+              style={{
+                fontFamily: "Manrope, sans-serif",
+                color: "rgb(var(--foreground))",
+              }}
             >
               {brand.brandName}
             </span>
           </div>
 
-          {/* Heading */}
-          <div className="space-y-2">
+          <div>
+            <p className="eyebrow mb-2">Corporate portal</p>
             <h2
-              className="text-[2.25rem] font-bold text-foreground leading-tight"
               style={{
                 fontFamily: "Manrope, sans-serif",
+                fontSize: "2rem",
+                fontWeight: 800,
                 letterSpacing: "-0.02em",
+                color: "rgb(var(--foreground))",
               }}
             >
               Welcome back
             </h2>
-            <p className="text-muted-foreground text-sm">
+            <p
+              className="text-sm mt-1"
+              style={{ color: "rgb(var(--foreground-subtle))" }}
+            >
               Sign in to your corporate onboarding portal
             </p>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="p-3 text-sm bg-destructive/10 text-destructive rounded-md">
+              <div
+                className="p-3 text-sm rounded-xl"
+                style={{
+                  background: "rgb(var(--destructive) / 0.1)",
+                  color: "rgb(var(--destructive))",
+                }}
+              >
                 {error}
               </div>
             )}
-
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label
-                  htmlFor="email"
-                  className="text-xs font-medium tracking-[0.03em] text-muted-foreground uppercase"
-                >
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="h-12 bg-surface-low border-0 rounded-lg text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-0 transition-all duration-150"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor="password"
-                  className="text-xs font-medium tracking-[0.03em] text-muted-foreground uppercase"
-                >
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="h-12 bg-surface-low border-0 rounded-lg text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-0 transition-all duration-150"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label
+                htmlFor="email"
+                className="eyebrow"
+                style={{ color: "rgb(var(--foreground-subtle))" }}
+              >
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="h-12 rounded-xl border-0 focus-visible:ring-2"
+                style={{ background: "rgb(var(--surface))" }}
+              />
             </div>
-
-            <Button
+            <div className="space-y-2">
+              <Label
+                htmlFor="password"
+                className="eyebrow"
+                style={{ color: "rgb(var(--foreground-subtle))" }}
+              >
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="h-12 rounded-xl border-0 focus-visible:ring-2"
+                style={{ background: "rgb(var(--surface))" }}
+              />
+            </div>
+            <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 rounded-lg text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-foreground border-0 shadow-none transition-all duration-150 gap-2"
+              className="btn-pill btn-primary w-full h-12 justify-center text-sm disabled:opacity-50"
             >
               {loading ? (
                 "Signing in…"
               ) : (
                 <>
-                  Sign in
-                  <ArrowRight className="h-4 w-4" />
+                  Sign in <ArrowRight className="h-4 w-4 ml-1" />
                 </>
               )}
-            </Button>
+            </button>
           </form>
 
-          {/* Footer */}
-          <p className="text-center text-sm text-muted-foreground">
+          <p
+            className="text-center text-sm"
+            style={{ color: "rgb(var(--foreground-subtle))" }}
+          >
             Don&apos;t have an account?{" "}
             <Link
               to="/register"
-              className="text-primary hover:underline font-medium"
+              className="font-semibold hover:opacity-70"
+              style={{ color: "rgb(var(--brand-primary))" }}
             >
               Register
             </Link>
           </p>
 
-          {/* Quick login */}
-          <div className="space-y-3 pt-2">
+          {/* Demo accounts */}
+          <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="h-px flex-1 bg-border" />
-              <span className="text-xs text-muted-foreground uppercase tracking-widest">
-                Demo accounts
-              </span>
-              <div className="h-px flex-1 bg-border" />
+              <div
+                className="h-px flex-1"
+                style={{ background: "rgb(var(--border))" }}
+              />
+              <span className="eyebrow">Demo accounts</span>
+              <div
+                className="h-px flex-1"
+                style={{ background: "rgb(var(--border))" }}
+              />
             </div>
             <div className="grid grid-cols-2 gap-2">
               {DEMO_USERS.map((u) => (
@@ -270,14 +326,34 @@ export default function LoginPage() {
                     if (result.success) navigate("/dashboard");
                   }}
                   disabled={loading}
-                  className="flex items-start gap-2.5 p-3 rounded-lg border border-border bg-card hover:bg-accent/50 text-left transition-colors duration-150 group"
+                  className="flex items-start gap-2.5 p-3 rounded-xl text-left transition-colors"
+                  style={{
+                    background: "rgb(var(--surface))",
+                    border: "1px solid rgb(var(--border))",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background =
+                      "rgb(var(--surface-high))")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "rgb(var(--surface))")
+                  }
                 >
-                  <u.icon className="h-4 w-4 mt-0.5 text-muted-foreground group-hover:text-primary shrink-0 transition-colors" />
+                  <u.icon
+                    className="h-4 w-4 mt-0.5 shrink-0"
+                    style={{ color: "rgb(var(--foreground-subtle))" }}
+                  />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground leading-tight">
+                    <p
+                      className="text-sm font-semibold leading-tight"
+                      style={{ color: "rgb(var(--foreground))" }}
+                    >
                       {u.label}
                     </p>
-                    <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">
+                    <p
+                      className="text-[11px] leading-snug mt-0.5"
+                      style={{ color: "rgb(var(--foreground-subtle))" }}
+                    >
                       {u.description}
                     </p>
                   </div>
