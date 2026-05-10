@@ -1,108 +1,139 @@
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Corporate Blue Theme — Light */
-    --background: 210 20% 98%;
-    --foreground: 215 25% 12%;
+    /* ── Warm beige surfaces ── */
+    --background: 244 239 232;
+    --surface: 237 230 220;
+    --surface-high: 226 217 204;
+    --surface-highest: 255 255 255;
 
-    --card: 0 0% 100%;
-    --card-foreground: 215 25% 12%;
+    /* ── Foreground ── */
+    --foreground: 22 19 16;
+    --foreground-subtle: 111 102 92;
+    --ink: 22 19 16;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 12%;
+    /* ── Brand (blue default; overridable via BrandConfigService) ── */
+    --brand-primary: 0 82 255;
+    --brand-secondary: 88 86 214;
 
-    --primary: 215 70% 38%;
-    --primary-foreground: 0 0% 100%;
+    /* ── Accent palette ── */
+    --soft: 227 236 255;
+    --mint: 184 239 193;
+    --mint-deep: 31 122 58;
+    --lemon: 244 226 122;
+    --sky: 191 220 247;
 
-    --secondary: 210 25% 93%;
-    --secondary-foreground: 215 25% 12%;
+    /* ── Semantic tokens ── */
+    --destructive: 220 38 38;
+    --destructive-foreground: 255 255 255;
+    --success: 34 197 94;
+    --success-foreground: 255 255 255;
+    --warning: 245 158 11;
+    --warning-foreground: 22 19 16;
 
-    --muted: 210 20% 95%;
-    --muted-foreground: 215 12% 50%;
+    /* ── shadcn compat aliases (same values as above) ── */
+    --card: 255 255 255;
+    --card-foreground: 22 19 16;
+    --popover: 255 255 255;
+    --popover-foreground: 22 19 16;
+    --primary: 0 82 255;
+    --primary-foreground: 255 255 255;
+    --secondary: 237 230 220;
+    --secondary-foreground: 22 19 16;
+    --muted: 237 230 220;
+    --muted-foreground: 111 102 92;
+    --accent: 237 230 220;
+    --accent-foreground: 22 19 16;
+    --tertiary: 191 220 247;
+    --border: 226 217 204;
+    --input: 226 217 204;
+    --ring: 0 82 255;
 
-    --accent: 210 25% 93%;
-    --accent-foreground: 215 25% 12%;
+    /* ── Surface compat aliases ── */
+    --surface-low: 237 230 220;
+    --surface-container: 255 255 255;
+    --primary-glow: 0 82 255;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    /* ── Sidebar ── */
+    --sidebar-background: 244 239 232;
+    --sidebar-foreground: 22 19 16;
+    --sidebar-primary: 0 82 255;
+    --sidebar-primary-foreground: 255 255 255;
+    --sidebar-accent: 237 230 220;
+    --sidebar-accent-foreground: 22 19 16;
+    --sidebar-border: 226 217 204;
+    --sidebar-ring: 0 82 255;
+    --sidebar-muted-foreground: 111 102 92;
 
-    --success: 142 60% 40%;
-    --success-foreground: 0 0% 100%;
+    /* ── Radius ── */
+    --radius: 0.875rem;
+    --radius-pill: 999px;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
-
-    --border: 214 20% 88%;
-    --input: 214 20% 88%;
-    --ring: 215 70% 38%;
-
-    --radius: 0.25rem;
-
-    --primary-glow: 210 75% 48%;
-    --surface-low: 210 18% 95%;
-    --surface-container: 0 0% 100%;
-    --surface-high: 210 25% 93%;
-    --surface-highest: 210 20% 90%;
-    --tertiary: 225 60% 65%;
-
-    --sidebar-background: 210 18% 96%;
-    --sidebar-foreground: 215 25% 12%;
-    --sidebar-primary: 215 70% 38%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 20% 91%;
-    --sidebar-accent-foreground: 215 25% 12%;
-    --sidebar-border: 210 18% 96%;
-    --sidebar-ring: 215 70% 38%;
-    --sidebar-muted-foreground: 215 12% 50%;
+    /* ── Shadows ── */
+    --card-shadow:
+      0 1px 0 rgba(20, 15, 10, 0.04), 0 18px 40px -18px rgba(20, 15, 10, 0.18);
   }
 
   .dark {
-    --background: 215 28% 8%;
-    --foreground: 210 20% 92%;
+    --background: 20 17 14;
+    --surface: 42 36 30;
+    --surface-high: 55 47 39;
+    --surface-highest: 68 58 48;
 
-    --card: 215 25% 11%;
-    --card-foreground: 210 20% 92%;
+    --foreground: 240 236 230;
+    --foreground-subtle: 149 138 125;
+    --ink: 240 236 230;
 
-    --popover: 215 25% 11%;
-    --popover-foreground: 210 20% 92%;
+    --brand-primary: 77 133 255;
+    --brand-secondary: 130 128 240;
 
-    --primary: 210 60% 55%;
-    --primary-foreground: 0 0% 100%;
+    --soft: 15 32 77;
+    --mint: 20 83 45;
+    --lemon: 92 77 10;
+    --sky: 30 62 100;
 
-    --secondary: 215 20% 18%;
-    --secondary-foreground: 210 20% 92%;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
+    --success: 74 222 128;
+    --success-foreground: 22 19 16;
+    --warning: 251 191 36;
+    --warning-foreground: 22 19 16;
 
-    --muted: 215 20% 16%;
-    --muted-foreground: 215 12% 55%;
+    --card: 28 24 20;
+    --card-foreground: 240 236 230;
+    --popover: 28 24 20;
+    --popover-foreground: 240 236 230;
+    --primary: 77 133 255;
+    --primary-foreground: 255 255 255;
+    --secondary: 42 36 30;
+    --secondary-foreground: 240 236 230;
+    --muted: 42 36 30;
+    --muted-foreground: 149 138 125;
+    --accent: 42 36 30;
+    --accent-foreground: 240 236 230;
+    --tertiary: 30 62 100;
+    --border: 55 47 39;
+    --input: 55 47 39;
+    --ring: 77 133 255;
 
-    --accent: 215 20% 18%;
-    --accent-foreground: 210 20% 92%;
+    --surface-low: 42 36 30;
+    --surface-container: 28 24 20;
+    --primary-glow: 77 133 255;
 
-    --destructive: 0 62% 40%;
-    --destructive-foreground: 0 0% 100%;
-
-    --success: 142 50% 35%;
-    --success-foreground: 0 0% 100%;
-
-    --warning: 38 80% 45%;
-    --warning-foreground: 0 0% 100%;
-
-    --border: 215 18% 20%;
-    --input: 215 18% 20%;
-    --ring: 210 60% 55%;
-
-    --sidebar-background: 215 32% 7%;
-    --sidebar-foreground: 210 20% 85%;
-    --sidebar-primary: 210 60% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 28% 12%;
-    --sidebar-accent-foreground: 210 20% 85%;
-    --sidebar-border: 215 22% 14%;
-    --sidebar-ring: 210 60% 55%;
-    --sidebar-muted-foreground: 215 12% 50%;
+    --sidebar-background: 15 12 10;
+    --sidebar-foreground: 220 213 205;
+    --sidebar-primary: 77 133 255;
+    --sidebar-primary-foreground: 255 255 255;
+    --sidebar-accent: 28 24 20;
+    --sidebar-accent-foreground: 220 213 205;
+    --sidebar-border: 42 36 30;
+    --sidebar-ring: 77 133 255;
+    --sidebar-muted-foreground: 149 138 125;
   }
 }
 
@@ -112,9 +143,128 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
+    font-feature-settings: "ss01", "cv11";
   }
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family:
+      "Manrope",
+      system-ui,
+      -apple-system,
+      sans-serif;
+  }
+}
+
+@layer utilities {
+  /* Display headline — Manrope bold, responsive */
+  .display {
+    font-family: "Manrope", system-ui, sans-serif;
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  /* Small uppercase section label */
+  .eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgb(var(--foreground-subtle));
+  }
+
+  /* Tabular numeric figures */
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    font-weight: 600;
+  }
+
+  /* Instrument Serif italic accent */
+  .serif-italic {
+    font-family: "Instrument Serif", Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  /* Dot-grid background pattern */
+  .dot-grid {
+    background-image: radial-gradient(
+      circle,
+      rgb(var(--foreground) / 0.08) 1px,
+      transparent 1px
+    );
+    background-size: 20px 20px;
+  }
+
+  /* Logo mark container */
+  .logo-mark {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logo-mark::after {
+    content: "";
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgb(var(--brand-primary));
+    border: 1.5px solid rgb(var(--background));
+  }
+
+  /* Card with warm shadow */
+  .card-warm {
+    background: rgb(var(--surface-highest));
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+  }
+
+  /* Pill button base */
+  .btn-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 1.125rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: opacity 0.15s;
+    cursor: pointer;
+  }
+  .btn-pill:hover {
+    opacity: 0.85;
+  }
+
+  .btn-primary {
+    background: rgb(var(--brand-primary));
+    color: #fff;
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: rgb(var(--foreground));
+    border: 1.5px solid rgb(var(--border));
+  }
+
+  .shadow-card {
+    box-shadow: var(--card-shadow);
+  }
+
+  .rounded-pill {
+    border-radius: var(--radius-pill);
   }
 }
