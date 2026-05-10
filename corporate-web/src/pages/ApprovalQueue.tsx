@@ -265,74 +265,63 @@ export default function ApprovalQueue() {
     <div className="space-y-6">
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card>
-          <CardContent className="pt-5 pb-4 px-5">
+        {[
+          {
+            label: "Pending",
+            value: pendingCount,
+            Icon: Clock,
+            bg: "rgb(var(--lemon) / 0.4)",
+            color: "#7a6200",
+          },
+          {
+            label: "Escalated",
+            value: escalatedCount,
+            Icon: AlertTriangle,
+            bg: "rgb(var(--soft))",
+            color: "rgb(var(--brand-primary))",
+          },
+          {
+            label: "Total Value",
+            value: formatNaira(totalValue),
+            Icon: ArrowUpRight,
+            bg: "rgb(var(--sky) / 0.4)",
+            color: "#0052a3",
+          },
+          {
+            label: "Resolved",
+            value: historyItems.length,
+            Icon: CheckCircle2,
+            bg: "rgb(var(--mint) / 0.3)",
+            color: "rgb(var(--mint-deep))",
+          },
+        ].map(({ label, value, Icon, bg, color }) => (
+          <div
+            key={label}
+            className="rounded-2xl p-5 shadow-card"
+            style={{ background: "rgb(var(--surface-highest))" }}
+          >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Pending
-                </p>
-                <p className="text-2xl font-bold text-foreground mt-1">
-                  {pendingCount}
-                </p>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-warning/10 flex items-center justify-center">
-                <Clock className="h-5 w-5 text-warning" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-5 pb-4 px-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Escalated
-                </p>
-                <p className="text-2xl font-bold text-destructive mt-1">
-                  {escalatedCount}
+                <p className="eyebrow mb-1">{label}</p>
+                <p
+                  className="text-2xl font-bold num"
+                  style={{
+                    fontFamily: "Manrope, sans-serif",
+                    color: "rgb(var(--foreground))",
+                  }}
+                >
+                  {value}
                 </p>
               </div>
-              <div className="h-10 w-10 rounded-lg bg-destructive/10 flex items-center justify-center">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
+              <div
+                className="h-10 w-10 rounded-pill flex items-center justify-center"
+                style={{ background: bg }}
+              >
+                <Icon className="h-5 w-5" style={{ color }} />
               </div>
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-5 pb-4 px-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Total Value
-                </p>
-                <p className="text-2xl font-bold text-foreground mt-1">
-                  {formatNaira(totalValue)}
-                </p>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <ArrowUpRight className="h-5 w-5 text-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-5 pb-4 px-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Resolved
-                </p>
-                <p className="text-2xl font-bold text-foreground mt-1">
-                  {historyItems.length}
-                </p>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center">
-                <CheckCircle2 className="h-5 w-5 text-success" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        ))}
       </div>
 
       {/* Filters */}
@@ -798,91 +787,73 @@ function ApprovalCard({
   const overdue = item.dueBy && isPast(new Date(item.dueBy));
 
   return (
-    <Card
-      className="hover:shadow-md transition-shadow cursor-pointer"
+    <div
+      className="rounded-2xl py-4 px-4 sm:px-5 cursor-pointer transition-all shadow-card hover:shadow-md"
+      style={{ background: "rgb(var(--surface-highest))" }}
       onClick={() => onSelect(item)}
     >
-      <CardContent className="py-4 px-4 sm:px-5">
-        <div className="flex items-start gap-3 sm:gap-4">
-          <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
-            <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-semibold text-sm text-foreground truncate">
-                {item.title}
-              </h3>
-              <Badge className={st.className + " text-[10px] h-5"}>
-                <st.icon className="h-3 w-3 mr-0.5" />
-                {st.label}
-              </Badge>
-              {item.priority !== "normal" && (
-                <Badge
-                  className={priorityConfig[item.priority] + " text-[10px] h-5"}
-                >
-                  {item.priority}
-                </Badge>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
-              {item.description}
-            </p>
-            <div className="flex items-center gap-2 sm:gap-4 mt-2 text-xs text-muted-foreground flex-wrap">
-              <span>
-                by{" "}
-                <span className="font-medium text-foreground">
-                  {item.initiator.name}
-                </span>
-              </span>
-              {item.amount && (
-                <span className="font-semibold text-foreground">
-                  {formatNaira(item.amount)}
-                </span>
-              )}
-              <span>
-                Step {item.currentStep}/{item.totalSteps}
-              </span>
-              {item.dueBy && (
-                <span className={overdue ? "text-destructive font-medium" : ""}>
-                  {overdue
-                    ? "Overdue"
-                    : `Due ${formatDistanceToNow(new Date(item.dueBy), { addSuffix: true })}`}
-                </span>
-              )}
-            </div>
-            {/* Mobile action buttons */}
-            {showActions && (
-              <div
-                className="flex gap-2 mt-3 sm:hidden"
-                onClick={(e) => e.stopPropagation()}
+      <div className="flex items-start gap-3 sm:gap-4">
+        <div
+          className="h-9 w-9 sm:h-10 sm:w-10 rounded-pill flex items-center justify-center shrink-0"
+          style={{ background: "rgb(var(--soft))" }}
+        >
+          <Icon
+            className="h-4 w-4 sm:h-5 sm:w-5"
+            style={{ color: "rgb(var(--brand-primary))" }}
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-semibold text-sm text-foreground truncate">
+              {item.title}
+            </h3>
+            <Badge className={st.className + " text-[10px] h-5"}>
+              <st.icon className="h-3 w-3 mr-0.5" />
+              {st.label}
+            </Badge>
+            {item.priority !== "normal" && (
+              <Badge
+                className={priorityConfig[item.priority] + " text-[10px] h-5"}
               >
-                <Button
-                  size="sm"
-                  className="h-8 text-xs flex-1"
-                  onClick={() => onAction("approve")}
-                >
-                  <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Approve
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8 text-xs flex-1"
-                  onClick={() => onAction("reject")}
-                >
-                  <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
-                </Button>
-              </div>
+                {item.priority}
+              </Badge>
             )}
           </div>
-          {/* Desktop action buttons */}
+          <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+            {item.description}
+          </p>
+          <div className="flex items-center gap-2 sm:gap-4 mt-2 text-xs text-muted-foreground flex-wrap">
+            <span>
+              by{" "}
+              <span className="font-medium text-foreground">
+                {item.initiator.name}
+              </span>
+            </span>
+            {item.amount && (
+              <span className="font-semibold text-foreground">
+                {formatNaira(item.amount)}
+              </span>
+            )}
+            <span>
+              Step {item.currentStep}/{item.totalSteps}
+            </span>
+            {item.dueBy && (
+              <span className={overdue ? "text-destructive font-medium" : ""}>
+                {overdue
+                  ? "Overdue"
+                  : `Due ${formatDistanceToNow(new Date(item.dueBy), { addSuffix: true })}`}
+              </span>
+            )}
+          </div>
+          {/* Mobile action buttons */}
           {showActions && (
             <div
-              className="hidden sm:flex gap-2 shrink-0"
+              className="flex gap-2 mt-3 sm:hidden"
               onClick={(e) => e.stopPropagation()}
             >
               <Button
                 size="sm"
-                className="h-8 text-xs"
+                className="h-8 text-xs flex-1"
                 onClick={() => onAction("approve")}
               >
                 <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Approve
@@ -890,7 +861,7 @@ function ApprovalCard({
               <Button
                 size="sm"
                 variant="outline"
-                className="h-8 text-xs"
+                className="h-8 text-xs flex-1"
                 onClick={() => onAction("reject")}
               >
                 <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
@@ -898,7 +869,31 @@ function ApprovalCard({
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+        {/* Desktop action buttons */}
+        {showActions && (
+          <div
+            className="hidden sm:flex gap-2 shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="btn-pill text-xs h-8 px-4"
+              style={{
+                background: "rgb(var(--mint) / 0.3)",
+                color: "rgb(var(--mint-deep))",
+              }}
+              onClick={() => onAction("approve")}
+            >
+              <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Approve
+            </button>
+            <button
+              className="btn-pill btn-outline text-xs h-8 px-4"
+              onClick={() => onAction("reject")}
+            >
+              <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

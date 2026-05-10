@@ -1,7 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   ChevronRight,
   Send,
@@ -42,21 +40,67 @@ const recentTransactions: {
   amount: number;
   status: TxStatus;
 }[] = [
-  { id: "tx-1", recipient: "Amazon Web Services", category: "Cloud Infrastructure", date: "2025-10-24T14:02:00Z", amount: -4280.0, status: "completed" },
-  { id: "tx-2", recipient: "Stripe Global Payout", category: "SaaS Revenue", date: "2025-10-23T09:15:00Z", amount: 84500.0, status: "completed" },
-  { id: "tx-3", recipient: "Jane Doe (Transfer)", category: "Q3 Bonus", date: "2025-10-22T16:45:00Z", amount: -15000.0, status: "pending" },
-  { id: "tx-4", recipient: "Uber Premium Business", category: "Corporate Travel", date: "2025-10-21T21:30:00Z", amount: -242.15, status: "completed" },
+  {
+    id: "tx-1",
+    recipient: "Amazon Web Services",
+    category: "Cloud Infrastructure",
+    date: "2025-10-24T14:02:00Z",
+    amount: -4280.0,
+    status: "completed",
+  },
+  {
+    id: "tx-2",
+    recipient: "Stripe Global Payout",
+    category: "SaaS Revenue",
+    date: "2025-10-23T09:15:00Z",
+    amount: 84500.0,
+    status: "completed",
+  },
+  {
+    id: "tx-3",
+    recipient: "Jane Doe (Transfer)",
+    category: "Q3 Bonus",
+    date: "2025-10-22T16:45:00Z",
+    amount: -15000.0,
+    status: "pending",
+  },
+  {
+    id: "tx-4",
+    recipient: "Uber Premium Business",
+    category: "Corporate Travel",
+    date: "2025-10-21T21:30:00Z",
+    amount: -242.15,
+    status: "completed",
+  },
 ];
 
-const statusStyles: Record<TxStatus, string> = {
-  completed: "bg-success/10 text-success",
-  pending: "bg-warning/10 text-warning",
-  failed: "bg-destructive/10 text-destructive",
+const statusConfig: Record<
+  TxStatus,
+  { bg: string; color: string; label: string }
+> = {
+  completed: {
+    bg: "rgb(var(--mint) / 0.3)",
+    color: "rgb(var(--mint-deep))",
+    label: "Completed",
+  },
+  pending: {
+    bg: "rgb(var(--lemon) / 0.4)",
+    color: "#7a6200",
+    label: "Pending",
+  },
+  failed: {
+    bg: "rgb(var(--soft))",
+    color: "rgb(var(--brand-primary))",
+    label: "Failed",
+  },
 };
 
 function formatNaira(n: number) {
   const abs = Math.abs(n);
-  const formatted = abs.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const formatted = abs.toLocaleString("en-NG", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
   return n < 0 ? `-₦${formatted}` : `+₦${formatted}`;
 }
 
@@ -72,81 +116,232 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const firstName = user?.full_name?.split(" ")[0] ?? "User";
 
-  const wholePart = Math.floor(accountBalance.totalAvailable).toLocaleString("en-NG");
+  const wholePart = Math.floor(accountBalance.totalAvailable).toLocaleString(
+    "en-NG",
+  );
   const centsPart = (accountBalance.totalAvailable % 1).toFixed(2).slice(1);
 
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Greeting */}
-      <div className="pt-1">
-        <h2 className="text-xl sm:text-[2rem] font-extrabold text-foreground leading-tight" style={{ fontFamily: "Manrope, sans-serif", letterSpacing: "-0.03em" }}>
-          {getGreeting()}, {firstName}
-        </h2>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="eyebrow mb-1">
+            {format(new Date(), "EEEE, d MMMM yyyy")}
+          </p>
+          <h2 className="display">
+            {getGreeting()}, <span className="serif-italic">{firstName}</span>
+          </h2>
+        </div>
+        <button
+          onClick={() => navigate("/payments/new")}
+          className="btn-pill btn-primary shrink-0 hidden sm:inline-flex"
+        >
+          <Send className="h-4 w-4" />
+          Send Money
+        </button>
       </div>
 
       {/* Hero row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Balance card */}
-        <div className="lg:col-span-2 bg-surface-container rounded-sm p-5 sm:p-8">
-          <div className="mt-1 sm:mt-2">
-            <p className="text-sm text-muted-foreground mb-1">Total Available Balance</p>
-            <p className="text-2xl sm:text-[3.5rem] font-extrabold text-foreground leading-none" style={{ fontFamily: "Manrope, sans-serif", letterSpacing: "-0.03em" }}>
-              ₦{wholePart}
-              <span className="text-sm sm:text-lg text-muted-foreground font-normal">{centsPart}</span>
-            </p>
-          </div>
-          <div className="flex gap-6 sm:gap-10 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-surface-high">
+        {/* Balance card — dark ink */}
+        <div
+          className="lg:col-span-2 rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-card"
+          style={{ background: "rgb(var(--foreground))" }}
+        >
+          {/* Blue glow */}
+          <div
+            className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle, rgb(var(--brand-primary) / 0.25) 0%, transparent 70%)",
+              transform: "translate(20%, -30%)",
+            }}
+          />
+          <p
+            className="text-sm mb-3"
+            style={{ color: "rgba(255,255,255,0.5)" }}
+          >
+            Total Available Balance
+          </p>
+          <p
+            className="num leading-none mb-6"
+            style={{
+              color: "#fff",
+              fontSize: "clamp(2.5rem, 5vw, 4rem)",
+              fontFamily: "Manrope, sans-serif",
+              fontWeight: 800,
+              letterSpacing: "-0.04em",
+            }}
+          >
+            ₦{wholePart}
+            <span
+              style={{
+                fontSize: "0.35em",
+                color: "rgba(255,255,255,0.5)",
+                fontWeight: 400,
+              }}
+            >
+              {centsPart}
+            </span>
+          </p>
+
+          <div
+            className="flex gap-8 pt-5"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}
+          >
             <div>
-              <p className="text-[10px] sm:text-xs font-semibold tracking-[0.05em] text-muted-foreground uppercase">Monthly Growth</p>
-              <p className="text-lg sm:text-xl font-bold text-primary mt-0.5 flex items-center gap-1.5" style={{ fontFamily: "Manrope, sans-serif" }}>
-                <TrendingUp className="h-4 w-4" />
+              <p
+                className="text-[10px] uppercase tracking-widest font-semibold mb-1"
+                style={{ color: "rgba(255,255,255,0.4)" }}
+              >
+                Monthly Growth
+              </p>
+              <p
+                className="flex items-center gap-1.5 text-lg font-bold"
+                style={{ color: "#fff", fontFamily: "Manrope, sans-serif" }}
+              >
+                <TrendingUp
+                  className="h-4 w-4"
+                  style={{ color: "rgb(var(--mint))" }}
+                />
                 +{accountBalance.monthlyGrowth}%
               </p>
             </div>
+            <div>
+              <p
+                className="text-[10px] uppercase tracking-widest font-semibold mb-1"
+                style={{ color: "rgba(255,255,255,0.4)" }}
+              >
+                Uncleared Funds
+              </p>
+              <p
+                className="text-lg font-bold"
+                style={{
+                  color: "rgba(255,255,255,0.7)",
+                  fontFamily: "Manrope, sans-serif",
+                }}
+              >
+                ₦{accountBalance.unclearFunds.toLocaleString("en-NG")}
+              </p>
+            </div>
+          </div>
+
+          {/* 3-action grid */}
+          <div className="grid grid-cols-3 gap-2 mt-5">
+            {quickActions.map((a) => (
+              <button
+                key={a.label}
+                className="flex flex-col items-center gap-2 py-3 rounded-xl transition-colors"
+                style={{ background: "rgba(255,255,255,0.08)" }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = "rgba(255,255,255,0.13)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "rgba(255,255,255,0.08)")
+                }
+              >
+                <a.icon className="h-4 w-4" style={{ color: "#fff" }} />
+                <span
+                  className="text-xs font-medium text-center leading-tight"
+                  style={{ color: "rgba(255,255,255,0.8)" }}
+                >
+                  {a.label}
+                </span>
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Right column */}
-        <div className="space-y-4 sm:space-y-6">
-          {/* Quick Actions */}
-          <div className="bg-surface-container rounded-sm p-4 sm:p-6">
-            <p className="text-xs font-semibold tracking-[0.05em] text-muted-foreground uppercase mb-3 sm:mb-4">Quick Actions</p>
-            <div className="space-y-1">
-              {quickActions.map((a) => (
-                <button key={a.label} className="w-full flex items-center justify-between py-3 px-1 text-left group hover:bg-surface-low rounded-sm transition-colors">
-                  <div className="flex items-center gap-3">
-                    <a.icon className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium text-foreground">{a.label}</span>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </button>
-              ))}
-            </div>
-          </div>
-
+        <div className="space-y-4">
           {/* Accounts */}
-          <div className="bg-surface-container rounded-sm p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <p className="text-xs font-semibold tracking-[0.05em] text-muted-foreground uppercase">Accounts</p>
-              <button className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">View All</button>
+          <div
+            className="rounded-2xl p-4 sm:p-5 shadow-card"
+            style={{ background: "rgb(var(--surface-highest))" }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <p className="eyebrow">Accounts</p>
+              <button
+                className="text-xs font-semibold"
+                style={{ color: "rgb(var(--brand-primary))" }}
+                onClick={() => navigate("/accounts")}
+              >
+                View All
+              </button>
             </div>
             <div className="space-y-3">
               {accounts.map((e) => (
                 <div key={e.name} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-surface-low flex items-center justify-center">
-                      <e.icon className="h-4 w-4 text-muted-foreground" />
+                    <div
+                      className="h-9 w-9 rounded-pill flex items-center justify-center shrink-0"
+                      style={{ background: "rgb(var(--soft))" }}
+                    >
+                      <e.icon
+                        className="h-4 w-4"
+                        style={{ color: "rgb(var(--brand-primary))" }}
+                      />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground">{e.name}</p>
-                      <p className="text-xs text-muted-foreground">{e.code}</p>
+                      <p
+                        className="text-sm font-semibold"
+                        style={{ color: "rgb(var(--foreground))" }}
+                      >
+                        {e.name}
+                      </p>
+                      <p
+                        className="text-xs"
+                        style={{ color: "rgb(var(--foreground-subtle))" }}
+                      >
+                        {e.code}
+                      </p>
                     </div>
                   </div>
-                  <p className="text-sm font-bold text-foreground" style={{ fontFamily: "Manrope, sans-serif" }}>
+                  <p
+                    className="text-sm font-bold num"
+                    style={{ fontFamily: "Manrope, sans-serif" }}
+                  >
                     ₦{e.balance.toLocaleString("en-NG")}
                   </p>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Growth stat */}
+          <div
+            className="rounded-2xl p-4 shadow-card"
+            style={{ background: "rgb(var(--surface-highest))" }}
+          >
+            <p className="eyebrow mb-2">Performance</p>
+            <div className="flex items-center gap-2">
+              <div
+                className="h-8 w-8 rounded-pill flex items-center justify-center"
+                style={{ background: "rgb(var(--mint) / 0.3)" }}
+              >
+                <TrendingUp
+                  className="h-4 w-4"
+                  style={{ color: "rgb(var(--mint-deep))" }}
+                />
+              </div>
+              <div>
+                <p
+                  className="text-xs"
+                  style={{ color: "rgb(var(--foreground-subtle))" }}
+                >
+                  Monthly growth
+                </p>
+                <p
+                  className="text-base font-bold"
+                  style={{
+                    color: "rgb(var(--foreground))",
+                    fontFamily: "Manrope, sans-serif",
+                  }}
+                >
+                  +{accountBalance.monthlyGrowth}%
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -155,43 +350,97 @@ export default function DashboardPage() {
       {/* Recent Activity */}
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <h3 className="text-lg font-bold text-foreground" style={{ fontFamily: "Manrope, sans-serif", letterSpacing: "-0.01em" }}>
+          <h3
+            className="text-lg font-bold"
+            style={{
+              fontFamily: "Manrope, sans-serif",
+              letterSpacing: "-0.01em",
+              color: "rgb(var(--foreground))",
+            }}
+          >
             Recent Activity
           </h3>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="text-xs font-medium rounded-sm">Filters</Button>
-            <Button variant="outline" size="sm" className="text-xs font-medium rounded-sm">Export CSV</Button>
+            <button className="btn-pill btn-outline text-xs">Filters</button>
+            <button className="btn-pill btn-outline text-xs">Export CSV</button>
           </div>
         </div>
 
-        {/* Mobile: card layout */}
+        {/* Mobile cards */}
         <div className="block sm:hidden space-y-3">
           {recentTransactions.map((tx) => {
-            const initials = tx.recipient.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+            const initials = tx.recipient
+              .split(" ")
+              .slice(0, 2)
+              .map((w) => w[0])
+              .join("")
+              .toUpperCase();
+            const st = statusConfig[tx.status];
             return (
-              <div key={tx.id} className="bg-surface-container rounded-sm p-4 space-y-2">
+              <div
+                key={tx.id}
+                className="rounded-2xl p-4 space-y-2 shadow-card"
+                style={{ background: "rgb(var(--surface-highest))" }}
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-9 w-9 rounded-full bg-surface-low flex items-center justify-center shrink-0">
-                      <span className="text-xs font-bold text-primary">{initials}</span>
+                    <div
+                      className="h-9 w-9 rounded-pill flex items-center justify-center shrink-0"
+                      style={{ background: "rgb(var(--soft))" }}
+                    >
+                      <span
+                        className="text-xs font-bold"
+                        style={{ color: "rgb(var(--brand-primary))" }}
+                      >
+                        {initials}
+                      </span>
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate">{tx.recipient}</p>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider">{tx.category}</p>
+                      <p
+                        className="text-sm font-semibold truncate"
+                        style={{ color: "rgb(var(--foreground))" }}
+                      >
+                        {tx.recipient}
+                      </p>
+                      <p
+                        className="text-xs uppercase tracking-wider"
+                        style={{ color: "rgb(var(--foreground-subtle))" }}
+                      >
+                        {tx.category}
+                      </p>
                     </div>
                   </div>
-                  <button className="p-1 rounded-sm hover:bg-surface-low transition-colors">
-                    <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                  <button className="p-1 rounded-xl">
+                    <MoreVertical
+                      className="h-4 w-4"
+                      style={{ color: "rgb(var(--foreground-subtle))" }}
+                    />
                   </button>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <p className="text-xs text-muted-foreground">{format(new Date(tx.date), "MMM d, yyyy")}</p>
-                    <Badge className={`${statusStyles[tx.status]} rounded-full px-2 text-[10px] border-0 uppercase tracking-wider`}>
-                      {tx.status}
-                    </Badge>
+                    <p
+                      className="text-xs"
+                      style={{ color: "rgb(var(--foreground-subtle))" }}
+                    >
+                      {format(new Date(tx.date), "MMM d, yyyy")}
+                    </p>
+                    <span
+                      className="px-2 py-0.5 rounded-pill text-[10px] font-semibold"
+                      style={{ background: st.bg, color: st.color }}
+                    >
+                      {st.label}
+                    </span>
                   </div>
-                  <p className={`text-sm font-semibold ${tx.amount >= 0 ? "text-success" : "text-foreground"}`}>
+                  <p
+                    className={`text-sm font-semibold num`}
+                    style={{
+                      color:
+                        tx.amount >= 0
+                          ? "rgb(var(--mint-deep))"
+                          : "rgb(var(--foreground))",
+                    }}
+                  >
                     {formatNaira(tx.amount)}
                   </p>
                 </div>
@@ -200,46 +449,103 @@ export default function DashboardPage() {
           })}
         </div>
 
-        {/* Desktop: table layout */}
-        <div className="hidden sm:block bg-surface-container rounded-sm overflow-hidden">
-          <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-6 py-3 bg-surface-low">
-            <p className="text-xs font-semibold tracking-[0.05em] text-muted-foreground uppercase">Recipient / Vendor</p>
-            <p className="text-xs font-semibold tracking-[0.05em] text-muted-foreground uppercase">Date</p>
-            <p className="text-xs font-semibold tracking-[0.05em] text-muted-foreground uppercase text-right">Amount</p>
-            <p className="text-xs font-semibold tracking-[0.05em] text-muted-foreground uppercase">Status</p>
-            <p className="text-xs font-semibold tracking-[0.05em] text-muted-foreground uppercase">Action</p>
+        {/* Desktop table */}
+        <div
+          className="hidden sm:block rounded-2xl overflow-hidden shadow-card"
+          style={{ background: "rgb(var(--surface-highest))" }}
+        >
+          <div
+            className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-6 py-3"
+            style={{ background: "rgb(var(--surface))" }}
+          >
+            {["Recipient / Vendor", "Date", "Amount", "Status", "Action"].map(
+              (h) => (
+                <p key={h} className="eyebrow">
+                  {h}
+                </p>
+              ),
+            )}
           </div>
 
           {recentTransactions.map((tx, i) => {
-            const initials = tx.recipient.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+            const initials = tx.recipient
+              .split(" ")
+              .slice(0, 2)
+              .map((w) => w[0])
+              .join("")
+              .toUpperCase();
+            const st = statusConfig[tx.status];
             return (
               <div
                 key={tx.id}
-                className={`grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-6 py-4 items-center hover:bg-surface-low transition-colors ${
-                  i < recentTransactions.length - 1 ? "border-b border-surface-high" : ""
-                }`}
+                className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-6 py-4 items-center transition-colors hover:bg-surface"
+                style={{
+                  borderTop: i > 0 ? "1px solid rgb(var(--border))" : undefined,
+                }}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-9 w-9 rounded-full bg-surface-low flex items-center justify-center shrink-0">
-                    <span className="text-xs font-bold text-primary">{initials}</span>
+                  <div
+                    className="h-9 w-9 rounded-pill flex items-center justify-center shrink-0"
+                    style={{ background: "rgb(var(--soft))" }}
+                  >
+                    <span
+                      className="text-xs font-bold"
+                      style={{ color: "rgb(var(--brand-primary))" }}
+                    >
+                      {initials}
+                    </span>
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{tx.recipient}</p>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider">{tx.category}</p>
+                    <p
+                      className="text-sm font-semibold truncate"
+                      style={{ color: "rgb(var(--foreground))" }}
+                    >
+                      {tx.recipient}
+                    </p>
+                    <p
+                      className="text-xs uppercase tracking-wider"
+                      style={{ color: "rgb(var(--foreground-subtle))" }}
+                    >
+                      {tx.category}
+                    </p>
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm text-foreground">{format(new Date(tx.date), "MMM d, yyyy")}</p>
-                  <p className="text-xs text-muted-foreground">{format(new Date(tx.date), "hh:mm a")}</p>
+                  <p
+                    className="text-sm"
+                    style={{ color: "rgb(var(--foreground))" }}
+                  >
+                    {format(new Date(tx.date), "MMM d, yyyy")}
+                  </p>
+                  <p
+                    className="text-xs"
+                    style={{ color: "rgb(var(--foreground-subtle))" }}
+                  >
+                    {format(new Date(tx.date), "hh:mm a")}
+                  </p>
                 </div>
-                <p className={`text-sm font-semibold text-right ${tx.amount >= 0 ? "text-success" : "text-foreground"}`}>
+                <p
+                  className="text-sm font-semibold num text-right"
+                  style={{
+                    color:
+                      tx.amount >= 0
+                        ? "rgb(var(--mint-deep))"
+                        : "rgb(var(--foreground))",
+                  }}
+                >
                   {formatNaira(tx.amount)}
                 </p>
-                <Badge className={`${statusStyles[tx.status]} rounded-full px-2.5 text-xs border-0 w-fit uppercase tracking-wider`}>
-                  {tx.status}
-                </Badge>
-                <button className="p-1 rounded-sm hover:bg-surface-low transition-colors">
-                  <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                <span
+                  className="px-2.5 py-1 rounded-pill text-xs font-semibold w-fit"
+                  style={{ background: st.bg, color: st.color }}
+                >
+                  {st.label}
+                </span>
+                <button className="p-1 rounded-xl hover:bg-surface">
+                  <MoreVertical
+                    className="h-4 w-4"
+                    style={{ color: "rgb(var(--foreground-subtle))" }}
+                  />
                 </button>
               </div>
             );
