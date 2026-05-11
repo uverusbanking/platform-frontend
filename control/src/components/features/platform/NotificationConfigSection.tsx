@@ -55,7 +55,7 @@ const PROVIDERS_BY_CHANNEL: Record<
   NotificationChannel,
   NotificationProviderType[]
 > = {
-  SMS: ["BULK_SMS_NIGERIA", "MSA", "TERMII", "TWILIO"],
+  SMS: ["BULK_SMS_NIGERIA", "AFRICAS_TALKING", "MSA", "TERMII", "TWILIO"],
   EMAIL: ["SENDGRID", "MAILGUN", "SMTP"],
   WHATSAPP: ["MSA", "META_CLOUD"],
   PUSH: ["FIREBASE"],
@@ -63,6 +63,7 @@ const PROVIDERS_BY_CHANNEL: Record<
 
 const PROVIDER_LABELS: Record<NotificationProviderType, string> = {
   BULK_SMS_NIGERIA: "BulkSMS Nigeria",
+  AFRICAS_TALKING: "Africa's Talking",
   MSA: "MyServiceAgent",
   TERMII: "Termii",
   TWILIO: "Twilio",
@@ -96,15 +97,22 @@ function ConfigDialog({ orgId, existing, open, onClose }: ConfigDialogProps) {
   );
   const [apiKey, setApiKey] = useState("");
   const [senderId, setSenderId] = useState(existing?.metadata?.sender_id ?? "");
+  const [atUsername, setAtUsername] = useState(
+    existing?.metadata?.username ?? "",
+  );
 
   const availableProviders = PROVIDERS_BY_CHANNEL[channel];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const meta: Record<string, string> = {};
+    if (senderId) meta.sender_id = senderId;
+    if (providerType === "AFRICAS_TALKING" && atUsername)
+      meta.username = atUsername;
     const payload: IUpsertNotificationConfigPayload = {
       provider_type: providerType,
       ...(apiKey ? { api_key: apiKey } : {}),
-      ...(senderId ? { metadata: { sender_id: senderId } } : {}),
+      ...(Object.keys(meta).length ? { metadata: meta } : {}),
     };
     mutate(
       { channel, payload },
@@ -198,6 +206,24 @@ function ConfigDialog({ orgId, existing, open, onClose }: ConfigDialogProps) {
               required={!isEdit}
             />
           </div>
+
+          {providerType === "AFRICAS_TALKING" && (
+            <div className="space-y-1.5">
+              <Label>
+                Username
+                <span className="ml-1 text-xs font-normal text-muted-foreground">
+                  (Africa&apos;s Talking account username)
+                </span>
+              </Label>
+              <Input
+                placeholder='e.g. myapp (or "sandbox" for testing)'
+                value={atUsername}
+                onChange={(e) => setAtUsername(e.target.value)}
+                className="rounded-xl"
+                required={providerType === "AFRICAS_TALKING" && !isEdit}
+              />
+            </div>
+          )}
 
           <div className="space-y-1.5">
             <Label>

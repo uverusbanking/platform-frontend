@@ -12,6 +12,7 @@ export type NotificationChannel = "SMS" | "EMAIL" | "WHATSAPP" | "PUSH";
 export type NotificationProviderType =
   | "MSA"
   | "BULK_SMS_NIGERIA"
+  | "AFRICAS_TALKING"
   | "TERMII"
   | "TWILIO"
   | "SENDGRID"
