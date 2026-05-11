@@ -90,3 +90,25 @@ export interface IGetFrozenFundsResponse {
     totalPages: number;
   };
 }
+
+export const WALLET_FREEZE_REASONS = [
+  "AML_REVIEW",
+  "KYC_INCOMPLETE",
+  "NFIU_REQUEST",
+  "COURT_ORDER",
+  "SUSPECTED_FRAUD",
+  "USER_REQUEST",
+  "PARTNER_BANK_DIRECTIVE",
+] as const;
+
+export type TWalletFreezeReason = (typeof WALLET_FREEZE_REASONS)[number];
+
+export interface IFreezeWalletPayload {
+  reason: TWalletFreezeReason;
+  transfer: boolean;
+  funding: boolean;
+}
+
+export interface IUnfreezeWalletPayload {
+  justification: string;
+}

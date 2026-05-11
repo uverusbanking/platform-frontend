@@ -291,7 +291,11 @@ export default function Customers() {
                     <SelectItem value="all">All Statuses</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="blocked">Blocked</SelectItem>
+                    <SelectItem value="frozen">Frozen</SelectItem>
+                    <SelectItem value="suspended">Suspended</SelectItem>
+                    <SelectItem value="restricted">Restricted</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="closed">Closed</SelectItem>
                   </SelectContent>
                 </Select>
                 {/* <Select
@@ -426,7 +430,7 @@ export default function Customers() {
                           </span>
                         </TableCell>
                         <TableCell>
-                          {StatusBadge({ status: customer.status })}
+                          <StatusBadge status={customer.user_status} />
                         </TableCell>
                         <TableCell className="text-muted-foreground font-medium text-xs whitespace-nowrap">
                           {new Date(customer.created_at).toLocaleDateString(
