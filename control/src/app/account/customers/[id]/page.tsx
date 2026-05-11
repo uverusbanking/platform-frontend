@@ -29,12 +29,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useGetPlatformCustomerWallets } from "@/hooks/endpoints/useWallet";
 import { useUserStore } from "@/state/userStore";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -50,6 +45,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { FreezeCustomerDialog } from "@/components/features/customers/FreezeCustomerDialog";
 import { UnFreezeCustomerDialog } from "@/components/features/customers/UnFreezeCustomerDialog";
+import { FreezeWalletDialog } from "@/components/features/customers/FreezeWalletDialog";
+import { UnfreezeWalletDialog } from "@/components/features/customers/UnfreezeWalletDialog";
 import { TransactionDetailModal } from "@/components/features/transactions/TransactionDetailModal";
 import {
   Carousel,
@@ -64,21 +61,34 @@ import { PERMISSIONS } from "@/auth/permissions";
 import { useGetCustomerById } from "@/hooks/queries/useCustomerQueries";
 import { useGetPlatformCustomerTransactions } from "@/hooks/queries/useTransactionQueries";
 
-
 export default function CustomerDetailPage() {
   const { id = "" } = useParams<{ id: string }>();
   const [showFreezeDialog, setShowFreezeDialog] = useState(false);
   const [showUnfreezeDialog, setShowUnfreezeDialog] = useState(false);
   const [activeWalletIdx, setActiveWalletIdx] = useState(0);
+  const [walletFreezeTarget, setWalletFreezeTarget] = useState<{
+    id: string;
+    accountNumber: string;
+  } | null>(null);
+  const [walletUnfreezeTarget, setWalletUnfreezeTarget] = useState<{
+    id: string;
+    accountNumber: string;
+  } | null>(null);
   const { data: customerResponse, isLoading } = useGetCustomerById(id);
   const customer = customerResponse?.data;
 
-  const statusValue = String(customer?.status ?? "").toLowerCase();
+  const statusValue = String(customer?.user_status ?? "").toLowerCase();
   const isFrozen = statusValue === "frozen";
   const statusClassMap = {
     active: "bg-success/10 text-success border-success/20",
     frozen: "bg-destructive/10 text-destructive border-destructive/20",
     blocked: "bg-destructive/10 text-destructive border-destructive/20",
+    suspended: "bg-destructive/10 text-destructive border-destructive/20",
+    inactive: "bg-muted/40 text-muted-foreground border-border/40",
+    closed: "bg-muted/40 text-muted-foreground border-border/40",
+    archived: "bg-muted/40 text-muted-foreground border-border/40",
+    pending: "bg-warning/10 text-warning border-warning/20",
+    restricted: "bg-warning/10 text-warning border-warning/20",
   } as const;
   const statusBadgeClass =
     statusValue in statusClassMap
@@ -146,7 +156,7 @@ export default function CustomerDetailPage() {
                 <Badge
                   className={`${statusBadgeClass}  font-black uppercase text-[10px] px-3 py-1 rounded-full backdrop-blur-sm`}
                 >
-                  {customer.status}
+                  {customer.user_status}
                 </Badge>
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-muted-foreground font-medium">
@@ -246,6 +256,28 @@ export default function CustomerDetailPage() {
         open={showUnfreezeDialog}
         onOpenChange={setShowUnfreezeDialog}
       />
+      {walletFreezeTarget && (
+        <FreezeWalletDialog
+          walletId={walletFreezeTarget.id}
+          customerId={customer.id}
+          accountNumber={walletFreezeTarget.accountNumber}
+          open={!!walletFreezeTarget}
+          onOpenChange={(open) => {
+            if (!open) setWalletFreezeTarget(null);
+          }}
+        />
+      )}
+      {walletUnfreezeTarget && (
+        <UnfreezeWalletDialog
+          walletId={walletUnfreezeTarget.id}
+          customerId={customer.id}
+          accountNumber={walletUnfreezeTarget.accountNumber}
+          open={!!walletUnfreezeTarget}
+          onOpenChange={(open) => {
+            if (!open) setWalletUnfreezeTarget(null);
+          }}
+        />
+      )}
 
       <div className="grid lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Stats and Info */}
@@ -337,15 +369,23 @@ export default function CustomerDetailPage() {
                     ];
                     const gradient = gradients[idx % gradients.length];
                     const balanceNum = parseFloat(wallet.balance || "0");
-                    const isFrozenWallet = wallet.is_transfer_frozen || wallet.is_funding_frozen;
+                    const isFrozenWallet =
+                      wallet.is_transfer_frozen || wallet.is_funding_frozen;
 
                     return (
-                      <CarouselItem key={wallet.id} className="pl-4 basis-[85%] md:basis-[48%]">
+                      <CarouselItem
+                        key={wallet.id}
+                        className="pl-4 basis-[85%] md:basis-[48%]"
+                      >
                         <div className="relative group/card h-full">
                           {/* Glow */}
-                          <div className={`absolute -inset-1 bg-gradient-to-br ${gradient} rounded-3xl blur-md opacity-20 group-hover/card:opacity-30 transition-opacity duration-500`} />
+                          <div
+                            className={`absolute -inset-1 bg-gradient-to-br ${gradient} rounded-3xl blur-md opacity-20 group-hover/card:opacity-30 transition-opacity duration-500`}
+                          />
 
-                          <div className={`relative h-full bg-gradient-to-br ${gradient} rounded-2xl p-6 shadow-xl overflow-hidden text-white flex flex-col justify-between`}>
+                          <div
+                            className={`relative h-full bg-gradient-to-br ${gradient} rounded-2xl p-6 shadow-xl overflow-hidden text-white flex flex-col justify-between`}
+                          >
                             {/* Background circles */}
                             <div className="absolute inset-0 pointer-events-none">
                               <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full border-2 border-white/10" />
@@ -363,8 +403,64 @@ export default function CustomerDetailPage() {
                                 </div>
                               </div>
                               <div className="flex flex-col items-end gap-1.5">
-                                <div className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${wallet.status === "ACTIVE" ? "bg-white/20" : "bg-white/10 text-white/50"}`}>
-                                  {wallet.status}
+                                <div className="flex items-center gap-1.5">
+                                  <div
+                                    className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${wallet.status === "ACTIVE" ? "bg-white/20" : "bg-white/10 text-white/50"}`}
+                                  >
+                                    {wallet.status}
+                                  </div>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <button
+                                        className="p-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <svg
+                                          className="w-3 h-3 text-white"
+                                          fill="currentColor"
+                                          viewBox="0 0 20 20"
+                                        >
+                                          <circle cx="4" cy="10" r="1.5" />
+                                          <circle cx="10" cy="10" r="1.5" />
+                                          <circle cx="16" cy="10" r="1.5" />
+                                        </svg>
+                                      </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                      align="end"
+                                      className="w-48 p-1.5 rounded-xl"
+                                    >
+                                      {isFrozenWallet ? (
+                                        <DropdownMenuItem
+                                          className="rounded-lg gap-2 text-xs font-bold cursor-pointer text-primary"
+                                          onClick={() =>
+                                            setWalletUnfreezeTarget({
+                                              id: wallet.id,
+                                              accountNumber:
+                                                wallet.account_number,
+                                            })
+                                          }
+                                        >
+                                          <Snowflake className="w-3.5 h-3.5" />
+                                          Unfreeze Wallet
+                                        </DropdownMenuItem>
+                                      ) : (
+                                        <DropdownMenuItem
+                                          className="rounded-lg gap-2 text-xs font-bold cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/5"
+                                          onClick={() =>
+                                            setWalletFreezeTarget({
+                                              id: wallet.id,
+                                              accountNumber:
+                                                wallet.account_number,
+                                            })
+                                          }
+                                        >
+                                          <Snowflake className="w-3.5 h-3.5" />
+                                          Freeze Wallet
+                                        </DropdownMenuItem>
+                                      )}
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                 </div>
                                 {isFrozenWallet && (
                                   <div className="flex items-center gap-1 bg-white/10 text-white/70 text-[8px] font-bold px-1.5 py-0.5 rounded-full">
@@ -381,7 +477,10 @@ export default function CustomerDetailPage() {
                                 <div className="w-8 h-6 rounded-md bg-gradient-to-br from-yellow-300/60 to-amber-400/60 shadow-inner" />
                               </div>
                               <div className="font-mono text-lg font-bold tracking-[0.2em] text-white/90">
-                                {wallet.account_number.replace(/(\d{4})(?=\d)/g, "$1 ")}
+                                {wallet.account_number.replace(
+                                  /(\d{4})(?=\d)/g,
+                                  "$1 ",
+                                )}
                               </div>
                             </div>
 
@@ -392,12 +491,20 @@ export default function CustomerDetailPage() {
                                   Available Balance
                                 </div>
                                 <div className="text-2xl font-black tracking-tight">
-                                  {wallet.currency} {balanceNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                  {wallet.currency}{" "}
+                                  {balanceNum.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })}
                                 </div>
                               </div>
                               <div className="text-right">
-                                <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-0.5">Bank</div>
-                                <div className="text-xs font-black text-white/80">{wallet.bank_name}</div>
+                                <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-0.5">
+                                  Bank
+                                </div>
+                                <div className="text-xs font-black text-white/80">
+                                  {wallet.bank_name}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -449,7 +556,6 @@ export default function CustomerDetailPage() {
             <TabsContent value="activity">
               <CustomerActivityTab customerId={id} />
             </TabsContent>
-
 
             <TabsContent
               value="documents"
@@ -823,7 +929,9 @@ export default function CustomerDetailPage() {
 }
 
 function HistoryTab({ customerId }: { customerId: string }) {
-  const [typeFilter, setTypeFilter] = useState<"ALL" | "CREDIT" | "DEBIT">("ALL");
+  const [typeFilter, setTypeFilter] = useState<"ALL" | "CREDIT" | "DEBIT">(
+    "ALL",
+  );
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
 
@@ -833,7 +941,10 @@ function HistoryTab({ customerId }: { customerId: string }) {
     ...(typeFilter !== "ALL" ? { type: typeFilter as "CREDIT" | "DEBIT" } : {}),
   };
 
-  const { data, isLoading } = useGetPlatformCustomerTransactions(customerId, filters);
+  const { data, isLoading } = useGetPlatformCustomerTransactions(
+    customerId,
+    filters,
+  );
 
   const transactions = data?.data ?? [];
   const meta = data?.meta;
@@ -867,19 +978,28 @@ function HistoryTab({ customerId }: { customerId: string }) {
             )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 text-xs font-bold gap-1.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs font-bold gap-1.5"
+                >
                   {filterLabels[typeFilter]}
                   <ChevronRight className="w-3 h-3 rotate-90" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-36">
-                <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground">Filter by type</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Filter by type
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {(["ALL", "CREDIT", "DEBIT"] as const).map((t) => (
                   <DropdownMenuItem
                     key={t}
                     className={`text-xs font-bold ${typeFilter === t ? "text-primary" : ""}`}
-                    onClick={() => { setTypeFilter(t); setPage(1); }}
+                    onClick={() => {
+                      setTypeFilter(t);
+                      setPage(1);
+                    }}
                   >
                     {filterLabels[t]}
                   </DropdownMenuItem>
@@ -940,9 +1060,33 @@ function HistoryTab({ customerId }: { customerId: string }) {
                         }`}
                       >
                         {isCredit ? (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M12 4v16m8-8H4"
+                            />
+                          </svg>
                         ) : (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" /></svg>
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M20 12H4"
+                            />
+                          </svg>
                         )}
                       </div>
                       <div className="flex flex-col gap-0.5 min-w-0">
@@ -953,11 +1097,14 @@ function HistoryTab({ customerId }: { customerId: string }) {
                           <span className="font-mono">{tx.reference}</span>
                           <span>·</span>
                           <span>
-                            {new Date(tx.createdAt).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
+                            {new Date(tx.createdAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              },
+                            )}
                           </span>
                         </div>
                       </div>
@@ -1017,15 +1164,17 @@ function HistoryTab({ customerId }: { customerId: string }) {
                 </Button>
               </div>
             )}
-            
           </div>
         )}
-        <Link to={`/account/customers/${customerId}/transactions`} className="block w-full">
-              <Button className="w-full gap-2 font-bold" size="sm">
-                View More
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </Link>
+        <Link
+          to={`/account/customers/${customerId}/transactions`}
+          className="block w-full"
+        >
+          <Button className="w-full gap-2 font-bold" size="sm">
+            View More
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </Link>
       </Card>
     </TabsContent>
   );

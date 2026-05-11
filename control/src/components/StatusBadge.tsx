@@ -13,7 +13,7 @@ export const StatusBadge = ({
     case "ACTIVE":
       return (
         <Badge
-          className="bg-success/10 text-success border-success/20 hover:bg-success/20 transition-colors font-medium capitalize"
+          className="bg-success/10 text-success border-success/20 hover:bg-success/20 transition-colors font-bold capitalize"
           variant={variant}
         >
           Active
@@ -22,24 +22,46 @@ export const StatusBadge = ({
     case "PENDING":
       return (
         <Badge
-          className="bg-warning/10 text-warning border-warning/20 hover:bg-warning/20 transition-colors font-medium capitalize"
+          className="bg-warning/10 text-warning border-warning/20 hover:bg-warning/20 transition-colors font-bold capitalize"
           variant={variant}
         >
           Pending
         </Badge>
       );
-    case "BLOCKED":
+    case "RESTRICTED":
       return (
         <Badge
-          className="bg-error/10 text-error border-error/20 hover:bg-error/20 transition-colors font-medium capitalize"
+          className="bg-warning/10 text-warning border-warning/20 hover:bg-warning/20 transition-colors font-bold capitalize"
           variant={variant}
         >
-          Blocked
+          Restricted
+        </Badge>
+      );
+    case "BLOCKED":
+    case "SUSPENDED":
+    case "FROZEN":
+      return (
+        <Badge
+          className="bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20 transition-colors font-bold capitalize"
+          variant={variant}
+        >
+          {status.toLowerCase()}
+        </Badge>
+      );
+    case "INACTIVE":
+    case "CLOSED":
+    case "ARCHIVED":
+      return (
+        <Badge
+          className="bg-muted text-muted-foreground border-border hover:bg-muted/80 transition-colors font-bold capitalize"
+          variant={variant}
+        >
+          {status.toLowerCase()}
         </Badge>
       );
     default:
       return (
-        <Badge variant={variant} className="font-medium capitalize">
+        <Badge variant={variant} className="font-bold capitalize">
           {status || "Unknown"}
         </Badge>
       );
