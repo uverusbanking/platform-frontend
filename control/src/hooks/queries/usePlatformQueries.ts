@@ -6,12 +6,22 @@ import {
   upsertPlatformNotificationConfig,
   removePlatformNotificationConfig,
   getPlatformNotificationBalance,
+  getPlatformAuditLogs,
+  getPlatformAuditLogDetail,
   type NotificationChannel,
   type INotificationConfig,
   type IUpsertNotificationConfigPayload,
   type INotificationBalance,
 } from "@/hooks/endpoints/usePlatform";
-import { getPlatformCustomerWallets as getPlatformCustomerWalletsList } from "@/hooks/endpoints/usePlatform";
+import {
+  getPlatformCustomerWallets as getPlatformCustomerWalletsList,
+  getFrozenFunds,
+} from "@/hooks/endpoints/usePlatform";
+import type {
+  IGetAuditLogsFilters,
+  IAuditLogsResponse,
+  IAuditLog,
+} from "@/types/activity.types";
 import { getOrganisations } from "@/hooks/endpoints/useOrganisation";
 import { IRole } from "@/types/user.types";
 import {
@@ -110,5 +120,21 @@ export const useGetPlatformNotificationBalance = (
     queryFn: () => getPlatformNotificationBalance(channel),
     enabled,
     staleTime: 1000 * 60 * 2,
+  });
+};
+
+export const useGetPlatformAuditLogs = (filters: IGetAuditLogsFilters) => {
+  return useQuery<IAuditLogsResponse, TError>({
+    queryKey: [QUERY_KEYS.PLATFORM.AUDIT_LOGS, filters],
+    queryFn: () => getPlatformAuditLogs(filters),
+    staleTime: 1000 * 30,
+  });
+};
+
+export const useGetPlatformAuditLogDetail = (id: string) => {
+  return useQuery<IApiResponse<IAuditLog>, TError>({
+    queryKey: [QUERY_KEYS.PLATFORM.AUDIT_LOGS, "detail", id],
+    queryFn: () => getPlatformAuditLogDetail(id),
+    enabled: !!id,
   });
 };

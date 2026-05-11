@@ -1,5 +1,10 @@
 import { IApiResponse } from "@/types/apiResponse.type";
 import { IRole } from "@/types/user.types";
+import type {
+  IGetAuditLogsFilters,
+  IAuditLogsResponse,
+  IAuditLog,
+} from "@/types/activity.types";
 import {
   IGetPlatformCustomerWalletsParams,
   IGetCustomersWalletsResponse,
@@ -113,4 +118,24 @@ export const getRoles = async (
     },
   );
   return response.data.data;
+};
+
+export const getPlatformAuditLogs = async (
+  filters: IGetAuditLogsFilters,
+): Promise<IAuditLogsResponse> => {
+  const { page = 1, limit = 25, ...rest } = filters;
+  const response = await apiClient.get<IAuditLogsResponse>(
+    `/platform/audit-logs`,
+    { params: { skip: (page - 1) * limit, take: limit, ...rest } },
+  );
+  return response.data;
+};
+
+export const getPlatformAuditLogDetail = async (
+  id: string,
+): Promise<IApiResponse<IAuditLog>> => {
+  const response = await apiClient.get<IApiResponse<IAuditLog>>(
+    `/platform/audit-logs/${id}`,
+  );
+  return response.data;
 };

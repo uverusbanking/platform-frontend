@@ -59,6 +59,8 @@ import NotificationSettingsPage from "@/app/account/settings/notifications/page"
 import CustomerActivityListPage from "@/app/account/customers/[id]/activity/page";
 import CustomerActivityDetailPage from "@/app/account/customers/[id]/activity/[activityId]/page";
 import FrozenFundsPage from "@/app/account/wallets/frozen-funds/page";
+import AuditLogsPage from "@/app/account/audit-logs/page";
+import AuditLogDetailPage from "@/app/account/audit-logs/[id]/page";
 
 // 404
 import NotFound from "@/app/not-found";
@@ -218,6 +220,11 @@ export default function App() {
                     <Route
                       path="wallets/frozen-funds"
                       element={<FrozenFundsPage />}
+                    />
+                    <Route path="audit-logs" element={<AuditLogsPage />} />
+                    <Route
+                      path="audit-logs/:id"
+                      element={<AuditLogDetailPage />}
                     />
 
                     <Route path="settings" element={<SettingsLayout />}>

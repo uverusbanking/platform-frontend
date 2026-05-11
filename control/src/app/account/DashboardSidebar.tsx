@@ -14,6 +14,7 @@ import {
   ChevronDown,
   Snowflake,
   Wallet,
+  ScrollText,
 } from "lucide-react";
 import {
   Sidebar,
@@ -141,6 +142,7 @@ const getNavigationItems = (): NavSection[] => [
         url: "/account/notifications",
         icon: Megaphone,
       },
+      { title: "Audit Logs", url: "/account/audit-logs", icon: ScrollText },
       { title: "Reports", url: "/account/reports", icon: BarChart3 },
       { title: "Settings", url: "/account/settings", icon: Settings },
     ],

@@ -21,6 +21,7 @@ export const QUERY_KEYS = {
     CUSTOMER_WALLETS: "platform-customer-wallets",
     NOTIFICATION_CONFIG: "platform-notification-config",
     NOTIFICATION_BALANCE: "platform-notification-balance",
+    AUDIT_LOGS: "platform-audit-logs",
   },
   CUSTOMER: {
     GET_ALL: "customers",
