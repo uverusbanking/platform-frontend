@@ -5,28 +5,24 @@ import { formatCurrency } from "@/lib/currency";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Command, CommandInput, CommandItem } from "@/components/ui/command";
+import Select from "react-select";
+import PageHeader from "@/components/PageHeader";
 import { AppLayout } from "@/components/AppLayout";
 import {
   Loader2,
   User,
   Building2,
   Check,
-  ChevronsUpDown,
+  AlertCircle,
   ArrowRight,
   ArrowLeft,
   Shield,
   Zap,
   Sparkles,
+  Search,
   Send as SendIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { cn } from "@/lib/utils";
 import { EnterPinDialog } from "@/components/TransactionPinDialog";
 import { useUserProfile } from "@/hooks/queries/useUser";
@@ -34,83 +30,13 @@ import { useWallet } from "@/hooks/useWallet";
 import { usePinStatus } from "@/hooks/queries/useSecurity";
 import { useResolveAccount } from "@/hooks/mutations/useTransferMutations";
 import { TransferService } from "@/services/transfer.service";
-import { useBanks } from "@/hooks/queries/useTransfers";
-import { BankListResponseDto } from "@/types";
+import {
+  useBanks,
+  useRecentBeneficiaries,
+  useSavedBeneficiaries,
+} from "@/hooks/queries/useTransfers";
+import { BankListResponseDto, BeneficiaryDto } from "@/types";
 import { BrandConfigService } from "@shared/core";
-
-// Virtualised bank list — logic unchanged
-const BankList = ({
-  banks,
-  loading,
-  selectedCode,
-  onSelect,
-}: {
-  banks: BankListResponseDto[];
-  loading: boolean;
-  selectedCode: string;
-  onSelect: (code: string) => void;
-}) => {
-  const [searchBank, setSearchBank] = useState("");
-  const parentRef = useRef<HTMLDivElement>(null);
-  const filteredBanks = banks.filter((bank) =>
-    bank.bank_name.toLowerCase().includes(searchBank.toLowerCase()),
-  );
-  const rowVirtualizer = useVirtualizer({
-    count: filteredBanks.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 40,
-    overscan: 5,
-  });
-  return (
-    <Command shouldFilter={false}>
-      <CommandInput
-        placeholder="Search bank..."
-        value={searchBank}
-        onValueChange={setSearchBank}
-      />
-      <div ref={parentRef} className="h-[300px] overflow-y-auto">
-        <div
-          style={{
-            height: `${rowVirtualizer.getTotalSize()}px`,
-            width: "100%",
-            position: "relative",
-          }}
-        >
-          {rowVirtualizer.getVirtualItems().length === 0 && !loading && (
-            <div className="p-4 text-sm text-center text-foreground-subtle w-full absolute top-0">
-              No bank found.
-            </div>
-          )}
-          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-            const bank = filteredBanks[virtualRow.index];
-            return (
-              <CommandItem
-                key={bank.bank_code}
-                value={bank.bank_name}
-                onSelect={() => onSelect(bank.bank_code)}
-                className="absolute top-0 left-0 w-full"
-                style={{
-                  height: `${virtualRow.size}px`,
-                  transform: `translateY(${virtualRow.start}px)`,
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    selectedCode === bank.bank_code
-                      ? "opacity-100"
-                      : "opacity-0",
-                  )}
-                />
-                {bank.bank_name}
-              </CommandItem>
-            );
-          })}
-        </div>
-      </div>
-    </Command>
-  );
-};
 
 type WizardStep = "type" | "recipient" | "amount" | "success";
 
@@ -129,6 +55,19 @@ const Send = () => {
   const { data: pinStatus } = usePinStatus();
   const { mutateAsync: resolveAccount } = useResolveAccount();
 
+  // Beneficiary state & hooks
+  const [beneficiarySearch, setBeneficiarySearch] = useState("");
+  const { data: recentBeneficiaries } = useRecentBeneficiaries({
+    limit: 6,
+    page: 1,
+  });
+  const { data: savedBeneficiaries, isLoading: loadingSaved } =
+    useSavedBeneficiaries({
+      search: beneficiarySearch,
+      page: 1,
+      limit: 20,
+    });
+
   // Form state — unchanged
   const [step, setStep] = useState<WizardStep>("type");
   const [transferType, setTransferType] = useState<"internal" | "bank">("bank");
@@ -143,7 +82,7 @@ const Send = () => {
   const [transactionDetails, setTransactionDetails] = useState<{
     reference?: string;
   } | null>(null);
-  const [openBankSelect, setOpenBankSelect] = useState(false);
+
   const [currentWalletIndex, setCurrentWalletIndex] = useState(0);
 
   const activeWallet = wallets[currentWalletIndex] || initialWallet;
@@ -223,6 +162,14 @@ const Send = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const selectBeneficiary = (b: BeneficiaryDto) => {
+    setAccountNumber(b.account_number);
+    setBankCode(b.bank_code);
+    setAccountName(b.account_name);
+    setTransferType(b.bank_code === "000017" ? "internal" : "bank");
+    toast.success(`Selected ${b.account_name}`);
   };
 
   const isRecipientValid =
@@ -313,7 +260,7 @@ const Send = () => {
       {/* ── 2-col grid ── */}
       <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr] items-start">
         {/* ── Form column ── */}
-        <div>
+        <div className="space-y-5">
           {/* Step: Type */}
           {step === "type" && (
             <div
@@ -385,137 +332,236 @@ const Send = () => {
 
           {/* Step: Recipient */}
           {step === "recipient" && (
-            <div
-              className="rounded-2xl p-6 shadow-card space-y-5"
-              style={{
-                background: "rgb(var(--surface-highest))",
-                border: "1px solid rgb(var(--surface-high))",
-              }}
-            >
-              <div>
-                <h2 className="font-bold text-[22px] tracking-tight mb-1">
-                  Who's getting paid?
-                </h2>
-                <div
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill text-xs font-semibold"
-                  style={{ background: "rgb(var(--surface))" }}
-                >
-                  {transferType === "internal" ? "Internal" : "External"}{" "}
-                  transfer
-                </div>
-              </div>
-
-              {transferType === "bank" && (
-                <div className="space-y-1.5">
-                  <Label className="eyebrow">Select Bank</Label>
-                  <Popover
-                    open={openBankSelect}
-                    onOpenChange={setOpenBankSelect}
+            <>
+              <div
+                className="rounded-2xl p-6 shadow-card space-y-5"
+                style={{
+                  background: "rgb(var(--surface-highest))",
+                  border: "1px solid rgb(var(--surface-high))",
+                }}
+              >
+                <div>
+                  <h2 className="font-bold text-[22px] tracking-tight mb-1">
+                    Enter Manually
+                  </h2>
+                  <div
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill text-xs font-semibold"
+                    style={{ background: "rgb(var(--surface))" }}
                   >
-                    <PopoverTrigger asChild>
-                      <button
-                        className="w-full h-12 flex items-center justify-between px-4 rounded-xl border text-sm font-medium text-left transition-colors hover:bg-surface"
-                        style={{ borderColor: "rgb(var(--border))" }}
-                      >
-                        <span
-                          className={
-                            bankCode
-                              ? "text-foreground"
-                              : "text-foreground-subtle"
-                          }
-                        >
-                          {bankCode
-                            ? banks.find((b) => b.bank_code === bankCode)
-                                ?.bank_name
-                            : "Select a bank"}
-                        </span>
-                        <ChevronsUpDown className="h-4 w-4 text-foreground-subtle" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[var(--radix-popover-trigger-width)] p-0"
-                      align="start"
-                    >
-                      <BankList
-                        banks={banks}
-                        loading={loadingBanks}
-                        selectedCode={bankCode}
-                        onSelect={(code) => {
-                          setBankCode(code);
-                          setOpenBankSelect(false);
+                    {transferType === "internal" ? "Internal" : "External"}{" "}
+                    transfer
+                  </div>
+                </div>
+
+                {transferType === "bank" && (
+                  <div className="space-y-1.5">
+                    <Label className="eyebrow">Select Bank</Label>
+                    <Select
+                      isLoading={loadingBanks}
+                      options={banks.map((b) => ({
+                        value: b.bank_code,
+                        label: b.bank_name,
+                      }))}
+                      value={
+                        bankCode
+                          ? {
+                              value: bankCode,
+                              label:
+                                banks.find((b) => b.bank_code === bankCode)
+                                  ?.bank_name || "",
+                            }
+                          : null
+                      }
+                      onChange={(option) => {
+                        if (option) {
+                          setBankCode(option.value);
                           setAccountName("");
                           if (accountNumber.length === 10)
-                            lookupAccountName(accountNumber, code);
-                        }}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              )}
+                            lookupAccountName(accountNumber, option.value);
+                        }
+                      }}
+                      placeholder="Select a bank"
+                      isSearchable
+                      classNames={{
+                        control: ({ isFocused }) =>
+                          cn(
+                            "flex h-12 w-full rounded-xl border bg-background px-3 py-1 text-sm transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+                            isFocused
+                              ? "ring-2 ring-primary ring-offset-2 border-primary"
+                              : "border-border",
+                          ),
+                        menu: () =>
+                          "mt-2 rounded-xl border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 z-50",
+                        option: ({ isFocused, isSelected }) =>
+                          cn(
+                            "relative flex w-full cursor-default select-none items-center rounded-lg py-2.5 px-3 text-sm outline-none transition-colors",
+                            isSelected
+                              ? "bg-primary text-primary-foreground"
+                              : isFocused
+                                ? "bg-accent text-accent-foreground"
+                                : "text-foreground",
+                          ),
+                        noOptionsMessage: () =>
+                          "py-6 text-center text-sm text-muted-foreground",
+                        loadingIndicator: () => "text-primary",
+                        placeholder: () => "text-muted-foreground",
+                        singleValue: () => "text-foreground",
+                        input: () => "text-foreground",
+                      }}
+                      unstyled
+                    />
+                  </div>
+                )}
 
-              <div className="space-y-1.5">
-                <Label className="eyebrow">Account Number</Label>
-                <div className="relative">
-                  <Input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={10}
-                    placeholder="0000000000"
-                    value={accountNumber}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, "");
-                      setAccountNumber(val);
-                      setAccountName("");
-                      if (val.length === 10) lookupAccountName(val, bankCode);
-                    }}
-                    className="h-12 text-lg font-mono tracking-widest"
-                  />
-                  {lookingUp && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <Loader2
-                        size={18}
-                        className="animate-spin text-brand-primary"
-                      />
-                    </div>
-                  )}
+                <div className="space-y-1.5">
+                  <Label className="eyebrow">Account Number</Label>
+                  <div className="relative">
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={10}
+                      placeholder="0000000000"
+                      value={accountNumber}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "");
+                        setAccountNumber(val);
+                        setAccountName("");
+                        if (val.length === 10) lookupAccountName(val, bankCode);
+                      }}
+                      className="h-12 text-lg font-mono tracking-widest"
+                    />
+                    {lookingUp && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <Loader2
+                          size={18}
+                          className="animate-spin text-brand-primary"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
+
+                {accountName && (
+                  <div
+                    className="flex items-center gap-3 p-4 rounded-xl"
+                    style={{ background: "rgb(var(--mint))" }}
+                  >
+                    <div
+                      className="w-9 h-9 rounded-pill flex items-center justify-center shrink-0"
+                      style={{ background: "rgb(var(--mint-deep))" }}
+                    >
+                      <Check size={16} className="text-white" />
+                    </div>
+                    <div>
+                      <p
+                        className="eyebrow"
+                        style={{ color: "rgb(var(--mint-deep))" }}
+                      >
+                        Verified
+                      </p>
+                      <p className="font-bold text-foreground">{accountName}</p>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  disabled={!isRecipientValid}
+                  onClick={() => setStep("amount")}
+                  className={cn(
+                    "w-full h-13 py-3.5 rounded-pill font-semibold text-base transition-opacity flex items-center justify-center gap-2",
+                    "bg-foreground text-surface-highest",
+                    !isRecipientValid && "opacity-40 cursor-not-allowed",
+                  )}
+                >
+                  Continue <ArrowRight size={16} />
+                </button>
               </div>
 
-              {accountName && (
-                <div
-                  className="flex items-center gap-3 p-4 rounded-xl"
-                  style={{ background: "rgb(var(--mint))" }}
-                >
-                  <div
-                    className="w-9 h-9 rounded-pill flex items-center justify-center shrink-0"
-                    style={{ background: "rgb(var(--mint-deep))" }}
-                  >
-                    <Check size={16} className="text-white" />
-                  </div>
-                  <div>
-                    <p
-                      className="eyebrow"
-                      style={{ color: "rgb(var(--mint-deep))" }}
-                    >
-                      Verified
-                    </p>
-                    <p className="font-bold text-foreground">{accountName}</p>
+              {/* Beneficiary Suggestions */}
+              <div
+                className="rounded-2xl p-6 shadow-card space-y-4"
+                style={{
+                  background: "rgb(var(--surface-highest))",
+                  border: "1px solid rgb(var(--surface-high))",
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-lg tracking-tight">
+                    Suggested Beneficiaries
+                  </h3>
+                  <div className="relative w-40 sm:w-64">
+                    <Search
+                      size={14}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-subtle"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Search saved..."
+                      className="w-full h-9 pl-9 pr-3 rounded-pill bg-surface border-none text-xs focus:ring-1 focus:ring-foreground outline-none"
+                      value={beneficiarySearch}
+                      onChange={(e) => setBeneficiarySearch(e.target.value)}
+                    />
                   </div>
                 </div>
-              )}
 
-              <button
-                disabled={!isRecipientValid}
-                onClick={() => setStep("amount")}
-                className={cn(
-                  "w-full h-13 py-3.5 rounded-pill font-semibold text-base transition-opacity flex items-center justify-center gap-2",
-                  "bg-foreground text-surface-highest",
-                  !isRecipientValid && "opacity-40 cursor-not-allowed",
+                {beneficiarySearch ? (
+                  <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 scrollbar-hide">
+                    {loadingSaved ? (
+                      [1, 2, 3].map((i) => (
+                        <Skeleton key={i} className="h-14 w-full rounded-xl" />
+                      ))
+                    ) : savedBeneficiaries?.data.length === 0 ? (
+                      <p className="text-center py-6 text-sm text-foreground-subtle">
+                        No beneficiaries found for "{beneficiarySearch}"
+                      </p>
+                    ) : (
+                      savedBeneficiaries?.data.map((b) => (
+                        <button
+                          key={b.id}
+                          onClick={() => selectBeneficiary(b)}
+                          className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-surface transition-colors text-left border border-transparent hover:border-surface-high"
+                        >
+                          <div className="w-10 h-10 rounded-pill bg-foreground text-surface-highest flex items-center justify-center font-bold text-xs shrink-0">
+                            {b.account_name.charAt(0)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm truncate">
+                              {b.account_name}
+                            </p>
+                            <p className="text-[11px] text-foreground-subtle truncate">
+                              {b.bank_name} • {b.account_number}
+                            </p>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2">
+                    {recentBeneficiaries?.data.map((b) => (
+                      <button
+                        key={b.id}
+                        onClick={() => selectBeneficiary(b)}
+                        className="flex flex-col items-center gap-2 group shrink-0"
+                      >
+                        <div className="w-14 h-14 rounded-pill bg-surface flex items-center justify-center font-bold text-lg text-foreground transition-all group-hover:scale-105 group-active:scale-95 border border-transparent group-hover:border-foreground/10 shadow-sm relative overflow-hidden">
+                          {b.account_name.charAt(0)}
+                          <div className="absolute inset-0 bg-foreground/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        <span className="text-[11px] font-semibold text-foreground-subtle group-hover:text-foreground truncate w-16 text-center">
+                          {b.account_name.split(" ")[0]}
+                        </span>
+                      </button>
+                    ))}
+                    {recentBeneficiaries?.data.length === 0 && (
+                      <p className="text-xs text-foreground-subtle italic py-2">
+                        No recent beneficiaries yet.
+                      </p>
+                    )}
+                  </div>
                 )}
-              >
-                Continue <ArrowRight size={16} />
-              </button>
-            </div>
+              </div>
+            </>
           )}
 
           {/* Step: Amount */}
@@ -720,116 +766,66 @@ const Send = () => {
                 ))}
               </div>
 
-              <div className="flex gap-3">
-                <button
-                  onClick={() => {
-                    setStep("type");
-                    setAmount("");
-                    setAccountNumber("");
-                    setAccountName("");
-                    setNarration("");
-                    setTransactionDetails(null);
-                  }}
-                  className="flex-1 py-3 rounded-pill text-sm font-semibold transition-colors"
-                  style={{ background: "rgb(var(--surface))" }}
-                >
-                  Send another
-                </button>
+              <div className="flex flex-col gap-2 pt-4">
                 <button
                   onClick={() => navigate("/account/dashboard")}
-                  className="flex-1 py-3 rounded-pill text-sm font-semibold bg-foreground text-surface-highest hover:opacity-90 transition-opacity"
+                  className="w-full py-3 rounded-pill font-bold text-sm bg-foreground text-surface-highest transition-opacity hover:opacity-90"
                 >
-                  Back to dashboard
+                  Return to Home
                 </button>
               </div>
             </div>
           )}
         </div>
 
-        {/* ── Sidebar ── */}
-        <div className="space-y-4">
-          {/* Balance card */}
+        {/* ── Info column ── */}
+        <div className="space-y-5">
           <div
-            className="rounded-2xl p-5"
-            style={{ background: "rgb(var(--foreground))", color: "#fff" }}
-          >
-            <p
-              className="text-xs font-semibold uppercase tracking-[0.14em] mb-1"
-              style={{ opacity: 0.55 }}
-            >
-              Sending from
-            </p>
-            <p className="num text-3xl font-bold mt-1">
-              {formatCurrency(
-                parseFloat(activeWallet?.balance ?? "0"),
-                activeWallet?.currency ?? "NGN",
-              )}
-            </p>
-            <p className="text-sm mt-1" style={{ opacity: 0.6 }}>
-              {activeWallet?.currency ?? "NGN"} wallet ·{" "}
-              {activeWallet?.account_number ?? ""}
-            </p>
-          </div>
-
-          {/* Info card */}
-          <div
-            className="rounded-2xl p-5 shadow-card"
+            className="rounded-2xl p-6 shadow-card"
             style={{
               background: "rgb(var(--surface-highest))",
               border: "1px solid rgb(var(--surface-high))",
             }}
           >
-            <p className="eyebrow mb-2">Why {brand.shortBrandName} is faster</p>
-            <h3 className="font-bold text-base tracking-tight mb-4">
-              Direct rail to NIBSS
-            </h3>
-            {[
-              {
-                icon: <Zap size={13} />,
-                label: "~8s median to other Nigerian banks",
-              },
-              {
-                icon: <Check size={13} />,
-                label: `Free to ${brand.shortBrandName} accounts`,
-              },
-              {
-                icon: <Shield size={13} />,
-                label: "PIN-protected every transfer",
-              },
-            ].map((r) => (
+            <div className="flex items-center gap-3 mb-5">
               <div
-                key={r.label}
-                className="flex items-center gap-3 py-2 text-sm"
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ background: "rgb(var(--surface))" }}
               >
-                <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: "rgb(var(--surface))" }}
-                >
-                  {r.icon}
-                </div>
-                <span>{r.label}</span>
+                <Shield size={20} className="text-brand-primary" />
               </div>
-            ))}
-          </div>
-
-          {/* Tip card */}
-          <div
-            className="rounded-2xl p-5"
-            style={{ background: "rgb(var(--mint))" }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles size={15} />
-              <span className="text-sm font-semibold">Save the ₦25 fee</span>
+              <p className="font-bold text-lg">Safe & Secure</p>
             </div>
-            <p className="text-xs text-foreground/70 leading-relaxed">
-              Ask your recipient if they have a {brand.shortBrandName} account —
-              internal transfers are always free.
-            </p>
+            <ul className="space-y-3">
+              {[
+                {
+                  icon: <Zap size={14} />,
+                  text: "Instant settlement to all banks",
+                },
+                {
+                  icon: <Sparkles size={14} />,
+                  text: "Zero fees on all internal transfers",
+                },
+                {
+                  icon: <AlertCircle size={14} />,
+                  text: "CBN insured and regulated",
+                },
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-3 text-sm">
+                  <span
+                    className="mt-0.5 shrink-0"
+                    style={{ color: "rgb(var(--brand-primary))" }}
+                  >
+                    {item.icon}
+                  </span>
+                  <span className="text-foreground-subtle">{item.text}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
 
-      {/* PIN dialog — unchanged */}
       <EnterPinDialog
         open={verifyOpen}
         onOpenChange={setVerifyOpen}

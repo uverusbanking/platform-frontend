@@ -170,6 +170,7 @@ const TransactionDetail = () => {
     failed: XCircle,
     reversed: RotateCcw,
   }[mappedStatus];
+
   const statusColor = {
     successful: "rgb(var(--mint-deep))",
     pending: "rgb(var(--warning))",
@@ -518,7 +519,7 @@ const TransactionDetail = () => {
               </span>
               <span
                 className={cn(
-                  "text-sm font-medium text-right",
+                  "text-sm font-medium text-right min-w-0 break-all",
                   mono && "font-mono text-xs",
                 )}
               >
@@ -532,13 +533,13 @@ const TransactionDetail = () => {
             <span className="text-foreground-subtle text-sm shrink-0">
               Reference
             </span>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs text-right text-foreground-subtle">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="font-mono text-xs text-right text-foreground-subtle break-all">
                 {transactionData.reference}
               </span>
               <button
                 onClick={copyReference}
-                className="w-7 h-7 rounded-xl flex items-center justify-center transition-colors hover:bg-surface"
+                className="w-7 h-7 rounded-xl flex items-center justify-center transition-colors hover:bg-surface shrink-0"
               >
                 <Copy size={12} className="text-foreground-subtle" />
               </button>
@@ -596,30 +597,10 @@ const TransactionDetail = () => {
                 ) : (
                   <Icon size={15} />
                 )}
-                {label}
+                <span className="hidden sm:inline">{label}</span>
               </button>
             ))}
           </div>
-
-          <button
-            onClick={() => navigate("/account/transactions")}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-pill text-sm font-semibold transition-colors hover:bg-surface"
-            style={{
-              background: "rgb(var(--surface-highest))",
-              border: "1px solid rgb(var(--surface-high))",
-            }}
-          >
-            Back to History
-          </button>
-
-          {!isCredit && mappedStatus === "successful" && (
-            <button
-              onClick={() => navigate("/account/send")}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-pill text-sm font-semibold bg-foreground text-surface-highest hover:opacity-90 transition-opacity"
-            >
-              Send Again
-            </button>
-          )}
         </div>
       </div>
     </AppLayout>

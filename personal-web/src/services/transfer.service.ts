@@ -8,6 +8,9 @@ import type {
   TransactionsResponseDto,
   SingleTransactionResponseDto,
   ApiResponse,
+  PaginationParams,
+  BeneficiaryDto,
+  PaginatedApiResponse,
 } from "@/types";
 
 export const TransferService = {
@@ -45,5 +48,17 @@ export const TransferService = {
   getTransactionDetails: (transactionId: string) =>
     api.get<SingleTransactionResponseDto>(
       `/api/v1/transactions/${transactionId}`,
+    ),
+
+  getRecentBeneficiaries: (params?: PaginationParams) =>
+    api.get<PaginatedApiResponse<BeneficiaryDto>>(
+      "/api/v1/transfers/beneficiaries/recent",
+      { query: params },
+    ),
+
+  getSavedBeneficiaries: (params?: PaginationParams) =>
+    api.get<PaginatedApiResponse<BeneficiaryDto>>(
+      "/api/v1/transfers/beneficiaries/saved",
+      { query: params },
     ),
 };

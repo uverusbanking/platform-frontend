@@ -3,6 +3,8 @@ import { IRole } from "@/types/user.types";
 import {
   IGetPlatformCustomerWalletsParams,
   IGetCustomersWalletsResponse,
+  IGetFrozenFundsParams,
+  IGetFrozenFundsResponse,
 } from "@/types/wallet.types";
 import apiClient from "@/lib/axios";
 
@@ -11,6 +13,16 @@ export const getPlatformCustomerWallets = async (
 ): Promise<IGetCustomersWalletsResponse> => {
   const response = await apiClient.get<IGetCustomersWalletsResponse>(
     `/platform/wallets/customers`,
+    { params },
+  );
+  return response.data;
+};
+
+export const getFrozenFunds = async (
+  params: IGetFrozenFundsParams,
+): Promise<IGetFrozenFundsResponse> => {
+  const response = await apiClient.get<IGetFrozenFundsResponse>(
+    `/platform/wallets/frozen-funds`,
     { params },
   );
   return response.data;

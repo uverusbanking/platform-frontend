@@ -12,6 +12,8 @@ import {
   Settings,
   BarChart3,
   ChevronDown,
+  Snowflake,
+  Wallet,
 } from "lucide-react";
 import {
   Sidebar,
@@ -84,6 +86,21 @@ const getNavigationItems = (): NavSection[] => [
         icon: Users,
       },
       { title: "Platform Users", url: "/account/staff", icon: UserCog },
+    ],
+  },
+  {
+    title: "Wallets",
+    items: [
+      {
+        title: "Customer Wallets",
+        url: "/account/customers/wallets",
+        icon: Wallet,
+      },
+      {
+        title: "Frozen Funds",
+        url: "/account/wallets/frozen-funds",
+        icon: Snowflake,
+      },
     ],
   },
   // {
@@ -229,8 +246,9 @@ export function DashboardSidebar() {
                               <item.icon className="w-5 h-5" />
                               <span className="flex-1">{item.title}</span>
                               <ChevronDown
-                                className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""
-                                  }`}
+                                className={`w-4 h-4 transition-transform ${
+                                  isOpen ? "rotate-180" : ""
+                                }`}
                               />
                             </SidebarMenuButton>
                           </CollapsibleTrigger>

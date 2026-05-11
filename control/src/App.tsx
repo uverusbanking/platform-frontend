@@ -57,6 +57,7 @@ import SettingsSecurityPage from "@/app/account/settings/security/page";
 import SettingsDevelopersPage from "@/app/account/settings/developers_disabled/page";
 import CustomerActivityListPage from "@/app/account/customers/[id]/activity/page";
 import CustomerActivityDetailPage from "@/app/account/customers/[id]/activity/[activityId]/page";
+import FrozenFundsPage from "@/app/account/wallets/frozen-funds/page";
 
 // 404
 import NotFound from "@/app/not-found";
@@ -213,6 +214,10 @@ export default function App() {
                     <Route path="expenses" element={<ExpensesPage />} />
                     <Route path="ussd" element={<UssdPage />} />
                     <Route path="whatsapp" element={<WhatsappPage />} />
+                    <Route
+                      path="wallets/frozen-funds"
+                      element={<FrozenFundsPage />}
+                    />
 
                     <Route path="settings" element={<SettingsLayout />}>
                       <Route

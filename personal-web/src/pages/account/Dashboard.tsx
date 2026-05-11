@@ -116,9 +116,9 @@ const Dashboard = () => {
     <AppLayout>
       {/* ── Header row ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-7">
-        <div>
+        <div className="min-w-0">
           <p className="eyebrow mb-2">{dateLabel}</p>
-          <h1 className="display text-[clamp(26px,3.5vw,44px)] m-0 leading-none">
+          <h1 className="display text-[clamp(20px,5vw,44px)] m-0 leading-none truncate">
             {hourGreeting},{" "}
             <span
               className="serif-italic"
@@ -145,9 +145,9 @@ const Dashboard = () => {
       </div>
 
       {/* ── Main 2-col grid ── */}
-      <div className="grid gap-5 lg:grid-cols-[1.6fr_1fr] items-start">
+      <div className="grid gap-4 sm:gap-5 lg:grid-cols-[1.6fr_1fr] items-start w-full max-w-full overflow-hidden">
         {/* ── Left column ── */}
-        <div className="space-y-5">
+        <div className="space-y-5 min-w-0">
           {/* Balance card */}
           {isLoadingWallet ? (
             <div className="rounded-2xl bg-surface p-7 space-y-4">
@@ -157,7 +157,7 @@ const Dashboard = () => {
             </div>
           ) : (
             <div
-              className="rounded-2xl p-7 relative overflow-hidden"
+              className="rounded-2xl p-5 sm:p-7 relative overflow-hidden shadow-card"
               style={{ background: "rgb(var(--foreground))", color: "#fff" }}
             >
               {/* Red radial blur */}
@@ -199,17 +199,17 @@ const Dashboard = () => {
 
               {/* Balance */}
               <div className="relative flex items-start justify-between mb-6">
-                <div>
+                <div className="min-w-0">
                   <p
                     className="text-xs font-semibold uppercase tracking-[0.14em] mb-2"
                     style={{ opacity: 0.55 }}
                   >
                     Available balance
                   </p>
-                  <div className="flex items-baseline gap-2">
+                  <div className="flex items-baseline gap-2 flex-wrap">
                     <p
                       className={cn(
-                        "num text-5xl sm:text-6xl font-bold leading-none transition-all duration-500",
+                        "num text-[clamp(28px,8vw,60px)] font-bold leading-none transition-all duration-500 break-all",
                         balanceFlash ? "text-mint" : "text-white",
                       )}
                     >
@@ -231,13 +231,13 @@ const Dashboard = () => {
                   {/* Account number chip */}
                   {activeWallet?.account_number && (
                     <div
-                      className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-pill text-xs font-medium"
+                      className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-pill text-xs font-medium max-w-full"
                       style={{ background: "rgba(255,255,255,0.1)" }}
                     >
-                      <span style={{ opacity: 0.6 }}>
+                      <span className="truncate opacity-60">
                         {activeWallet.bank_name || "Virtual"}
                       </span>
-                      <span className="num font-semibold">
+                      <span className="num font-semibold shrink-0">
                         {formatAccountNumber(activeWallet.account_number)}
                       </span>
                       <button
@@ -247,7 +247,7 @@ const Dashboard = () => {
                           );
                           toast.success("Account number copied!");
                         }}
-                        className="hover:opacity-70 transition-opacity"
+                        className="hover:opacity-70 transition-opacity shrink-0"
                       >
                         <Copy size={12} />
                       </button>
@@ -265,7 +265,7 @@ const Dashboard = () => {
               </div>
 
               {/* 4-action grid */}
-              <div className="relative grid grid-cols-4 gap-2.5">
+              <div className="relative grid grid-cols-4 gap-2 sm:gap-2.5">
                 {[
                   { icon: Send, label: "Send", path: "/account/send" },
                   { icon: QrCode, label: "Receive", path: "/account/receive" },
@@ -283,7 +283,7 @@ const Dashboard = () => {
                   <button
                     key={a.path}
                     onClick={() => navigate(a.path)}
-                    className="flex flex-col items-start gap-3 p-3 rounded-[18px] transition-colors text-left"
+                    className="flex flex-col items-start gap-3 p-3 rounded-[18px] transition-colors text-left group"
                     style={{ background: "rgba(255,255,255,0.08)" }}
                     onMouseEnter={(e) =>
                       (e.currentTarget.style.background =
@@ -295,7 +295,7 @@ const Dashboard = () => {
                     }
                   >
                     <div
-                      className="w-8 h-8 rounded-pill flex items-center justify-center"
+                      className="w-8 h-8 rounded-pill flex items-center justify-center transition-transform group-active:scale-90"
                       style={{
                         background: "#fff",
                         color: "rgb(var(--foreground))",
@@ -303,7 +303,7 @@ const Dashboard = () => {
                     >
                       <a.icon size={14} strokeWidth={2.5} />
                     </div>
-                    <span className="text-[12px] font-semibold leading-tight">
+                    <span className="text-[12px] font-semibold leading-tight truncate w-full">
                       {a.label}
                     </span>
                   </button>
@@ -374,7 +374,7 @@ const Dashboard = () => {
         </div>
 
         {/* ── Right column ── */}
-        <div className="space-y-5">
+        <div className="space-y-5 min-w-0">
           {/* Mini stats */}
           <div className="grid grid-cols-2 gap-3">
             <StatCard
