@@ -55,3 +55,38 @@ export interface IGetPlatformCustomerWalletsParams {
   status?: string;
   organisation_id?: string;
 }
+
+export interface IFrozenFundEntry {
+  id: string;
+  customer_id: string;
+  customer_name: string;
+  customer_email: string;
+  account_number: string;
+  currency: string;
+  balance: string;
+  hold_balance: string;
+  is_transfer_frozen: boolean;
+  is_funding_frozen: boolean;
+  status: string;
+  organisation?: {
+    id: string;
+    organisation_name: string;
+  };
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IGetFrozenFundsParams {
+  page?: number;
+  limit?: number;
+}
+
+export interface IGetFrozenFundsResponse {
+  data: IFrozenFundEntry[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}

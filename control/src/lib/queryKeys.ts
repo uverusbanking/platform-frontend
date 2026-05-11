@@ -35,6 +35,7 @@ export const QUERY_KEYS = {
   WALLET: {
     GET_ALL: "wallets",
     CUSTOMER_WALLETS: "customer-wallets",
+    FROZEN_FUNDS: "platform-frozen-funds",
   },
   AUTH: {
     ENCRYPTION_PUBLIC_KEY: "encryption-public-key",

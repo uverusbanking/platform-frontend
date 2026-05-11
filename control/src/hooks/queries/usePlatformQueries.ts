@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { TError } from "@/types/apiResponse.type";
-import {
-  getRoles,
-} from "@/hooks/endpoints/usePlatform";
+import { getRoles, getFrozenFunds } from "@/hooks/endpoints/usePlatform";
 import { getPlatformCustomerWallets as getPlatformCustomerWalletsList } from "@/hooks/endpoints/usePlatform";
 import { getOrganisations } from "@/hooks/endpoints/useOrganisation";
 import { IRole } from "@/types/user.types";
@@ -13,6 +11,8 @@ import {
 import {
   IGetPlatformCustomerWalletsParams,
   IGetCustomersWalletsResponse,
+  IGetFrozenFundsParams,
+  IGetFrozenFundsResponse,
 } from "@/types/wallet.types";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 
@@ -33,6 +33,14 @@ export const useGetOrganisations = (
     queryKey: [QUERY_KEYS.PLATFORM.ORGANISATIONS, params],
     queryFn: () => getOrganisations(params),
     staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+};
+
+export const useGetFrozenFunds = (params: IGetFrozenFundsParams) => {
+  return useQuery<IGetFrozenFundsResponse, TError>({
+    queryKey: [QUERY_KEYS.WALLET.FROZEN_FUNDS, params],
+    queryFn: () => getFrozenFunds(params),
+    staleTime: 1000 * 60 * 2,
   });
 };
 

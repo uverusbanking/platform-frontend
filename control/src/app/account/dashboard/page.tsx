@@ -1,8 +1,13 @@
 "use client";
 
+import { useNavigate } from "react-router-dom";
 import { KPICard } from "@/components/features/dashboard/KPICard";
 import { useGetOrganisationStatistics } from "@/hooks/queries/useOrganisationQueries";
+import { useGetFrozenFunds } from "@/hooks/queries/usePlatformQueries";
 import { KPICardSkeleton } from "@/components/features/dashboard/KPICardSkeleton";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 // import { AnalyticsChart } from "@/components/features/dashboard/AnalyticsChart";
 import {
   Wallet,
@@ -10,6 +15,10 @@ import {
   TrendingDown,
   Users,
   Building2,
+  Snowflake,
+  Lock,
+  ArrowUpDown,
+  ArrowRight,
 } from "lucide-react";
 
 // Sample data for demonstration
@@ -32,10 +41,15 @@ import {
 // ];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { data: platformStats, isLoading: platformStatsLoading } =
     useGetOrganisationStatistics();
+  const { data: frozenFundsData, isLoading: frozenFundsLoading } =
+    useGetFrozenFunds({ page: 1, limit: 5 });
 
   const stats = platformStats?.data;
+  const frozenEntries = frozenFundsData?.data || [];
+  const frozenMeta = frozenFundsData?.meta;
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
@@ -142,6 +156,81 @@ export default function Dashboard() {
           /> */}
         </div>
       )}
+
+      {/* Frozen Funds Summary */}
+      <Card className="border-none shadow-premium bg-blue-500/5 backdrop-blur-md overflow-hidden">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <Snowflake className="w-5 h-5 text-blue-500" />
+              </div>
+              <div>
+                <p className="font-black text-base">Frozen Funds</p>
+                <p className="text-xs text-muted-foreground">
+                  {frozenFundsLoading
+                    ? "Loading…"
+                    : `${frozenMeta?.total ?? 0} frozen wallet${(frozenMeta?.total ?? 0) !== 1 ? "s" : ""} platform-wide`}
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/account/wallets/frozen-funds")}
+              className="rounded-xl font-bold gap-2"
+            >
+              View All <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+
+          {frozenFundsLoading ? (
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full rounded-xl" />
+              ))}
+            </div>
+          ) : frozenEntries.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
+              <Snowflake className="w-8 h-8 opacity-20" />
+              <p className="text-sm font-bold">No frozen wallets</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {frozenEntries.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="flex items-center justify-between rounded-xl bg-muted/20 px-4 py-3 hover:bg-muted/40 transition-colors cursor-pointer"
+                  onClick={() =>
+                    navigate(`/account/customers/${entry.customer_id}`)
+                  }
+                >
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-bold text-sm truncate">
+                      {entry.customer_name}
+                    </span>
+                    <span className="text-xs text-muted-foreground font-mono">
+                      {entry.account_number}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 ml-4">
+                    {entry.is_transfer_frozen && (
+                      <div className="flex items-center gap-1 text-[11px] font-bold text-orange-600 bg-orange-500/10 px-2 py-0.5 rounded-lg">
+                        <ArrowUpDown className="w-3 h-3" /> Transfer
+                      </div>
+                    )}
+                    {entry.is_funding_frozen && (
+                      <div className="flex items-center gap-1 text-[11px] font-bold text-red-600 bg-red-500/10 px-2 py-0.5 rounded-lg">
+                        <Lock className="w-3 h-3" /> Funding
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Charts */}
       {/* <AnalyticsChart
