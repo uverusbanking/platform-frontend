@@ -19,6 +19,7 @@ import {
   Shield,
   Zap,
   Sparkles,
+  Search,
   Send as SendIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -29,8 +30,12 @@ import { useWallet } from "@/hooks/useWallet";
 import { usePinStatus } from "@/hooks/queries/useSecurity";
 import { useResolveAccount } from "@/hooks/mutations/useTransferMutations";
 import { TransferService } from "@/services/transfer.service";
-import { useBanks } from "@/hooks/queries/useTransfers";
-import { BankListResponseDto } from "@/types";
+import {
+  useBanks,
+  useRecentBeneficiaries,
+  useSavedBeneficiaries,
+} from "@/hooks/queries/useTransfers";
+import { BankListResponseDto, BeneficiaryDto } from "@/types";
 import { BrandConfigService } from "@shared/core";
 
 type WizardStep = "type" | "recipient" | "amount" | "success";
@@ -49,6 +54,19 @@ const Send = () => {
   const { wallets, wallet: initialWallet, isLoadingWallet } = useWallet();
   const { data: pinStatus } = usePinStatus();
   const { mutateAsync: resolveAccount } = useResolveAccount();
+
+  // Beneficiary state & hooks
+  const [beneficiarySearch, setBeneficiarySearch] = useState("");
+  const { data: recentBeneficiaries } = useRecentBeneficiaries({
+    limit: 6,
+    page: 1,
+  });
+  const { data: savedBeneficiaries, isLoading: loadingSaved } =
+    useSavedBeneficiaries({
+      search: beneficiarySearch,
+      page: 1,
+      limit: 20,
+    });
 
   // Form state — unchanged
   const [step, setStep] = useState<WizardStep>("type");
@@ -146,6 +164,14 @@ const Send = () => {
     }
   };
 
+  const selectBeneficiary = (b: BeneficiaryDto) => {
+    setAccountNumber(b.account_number);
+    setBankCode(b.bank_code);
+    setAccountName(b.account_name);
+    setTransferType(b.bank_code === "000017" ? "internal" : "bank");
+    toast.success(`Selected ${b.account_name}`);
+  };
+
   const isRecipientValid =
     accountNumber.length === 10 && !!accountName && !lookingUp;
 
@@ -234,7 +260,7 @@ const Send = () => {
       {/* ── 2-col grid ── */}
       <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr] items-start">
         {/* ── Form column ── */}
-        <div>
+        <div className="space-y-5">
           {/* Step: Type */}
           {step === "type" && (
             <div
@@ -306,149 +332,236 @@ const Send = () => {
 
           {/* Step: Recipient */}
           {step === "recipient" && (
-            <div
-              className="rounded-2xl p-6 shadow-card space-y-5"
-              style={{
-                background: "rgb(var(--surface-highest))",
-                border: "1px solid rgb(var(--surface-high))",
-              }}
-            >
-              <div>
-                <h2 className="font-bold text-[22px] tracking-tight mb-1">
-                  Who's getting paid?
-                </h2>
-                <div
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill text-xs font-semibold"
-                  style={{ background: "rgb(var(--surface))" }}
-                >
-                  {transferType === "internal" ? "Internal" : "External"}{" "}
-                  transfer
-                </div>
-              </div>
-
-              {transferType === "bank" && (
-                <div className="space-y-1.5">
-                  <Label className="eyebrow">Select Bank</Label>
-                  <Select
-                    isLoading={loadingBanks}
-                    options={banks.map((b) => ({
-                      value: b.bank_code,
-                      label: b.bank_name,
-                    }))}
-                    value={
-                      bankCode
-                        ? {
-                            value: bankCode,
-                            label:
-                              banks.find((b) => b.bank_code === bankCode)
-                                ?.bank_name || "",
-                          }
-                        : null
-                    }
-                    onChange={(option) => {
-                      if (option) {
-                        setBankCode(option.value);
-                        setAccountName("");
-                        if (accountNumber.length === 10)
-                          lookupAccountName(accountNumber, option.value);
-                      }
-                    }}
-                    placeholder="Select a bank"
-                    isSearchable
-                    classNames={{
-                      control: ({ isFocused }) =>
-                        cn(
-                          "flex h-12 w-full rounded-xl border bg-background px-3 py-1 text-sm transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
-                          isFocused
-                            ? "ring-2 ring-primary ring-offset-2 border-primary"
-                            : "border-border",
-                        ),
-                      menu: () =>
-                        "mt-2 rounded-xl border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 z-50",
-                      option: ({ isFocused, isSelected }) =>
-                        cn(
-                          "relative flex w-full cursor-default select-none items-center rounded-lg py-2.5 px-3 text-sm outline-none transition-colors",
-                          isSelected
-                            ? "bg-primary text-primary-foreground"
-                            : isFocused
-                              ? "bg-accent text-accent-foreground"
-                              : "text-foreground",
-                        ),
-                      noOptionsMessage: () =>
-                        "py-6 text-center text-sm text-muted-foreground",
-                      loadingIndicator: () => "text-primary",
-                      placeholder: () => "text-muted-foreground",
-                      singleValue: () => "text-foreground",
-                      input: () => "text-foreground",
-                    }}
-                    unstyled
-                  />
-                </div>
-              )}
-
-              <div className="space-y-1.5">
-                <Label className="eyebrow">Account Number</Label>
-                <div className="relative">
-                  <Input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={10}
-                    placeholder="0000000000"
-                    value={accountNumber}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, "");
-                      setAccountNumber(val);
-                      setAccountName("");
-                      if (val.length === 10) lookupAccountName(val, bankCode);
-                    }}
-                    className="h-12 text-lg font-mono tracking-widest"
-                  />
-                  {lookingUp && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <Loader2
-                        size={18}
-                        className="animate-spin text-brand-primary"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {accountName && (
-                <div
-                  className="flex items-center gap-3 p-4 rounded-xl"
-                  style={{ background: "rgb(var(--mint))" }}
-                >
-                  <div
-                    className="w-9 h-9 rounded-pill flex items-center justify-center shrink-0"
-                    style={{ background: "rgb(var(--mint-deep))" }}
-                  >
-                    <Check size={16} className="text-white" />
-                  </div>
-                  <div>
-                    <p
-                      className="eyebrow"
-                      style={{ color: "rgb(var(--mint-deep))" }}
-                    >
-                      Verified
-                    </p>
-                    <p className="font-bold text-foreground">{accountName}</p>
-                  </div>
-                </div>
-              )}
-
-              <button
-                disabled={!isRecipientValid}
-                onClick={() => setStep("amount")}
-                className={cn(
-                  "w-full h-13 py-3.5 rounded-pill font-semibold text-base transition-opacity flex items-center justify-center gap-2",
-                  "bg-foreground text-surface-highest",
-                  !isRecipientValid && "opacity-40 cursor-not-allowed",
-                )}
+            <>
+              <div
+                className="rounded-2xl p-6 shadow-card space-y-5"
+                style={{
+                  background: "rgb(var(--surface-highest))",
+                  border: "1px solid rgb(var(--surface-high))",
+                }}
               >
-                Continue <ArrowRight size={16} />
-              </button>
-            </div>
+                <div>
+                  <h2 className="font-bold text-[22px] tracking-tight mb-1">
+                    Enter Manually
+                  </h2>
+                  <div
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill text-xs font-semibold"
+                    style={{ background: "rgb(var(--surface))" }}
+                  >
+                    {transferType === "internal" ? "Internal" : "External"}{" "}
+                    transfer
+                  </div>
+                </div>
+
+                {transferType === "bank" && (
+                  <div className="space-y-1.5">
+                    <Label className="eyebrow">Select Bank</Label>
+                    <Select
+                      isLoading={loadingBanks}
+                      options={banks.map((b) => ({
+                        value: b.bank_code,
+                        label: b.bank_name,
+                      }))}
+                      value={
+                        bankCode
+                          ? {
+                              value: bankCode,
+                              label:
+                                banks.find((b) => b.bank_code === bankCode)
+                                  ?.bank_name || "",
+                            }
+                          : null
+                      }
+                      onChange={(option) => {
+                        if (option) {
+                          setBankCode(option.value);
+                          setAccountName("");
+                          if (accountNumber.length === 10)
+                            lookupAccountName(accountNumber, option.value);
+                        }
+                      }}
+                      placeholder="Select a bank"
+                      isSearchable
+                      classNames={{
+                        control: ({ isFocused }) =>
+                          cn(
+                            "flex h-12 w-full rounded-xl border bg-background px-3 py-1 text-sm transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+                            isFocused
+                              ? "ring-2 ring-primary ring-offset-2 border-primary"
+                              : "border-border",
+                          ),
+                        menu: () =>
+                          "mt-2 rounded-xl border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 z-50",
+                        option: ({ isFocused, isSelected }) =>
+                          cn(
+                            "relative flex w-full cursor-default select-none items-center rounded-lg py-2.5 px-3 text-sm outline-none transition-colors",
+                            isSelected
+                              ? "bg-primary text-primary-foreground"
+                              : isFocused
+                                ? "bg-accent text-accent-foreground"
+                                : "text-foreground",
+                          ),
+                        noOptionsMessage: () =>
+                          "py-6 text-center text-sm text-muted-foreground",
+                        loadingIndicator: () => "text-primary",
+                        placeholder: () => "text-muted-foreground",
+                        singleValue: () => "text-foreground",
+                        input: () => "text-foreground",
+                      }}
+                      unstyled
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  <Label className="eyebrow">Account Number</Label>
+                  <div className="relative">
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={10}
+                      placeholder="0000000000"
+                      value={accountNumber}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "");
+                        setAccountNumber(val);
+                        setAccountName("");
+                        if (val.length === 10) lookupAccountName(val, bankCode);
+                      }}
+                      className="h-12 text-lg font-mono tracking-widest"
+                    />
+                    {lookingUp && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <Loader2
+                          size={18}
+                          className="animate-spin text-brand-primary"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {accountName && (
+                  <div
+                    className="flex items-center gap-3 p-4 rounded-xl"
+                    style={{ background: "rgb(var(--mint))" }}
+                  >
+                    <div
+                      className="w-9 h-9 rounded-pill flex items-center justify-center shrink-0"
+                      style={{ background: "rgb(var(--mint-deep))" }}
+                    >
+                      <Check size={16} className="text-white" />
+                    </div>
+                    <div>
+                      <p
+                        className="eyebrow"
+                        style={{ color: "rgb(var(--mint-deep))" }}
+                      >
+                        Verified
+                      </p>
+                      <p className="font-bold text-foreground">{accountName}</p>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  disabled={!isRecipientValid}
+                  onClick={() => setStep("amount")}
+                  className={cn(
+                    "w-full h-13 py-3.5 rounded-pill font-semibold text-base transition-opacity flex items-center justify-center gap-2",
+                    "bg-foreground text-surface-highest",
+                    !isRecipientValid && "opacity-40 cursor-not-allowed",
+                  )}
+                >
+                  Continue <ArrowRight size={16} />
+                </button>
+              </div>
+
+              {/* Beneficiary Suggestions */}
+              <div
+                className="rounded-2xl p-6 shadow-card space-y-4"
+                style={{
+                  background: "rgb(var(--surface-highest))",
+                  border: "1px solid rgb(var(--surface-high))",
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-lg tracking-tight">
+                    Suggested Beneficiaries
+                  </h3>
+                  <div className="relative w-40 sm:w-64">
+                    <Search
+                      size={14}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-subtle"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Search saved..."
+                      className="w-full h-9 pl-9 pr-3 rounded-pill bg-surface border-none text-xs focus:ring-1 focus:ring-foreground outline-none"
+                      value={beneficiarySearch}
+                      onChange={(e) => setBeneficiarySearch(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {beneficiarySearch ? (
+                  <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 scrollbar-hide">
+                    {loadingSaved ? (
+                      [1, 2, 3].map((i) => (
+                        <Skeleton key={i} className="h-14 w-full rounded-xl" />
+                      ))
+                    ) : savedBeneficiaries?.data.length === 0 ? (
+                      <p className="text-center py-6 text-sm text-foreground-subtle">
+                        No beneficiaries found for "{beneficiarySearch}"
+                      </p>
+                    ) : (
+                      savedBeneficiaries?.data.map((b) => (
+                        <button
+                          key={b.id}
+                          onClick={() => selectBeneficiary(b)}
+                          className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-surface transition-colors text-left border border-transparent hover:border-surface-high"
+                        >
+                          <div className="w-10 h-10 rounded-pill bg-foreground text-surface-highest flex items-center justify-center font-bold text-xs shrink-0">
+                            {b.account_name.charAt(0)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm truncate">
+                              {b.account_name}
+                            </p>
+                            <p className="text-[11px] text-foreground-subtle truncate">
+                              {b.bank_name} • {b.account_number}
+                            </p>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2">
+                    {recentBeneficiaries?.data.map((b) => (
+                      <button
+                        key={b.id}
+                        onClick={() => selectBeneficiary(b)}
+                        className="flex flex-col items-center gap-2 group shrink-0"
+                      >
+                        <div className="w-14 h-14 rounded-pill bg-surface flex items-center justify-center font-bold text-lg text-foreground transition-all group-hover:scale-105 group-active:scale-95 border border-transparent group-hover:border-foreground/10 shadow-sm relative overflow-hidden">
+                          {b.account_name.charAt(0)}
+                          <div className="absolute inset-0 bg-foreground/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        <span className="text-[11px] font-semibold text-foreground-subtle group-hover:text-foreground truncate w-16 text-center">
+                          {b.account_name.split(" ")[0]}
+                        </span>
+                      </button>
+                    ))}
+                    {recentBeneficiaries?.data.length === 0 && (
+                      <p className="text-xs text-foreground-subtle italic py-2">
+                        No recent beneficiaries yet.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
           )}
 
           {/* Step: Amount */}
@@ -689,7 +802,10 @@ const Send = () => {
                   icon: <Zap size={14} />,
                   text: "Instant settlement to all banks",
                 },
-                { icon: <Sparkles size={14} />, text: "Zero fees on all internal transfers" },
+                {
+                  icon: <Sparkles size={14} />,
+                  text: "Zero fees on all internal transfers",
+                },
                 {
                   icon: <AlertCircle size={14} />,
                   text: "CBN insured and regulated",

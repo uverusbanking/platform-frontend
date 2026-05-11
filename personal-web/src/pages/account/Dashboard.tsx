@@ -118,7 +118,7 @@ const Dashboard = () => {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-7">
         <div className="min-w-0">
           <p className="eyebrow mb-2">{dateLabel}</p>
-          <h1 className="display text-[clamp(26px,3.5vw,44px)] m-0 leading-none truncate">
+          <h1 className="display text-[clamp(20px,5vw,44px)] m-0 leading-none truncate">
             {hourGreeting},{" "}
             <span
               className="serif-italic"
@@ -145,9 +145,9 @@ const Dashboard = () => {
       </div>
 
       {/* ── Main 2-col grid ── */}
-      <div className="grid gap-5 lg:grid-cols-[1.6fr_1fr] items-start">
+      <div className="grid gap-4 sm:gap-5 lg:grid-cols-[1.6fr_1fr] items-start w-full max-w-full overflow-hidden">
         {/* ── Left column ── */}
-        <div className="space-y-5">
+        <div className="space-y-5 min-w-0">
           {/* Balance card */}
           {isLoadingWallet ? (
             <div className="rounded-2xl bg-surface p-7 space-y-4">
@@ -157,7 +157,7 @@ const Dashboard = () => {
             </div>
           ) : (
             <div
-              className="rounded-2xl p-7 relative overflow-hidden shadow-card"
+              className="rounded-2xl p-5 sm:p-7 relative overflow-hidden shadow-card"
               style={{ background: "rgb(var(--foreground))", color: "#fff" }}
             >
               {/* Red radial blur */}
@@ -209,7 +209,7 @@ const Dashboard = () => {
                   <div className="flex items-baseline gap-2 flex-wrap">
                     <p
                       className={cn(
-                        "num text-[clamp(32px,6vw,60px)] font-bold leading-none transition-all duration-500",
+                        "num text-[clamp(28px,8vw,60px)] font-bold leading-none transition-all duration-500 break-all",
                         balanceFlash ? "text-mint" : "text-white",
                       )}
                     >
@@ -265,7 +265,7 @@ const Dashboard = () => {
               </div>
 
               {/* 4-action grid */}
-              <div className="relative grid grid-cols-4 gap-2.5">
+              <div className="relative grid grid-cols-4 gap-2 sm:gap-2.5">
                 {[
                   { icon: Send, label: "Send", path: "/account/send" },
                   { icon: QrCode, label: "Receive", path: "/account/receive" },
@@ -374,7 +374,7 @@ const Dashboard = () => {
         </div>
 
         {/* ── Right column ── */}
-        <div className="space-y-5">
+        <div className="space-y-5 min-w-0">
           {/* Mini stats */}
           <div className="grid grid-cols-2 gap-3">
             <StatCard

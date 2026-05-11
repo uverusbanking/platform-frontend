@@ -29,7 +29,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
 
-        <SidebarInset className="flex-1 flex flex-col min-w-0">
+        <SidebarInset className="flex-1 flex flex-col min-w-0 max-w-full overflow-x-hidden">
           {/* Topbar */}
           <header className="sticky top-0 z-40 flex items-center justify-between px-5 py-3 bg-background border-b border-border">
             <div className="flex items-center gap-3">
