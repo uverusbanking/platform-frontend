@@ -203,15 +203,17 @@ export default function PaymentDetailPage() {
   if (!payment) {
     return (
       <div className="space-y-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="-ml-2 text-muted-foreground"
+        <button
+          className="flex items-center gap-1.5 text-sm transition-colors"
+          style={{ color: "rgb(var(--foreground-subtle))" }}
           onClick={() => navigate("/payments")}
         >
-          <ArrowLeft className="mr-1 h-4 w-4" /> Back to Payments
-        </Button>
-        <p className="text-center py-12 text-muted-foreground">
+          <ArrowLeft className="h-4 w-4" /> Back to Payments
+        </button>
+        <p
+          className="text-center py-12"
+          style={{ color: "rgb(var(--foreground-subtle))" }}
+        >
           Payment not found.
         </p>
       </div>
@@ -224,24 +226,30 @@ export default function PaymentDetailPage() {
     <div className="space-y-6 max-w-3xl">
       {/* Header */}
       <div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mb-2 -ml-2 text-muted-foreground"
+        <button
+          className="flex items-center gap-1.5 text-sm mb-3 transition-colors"
+          style={{ color: "rgb(var(--foreground-subtle))" }}
           onClick={() => navigate("/payments")}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.color = "rgb(var(--foreground))")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.color = "rgb(var(--foreground-subtle))")
+          }
         >
-          <ArrowLeft className="mr-1 h-4 w-4" /> Back to Payments
-        </Button>
+          <ArrowLeft className="h-4 w-4" /> Back to Payments
+        </button>
         <div className="flex items-center gap-3 flex-wrap">
-          <h1
-            className="text-xl sm:text-2xl font-bold"
-            style={{ fontFamily: "Manrope, sans-serif" }}
-          >
-            Payment Details
-          </h1>
+          <p className="eyebrow">Payments</p>
+        </div>
+        <div className="flex items-center gap-3 flex-wrap mt-1">
+          <h1 className="display">Payment Details</h1>
           <Badge className={ps.className}>{ps.label}</Badge>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p
+          className="text-sm mt-1"
+          style={{ color: "rgb(var(--foreground-subtle))" }}
+        >
           Created {format(new Date(payment.created_at), "dd MMM yyyy, HH:mm")}
         </p>
       </div>
