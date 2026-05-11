@@ -1,13 +1,38 @@
 import { useState, useRef, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, X, Download } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Upload,
+  FileSpreadsheet,
+  AlertCircle,
+  CheckCircle2,
+  X,
+  Download,
+} from "lucide-react";
 import { toast } from "sonner";
 
 interface CsvRow {
@@ -21,7 +46,11 @@ interface CsvRow {
 }
 
 const fmt = (n: number) =>
-  "₦ " + n.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  "₦ " +
+  n.toLocaleString("en-NG", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
 function parseCsv(text: string): CsvRow[] {
   const lines = text.trim().split("\n");
@@ -29,7 +58,13 @@ function parseCsv(text: string): CsvRow[] {
 
   return lines.slice(1).map((line) => {
     const parts = line.split(",").map((p) => p.trim().replace(/^"|"$/g, ""));
-    const [accountNumber = "", bankName = "", recipientName = "", amount = "", memo = ""] = parts;
+    const [
+      accountNumber = "",
+      bankName = "",
+      recipientName = "",
+      amount = "",
+      memo = "",
+    ] = parts;
 
     let valid = true;
     let error: string | undefined;
@@ -45,7 +80,15 @@ function parseCsv(text: string): CsvRow[] {
       error = "Invalid amount";
     }
 
-    return { accountNumber, bankName, recipientName, amount, memo, valid, error };
+    return {
+      accountNumber,
+      bankName,
+      recipientName,
+      amount,
+      memo,
+      valid,
+      error,
+    };
   });
 }
 
@@ -84,15 +127,18 @@ export default function BulkCsvUpload() {
     reader.readAsText(file);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file && (file.name.endsWith(".csv") || file.type === "text/csv")) {
-      handleFile(file);
-    } else {
-      toast.error("Please upload a .csv file");
-    }
-  }, [handleFile]);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      const file = e.dataTransfer.files[0];
+      if (file && (file.name.endsWith(".csv") || file.type === "text/csv")) {
+        handleFile(file);
+      } else {
+        toast.error("Please upload a .csv file");
+      }
+    },
+    [handleFile],
+  );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -124,32 +170,71 @@ export default function BulkCsvUpload() {
     setFileName("");
     setBatchName("");
     setSourceAccount("");
-    toast.success(`Bulk payment "${batchName}" submitted for approval (${validRows.length} recipients, ${fmt(totalAmount)})`);
+    toast.success(
+      `Bulk payment "${batchName}" submitted for approval (${validRows.length} recipients, ${fmt(totalAmount)})`,
+    );
   };
 
   if (rows.length === 0) {
     return (
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <p className="text-sm text-muted-foreground">Upload a CSV file to create a bulk payment batch.</p>
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={handleDownloadTemplate}>
+          <p
+            className="text-sm"
+            style={{ color: "rgb(var(--foreground-subtle))" }}
+          >
+            Upload a CSV file to create a bulk payment batch.
+          </p>
+          <button
+            className="btn-pill btn-outline text-xs gap-1.5"
+            onClick={handleDownloadTemplate}
+          >
             <Download className="h-3.5 w-3.5" />
             Download template
-          </Button>
+          </button>
         </div>
-        <Card
-          className="border-dashed border-2 p-8 sm:p-12 text-center cursor-pointer hover:border-primary/50 transition-colors"
+        <div
+          className="rounded-2xl p-8 sm:p-12 text-center cursor-pointer transition-colors"
+          style={{
+            background: "rgb(var(--surface-highest))",
+            border: "2px dashed rgb(var(--border))",
+          }}
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
           onClick={() => fileRef.current?.click()}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.borderColor =
+              "rgb(var(--brand-primary) / 0.5)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.borderColor = "rgb(var(--border))")
+          }
         >
-          <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleInputChange} />
-          <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-4" />
-          <p className="text-sm font-medium text-foreground mb-1">Drop your CSV file here or click to browse</p>
-          <p className="text-xs text-muted-foreground">
-            Required columns: Account Number, Bank Name, Recipient Name, Amount, Memo
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".csv"
+            className="hidden"
+            onChange={handleInputChange}
+          />
+          <Upload
+            className="h-10 w-10 mx-auto mb-4"
+            style={{ color: "rgb(var(--foreground-subtle))" }}
+          />
+          <p
+            className="text-sm font-medium mb-1"
+            style={{ color: "rgb(var(--foreground))" }}
+          >
+            Drop your CSV file here or click to browse
           </p>
-        </Card>
+          <p
+            className="text-xs"
+            style={{ color: "rgb(var(--foreground-subtle))" }}
+          >
+            Required columns: Account Number, Bank Name, Recipient Name, Amount,
+            Memo
+          </p>
+        </div>
       </div>
     );
   }
@@ -159,21 +244,43 @@ export default function BulkCsvUpload() {
       {/* Summary bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <FileSpreadsheet className="h-5 w-5 text-primary shrink-0" />
+          <FileSpreadsheet
+            className="h-5 w-5 shrink-0"
+            style={{ color: "rgb(var(--brand-primary))" }}
+          />
           <div>
-            <p className="text-sm font-medium">{fileName}</p>
-            <p className="text-xs text-muted-foreground">
-              {validRows.length} valid · {invalidRows.length} errors · Total: {fmt(totalAmount)}
+            <p
+              className="text-sm font-medium"
+              style={{ color: "rgb(var(--foreground))" }}
+            >
+              {fileName}
+            </p>
+            <p
+              className="text-xs"
+              style={{ color: "rgb(var(--foreground-subtle))" }}
+            >
+              {validRows.length} valid · {invalidRows.length} errors · Total:{" "}
+              {fmt(totalAmount)}
             </p>
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="text-xs" onClick={() => { setRows([]); setFileName(""); }}>
+          <button
+            className="btn-pill btn-outline text-xs"
+            onClick={() => {
+              setRows([]);
+              setFileName("");
+            }}
+          >
             Clear
-          </Button>
-          <Button size="sm" className="text-xs" disabled={validRows.length === 0} onClick={() => setConfirmOpen(true)}>
+          </button>
+          <button
+            className="btn-pill btn-primary text-xs disabled:opacity-50"
+            disabled={validRows.length === 0}
+            onClick={() => setConfirmOpen(true)}
+          >
             Submit Batch ({validRows.length})
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -182,7 +289,9 @@ export default function BulkCsvUpload() {
         <div className="flex items-start gap-2 p-3 rounded-md bg-destructive/10 border border-destructive/20">
           <AlertCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
           <div className="text-xs text-destructive">
-            <p className="font-medium">{invalidRows.length} row(s) have errors and will be skipped.</p>
+            <p className="font-medium">
+              {invalidRows.length} row(s) have errors and will be skipped.
+            </p>
             <p>Fix the CSV and re-upload, or remove invalid rows below.</p>
           </div>
         </div>
@@ -191,94 +300,213 @@ export default function BulkCsvUpload() {
       {/* Mobile cards */}
       <div className="block sm:hidden space-y-2">
         {rows.map((row, idx) => (
-          <Card key={idx} className={`p-3 space-y-1 ${!row.valid ? "border-destructive/30 bg-destructive/5" : ""}`}>
+          <div
+            key={idx}
+            className="rounded-2xl p-3 space-y-1 shadow-card"
+            style={{
+              background: row.valid
+                ? "rgb(var(--surface-highest))"
+                : "rgb(var(--destructive) / 0.05)",
+              border: row.valid
+                ? "none"
+                : "1px solid rgb(var(--destructive) / 0.2)",
+            }}
+          >
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">{row.recipientName || "Unknown"}</span>
+              <span
+                className="text-sm font-medium"
+                style={{ color: "rgb(var(--foreground))" }}
+              >
+                {row.recipientName || "Unknown"}
+              </span>
               <div className="flex items-center gap-1">
                 {row.valid ? (
-                  <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+                  <CheckCircle2
+                    className="h-3.5 w-3.5"
+                    style={{ color: "rgb(var(--mint-deep))" }}
+                  />
                 ) : (
-                  <Badge variant="outline" className="text-[10px] bg-destructive/10 text-destructive border-destructive/20">{row.error}</Badge>
+                  <span
+                    className="text-[10px] font-semibold px-2 py-0.5 rounded-pill"
+                    style={{
+                      background: "rgb(var(--destructive) / 0.1)",
+                      color: "rgb(var(--destructive))",
+                    }}
+                  >
+                    {row.error}
+                  </span>
                 )}
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveRow(idx)}>
-                  <X className="h-3 w-3" />
-                </Button>
+                <button
+                  className="h-6 w-6 flex items-center justify-center rounded-pill hover:bg-surface transition-colors"
+                  onClick={() => handleRemoveRow(idx)}
+                >
+                  <X
+                    className="h-3 w-3"
+                    style={{ color: "rgb(var(--foreground-subtle))" }}
+                  />
+                </button>
               </div>
             </div>
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>{row.accountNumber} · {row.bankName}</span>
-              <span className="font-medium text-foreground">{row.valid ? fmt(Number(row.amount)) : row.amount}</span>
+            <div
+              className="flex items-center justify-between text-xs"
+              style={{ color: "rgb(var(--foreground-subtle))" }}
+            >
+              <span>
+                {row.accountNumber} · {row.bankName}
+              </span>
+              <span
+                className="font-medium"
+                style={{ color: "rgb(var(--foreground))" }}
+              >
+                {row.valid ? fmt(Number(row.amount)) : row.amount}
+              </span>
             </div>
-          </Card>
+          </div>
         ))}
       </div>
 
       {/* Desktop table */}
-      <Card className="hidden sm:block">
+      <div
+        className="hidden sm:block rounded-2xl overflow-hidden shadow-card"
+        style={{ background: "rgb(var(--surface-highest))" }}
+      >
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="text-xs w-8">#</TableHead>
-                <TableHead className="text-xs">Recipient</TableHead>
-                <TableHead className="text-xs">Account</TableHead>
-                <TableHead className="text-xs">Bank</TableHead>
-                <TableHead className="text-xs">Memo</TableHead>
-                <TableHead className="text-xs text-right">Amount</TableHead>
-                <TableHead className="text-xs w-20">Status</TableHead>
+              <TableRow style={{ background: "rgb(var(--surface))" }}>
+                <TableHead className="eyebrow py-3 w-8">#</TableHead>
+                <TableHead className="eyebrow py-3">Recipient</TableHead>
+                <TableHead className="eyebrow py-3">Account</TableHead>
+                <TableHead className="eyebrow py-3">Bank</TableHead>
+                <TableHead className="eyebrow py-3">Memo</TableHead>
+                <TableHead className="eyebrow py-3 text-right">
+                  Amount
+                </TableHead>
+                <TableHead className="eyebrow py-3 w-20">Status</TableHead>
                 <TableHead className="w-8" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {rows.map((row, idx) => (
-                <TableRow key={idx} className={!row.valid ? "bg-destructive/5" : ""}>
-                  <TableCell className="text-xs text-muted-foreground">{idx + 1}</TableCell>
-                  <TableCell className="text-sm font-medium">{row.recipientName || "—"}</TableCell>
-                  <TableCell className="text-sm">{row.accountNumber}</TableCell>
-                  <TableCell className="text-sm">{row.bankName}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground truncate max-w-[180px]">{row.memo || "—"}</TableCell>
-                  <TableCell className="text-sm text-right font-medium whitespace-nowrap">
+                <TableRow
+                  key={idx}
+                  style={
+                    !row.valid
+                      ? { background: "rgb(var(--destructive) / 0.04)" }
+                      : undefined
+                  }
+                  className="hover:bg-surface transition-colors"
+                >
+                  <TableCell
+                    className="text-xs"
+                    style={{ color: "rgb(var(--foreground-subtle))" }}
+                  >
+                    {idx + 1}
+                  </TableCell>
+                  <TableCell
+                    className="text-sm font-medium"
+                    style={{ color: "rgb(var(--foreground))" }}
+                  >
+                    {row.recipientName || "—"}
+                  </TableCell>
+                  <TableCell
+                    className="text-sm"
+                    style={{ color: "rgb(var(--foreground))" }}
+                  >
+                    {row.accountNumber}
+                  </TableCell>
+                  <TableCell
+                    className="text-sm"
+                    style={{ color: "rgb(var(--foreground))" }}
+                  >
+                    {row.bankName}
+                  </TableCell>
+                  <TableCell
+                    className="text-sm truncate max-w-[180px]"
+                    style={{ color: "rgb(var(--foreground-subtle))" }}
+                  >
+                    {row.memo || "—"}
+                  </TableCell>
+                  <TableCell
+                    className="text-sm text-right font-medium whitespace-nowrap"
+                    style={{ color: "rgb(var(--foreground))" }}
+                  >
                     {row.valid ? fmt(Number(row.amount)) : row.amount}
                   </TableCell>
                   <TableCell>
-                    {row.valid ? (
-                      <Badge variant="outline" className="text-[10px] bg-success/10 text-success border-success/20">Valid</Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-[10px] bg-destructive/10 text-destructive border-destructive/20">{row.error}</Badge>
-                    )}
+                    <span
+                      className="text-[10px] font-semibold px-2 py-0.5 rounded-pill"
+                      style={
+                        row.valid
+                          ? {
+                              background: "rgb(var(--mint) / 0.3)",
+                              color: "rgb(var(--mint-deep))",
+                            }
+                          : {
+                              background: "rgb(var(--destructive) / 0.1)",
+                              color: "rgb(var(--destructive))",
+                            }
+                      }
+                    >
+                      {row.valid ? "Valid" : row.error}
+                    </span>
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveRow(idx)}>
-                      <X className="h-3 w-3" />
-                    </Button>
+                    <button
+                      className="h-6 w-6 flex items-center justify-center rounded-pill hover:bg-surface transition-colors"
+                      onClick={() => handleRemoveRow(idx)}
+                    >
+                      <X
+                        className="h-3 w-3"
+                        style={{ color: "rgb(var(--foreground-subtle))" }}
+                      />
+                    </button>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
-      </Card>
+      </div>
 
       {/* Confirm Dialog */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Submit Bulk Payment</DialogTitle>
-            <DialogDescription>Review and confirm the batch details.</DialogDescription>
+            <DialogDescription>
+              Review and confirm the batch details.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
-              <Label className="text-sm font-medium mb-1.5 block">Batch name</Label>
-              <Input placeholder="e.g. April Vendor Payments" value={batchName} onChange={(e) => setBatchName(e.target.value)} />
+              <Label className="text-sm font-medium mb-1.5 block">
+                Batch name
+              </Label>
+              <Input
+                placeholder="e.g. April Vendor Payments"
+                value={batchName}
+                onChange={(e) => setBatchName(e.target.value)}
+              />
             </div>
             <div>
-              <Label className="text-sm font-medium mb-1.5 block">Source account</Label>
+              <Label className="text-sm font-medium mb-1.5 block">
+                Source account
+              </Label>
               <Select value={sourceAccount} onValueChange={setSourceAccount}>
-                <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select account" />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="operating">Operating Account — ₦ 12,450,000.00</SelectItem>
-                  <SelectItem value="collections">Collections Account — ₦ 8,320,000.00</SelectItem>
-                  <SelectItem value="payroll">Payroll Account — ₦ 3,150,000.00</SelectItem>
+                  <SelectItem value="operating">
+                    Operating Account — ₦ 12,450,000.00
+                  </SelectItem>
+                  <SelectItem value="collections">
+                    Collections Account — ₦ 8,320,000.00
+                  </SelectItem>
+                  <SelectItem value="payroll">
+                    Payroll Account — ₦ 3,150,000.00
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -293,15 +521,24 @@ export default function BulkCsvUpload() {
               </div>
               {invalidRows.length > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Skipped (errors)</span>
+                  <span className="text-muted-foreground">
+                    Skipped (errors)
+                  </span>
                   <span className="text-destructive">{invalidRows.length}</span>
                 </div>
               )}
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmit} disabled={!batchName || !sourceAccount}>Submit for Approval</Button>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={!batchName || !sourceAccount}
+            >
+              Submit for Approval
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

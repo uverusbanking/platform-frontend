@@ -10,7 +10,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, GripVertical } from "lucide-react";
@@ -54,7 +60,7 @@ export default function EditThresholdModal({
       flowType: "sequential",
       enabled: true,
       steps: [],
-    }
+    },
   );
 
   // Reset form when threshold changes
@@ -64,7 +70,10 @@ export default function EditThresholdModal({
     setLastThresholdId(threshold.id);
   }
 
-  const updateField = <K extends keyof ApprovalThreshold>(key: K, value: ApprovalThreshold[K]) => {
+  const updateField = <K extends keyof ApprovalThreshold>(
+    key: K,
+    value: ApprovalThreshold[K],
+  ) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -80,7 +89,9 @@ export default function EditThresholdModal({
   };
 
   const updateStep = (index: number, updates: Partial<ApprovalStep>) => {
-    const newSteps = form.steps.map((s, i) => (i === index ? { ...s, ...updates } : s));
+    const newSteps = form.steps.map((s, i) =>
+      i === index ? { ...s, ...updates } : s,
+    );
     updateField("steps", newSteps);
   };
 
@@ -130,7 +141,9 @@ export default function EditThresholdModal({
               <Input
                 type="number"
                 value={form.minAmount}
-                onChange={(e) => updateField("minAmount", Number(e.target.value))}
+                onChange={(e) =>
+                  updateField("minAmount", Number(e.target.value))
+                }
                 className="text-sm"
               />
             </div>
@@ -141,7 +154,10 @@ export default function EditThresholdModal({
                   type="number"
                   value={form.maxAmount ?? ""}
                   onChange={(e) =>
-                    updateField("maxAmount", e.target.value ? Number(e.target.value) : null)
+                    updateField(
+                      "maxAmount",
+                      e.target.value ? Number(e.target.value) : null,
+                    )
                   }
                   placeholder="Unlimited"
                   className="text-sm"
@@ -154,7 +170,9 @@ export default function EditThresholdModal({
                       updateField("maxAmount", checked ? null : 10_000_000)
                     }
                   />
-                  <span className="text-[10px] text-muted-foreground font-medium">No limit</span>
+                  <span className="text-[10px] text-muted-foreground font-medium">
+                    No limit
+                  </span>
                 </div>
               </div>
             </div>
@@ -166,29 +184,39 @@ export default function EditThresholdModal({
               <Label className="text-xs font-semibold">Flow Type</Label>
               <Select
                 value={form.flowType}
-                onValueChange={(v) => updateField("flowType", v as ApprovalFlowType)}
+                onValueChange={(v) =>
+                  updateField("flowType", v as ApprovalFlowType)
+                }
               >
                 <SelectTrigger className="text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(FLOW_TYPE_LABELS).map(([key, { label, description }]) => (
-                    <SelectItem key={key} value={key} className="text-sm">
-                      <span className="font-medium">{label}</span>
-                      <span className="text-muted-foreground ml-1 text-xs">– {description}</span>
-                    </SelectItem>
-                  ))}
+                  {Object.entries(FLOW_TYPE_LABELS).map(
+                    ([key, { label, description }]) => (
+                      <SelectItem key={key} value={key} className="text-sm">
+                        <span className="font-medium">{label}</span>
+                        <span className="text-muted-foreground ml-1 text-xs">
+                          – {description}
+                        </span>
+                      </SelectItem>
+                    ),
+                  )}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Required Approvers</Label>
+              <Label className="text-xs font-semibold">
+                Required Approvers
+              </Label>
               <Input
                 type="number"
                 min={1}
                 max={10}
                 value={form.requiredApprovers}
-                onChange={(e) => updateField("requiredApprovers", Number(e.target.value))}
+                onChange={(e) =>
+                  updateField("requiredApprovers", Number(e.target.value))
+                }
                 className="text-sm"
               />
             </div>
@@ -211,7 +239,13 @@ export default function EditThresholdModal({
             </div>
 
             {form.steps.length === 0 && (
-              <p className="text-xs text-muted-foreground py-3 text-center border border-dashed border-border rounded-sm">
+              <p
+                className="text-xs py-3 text-center rounded-xl"
+                style={{
+                  color: "rgb(var(--foreground-subtle))",
+                  border: "1px dashed rgb(var(--border))",
+                }}
+              >
                 No steps configured. Add at least one approval step.
               </p>
             )}
@@ -220,12 +254,25 @@ export default function EditThresholdModal({
               {form.steps.map((step, i) => (
                 <div
                   key={step.id}
-                  className="flex items-center gap-2 p-2.5 bg-surface-container border border-border rounded-sm"
+                  className="flex items-center gap-2 p-2.5 rounded-xl"
+                  style={{
+                    background: "rgb(var(--surface))",
+                    border: "1px solid rgb(var(--border))",
+                  }}
                 >
-                  <GripVertical className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  <Badge variant="outline" className="text-[10px] font-bold shrink-0 w-6 justify-center">
+                  <GripVertical
+                    className="h-3.5 w-3.5 shrink-0"
+                    style={{ color: "rgb(var(--foreground-subtle))" }}
+                  />
+                  <span
+                    className="text-[10px] font-bold shrink-0 w-6 text-center px-1 py-0.5 rounded-pill"
+                    style={{
+                      background: "rgb(var(--soft))",
+                      color: "rgb(var(--brand-primary))",
+                    }}
+                  >
                     {step.order}
-                  </Badge>
+                  </span>
                   <Input
                     value={step.label}
                     onChange={(e) => updateStep(i, { label: e.target.value })}
@@ -234,14 +281,20 @@ export default function EditThresholdModal({
                   />
                   <Select
                     value={step.role}
-                    onValueChange={(v) => updateStep(i, { role: v as CorporateRole })}
+                    onValueChange={(v) =>
+                      updateStep(i, { role: v as CorporateRole })
+                    }
                   >
                     <SelectTrigger className="text-xs h-8 w-28">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {ROLE_OPTIONS.map((r) => (
-                        <SelectItem key={r.value} value={r.value} className="text-xs">
+                        <SelectItem
+                          key={r.value}
+                          value={r.value}
+                          className="text-xs"
+                        >
                           {r.label}
                         </SelectItem>
                       ))}
@@ -250,9 +303,13 @@ export default function EditThresholdModal({
                   <div className="flex items-center gap-1 shrink-0">
                     <Switch
                       checked={step.required}
-                      onCheckedChange={(checked) => updateStep(i, { required: checked })}
+                      onCheckedChange={(checked) =>
+                        updateStep(i, { required: checked })
+                      }
                     />
-                    <span className="text-[10px] text-muted-foreground">Req</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      Req
+                    </span>
                   </div>
                   <Button
                     variant="ghost"
@@ -278,7 +335,12 @@ export default function EditThresholdModal({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" size="sm" className="text-xs rounded-sm" onClick={() => onOpenChange(false)}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs rounded-sm"
+            onClick={() => onOpenChange(false)}
+          >
             Cancel
           </Button>
           <Button size="sm" className="text-xs rounded-sm" onClick={handleSave}>
