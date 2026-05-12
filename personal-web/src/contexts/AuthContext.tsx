@@ -40,8 +40,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// sessionStorage keys — tab-isolated, cleared on tab close, not accessible
+// cross-origin. Access token and session ID are stored here; user profile is
+// kept in React state only (never written to any browser storage).
 const TOKEN_KEY = "sb-access-token";
-const USER_KEY = "sb-user-data";
 const SESSION_ID_KEY = "sb-session-id";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -72,23 +74,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setPendingPassword(password);
   };
 
-  // Initialize auth state from localStorage
+  // Restore auth state from sessionStorage on mount.
+  // User profile is never persisted — re-fetch from the API using the stored
+  // token so the profile is always fresh and never sits in browser storage.
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    const userData = localStorage.getItem(USER_KEY);
+    const token = sessionStorage.getItem(TOKEN_KEY);
 
-    if (token && userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setAccessToken(token);
-        setUser(parsedUser);
-      } catch (error) {
-        console.error("Failed to parse user data:", error);
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(USER_KEY);
-      }
+    if (!token) {
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+
+    setAccessToken(token);
+
+    UserService.getProfile()
+      .then((response) => {
+        const profileData = response.data;
+        setUser({
+          id: profileData.id,
+          email: profileData.email,
+          firstName: profileData.first_name || profileData.firstName || "",
+          lastName: profileData.last_name || profileData.lastName || "",
+          role: profileData.user_status === "ACTIVE" ? "user" : "pending",
+          pin_set: profileData.pin_set,
+          customerId: profileData.id,
+        });
+      })
+      .catch(() => {
+        // Token is expired or invalid — clear session and force re-login.
+        sessionStorage.removeItem(TOKEN_KEY);
+        sessionStorage.removeItem(SESSION_ID_KEY);
+        setAccessToken(null);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   // Proactive token refresh
@@ -97,7 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const refreshInterval = setInterval(
       async () => {
-        const sessionId = localStorage.getItem(SESSION_ID_KEY);
+        const sessionId = sessionStorage.getItem(SESSION_ID_KEY);
         if (!sessionId) return;
 
         try {
@@ -106,9 +124,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           });
           if (response.access_token) {
             setAccessToken(response.access_token);
-            localStorage.setItem(TOKEN_KEY, response.access_token);
+            sessionStorage.setItem(TOKEN_KEY, response.access_token);
             if (response.session_id) {
-              localStorage.setItem(SESSION_ID_KEY, response.session_id);
+              sessionStorage.setItem(SESSION_ID_KEY, response.session_id);
             }
           }
         } catch (error) {
@@ -138,17 +156,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const result = response.data;
 
-      // Store token and user data if available immediately
       if (result.access_token) {
         setAccessToken(result.access_token);
-        localStorage.setItem(TOKEN_KEY, result.access_token);
+        sessionStorage.setItem(TOKEN_KEY, result.access_token);
+        if (result.session_id) {
+          sessionStorage.setItem(SESSION_ID_KEY, result.session_id);
+        }
 
-        // Fetch full profile since login payload is minimal
         try {
           const profileResponse = await UserService.getProfile();
           const profileData = profileResponse.data;
 
-          const userData: UserDto = {
+          setUser({
             id: profileData.id,
             email: profileData.email,
             firstName: profileData.first_name || profileData.firstName || "",
@@ -156,27 +175,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             role: profileData.user_status === "ACTIVE" ? "user" : "pending",
             pin_set: profileData.pin_set,
             customerId: profileData.id,
-          };
-
-          setUser(userData);
-          localStorage.setItem(USER_KEY, JSON.stringify(userData));
-          if (result.session_id) {
-            localStorage.setItem(SESSION_ID_KEY, result.session_id);
-          }
+          });
         } catch (profileError) {
           console.error(
             "Failed to fetch user profile after login:",
             profileError,
           );
-          // Fallback with basic info if profile fetch fails
-          const basicUser: UserDto = {
+          setUser({
             id: result.user.id,
             email: result.user.email,
             firstName: "",
             lastName: "",
-          };
-          setUser(basicUser);
-          localStorage.setItem(USER_KEY, JSON.stringify(basicUser));
+          });
         }
 
         return { error: null };
@@ -191,7 +201,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       return { error: new Error("Authentication failed: No token received") };
     } catch (error: any) {
-      // Check if error indicates unverified account
       const errorMessage = error.message || "";
 
       if (
@@ -199,10 +208,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         errorMessage.includes("verify") ||
         errorMessage.includes("OTP")
       ) {
-        // Store credentials for auto-login after verification
         setPendingCredentials(email, password);
 
-        // Try to send OTP
         try {
           await AuthService.sendOtp({ email });
         } catch (otpError) {
@@ -230,16 +237,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
         const result = response.data;
 
-        // Store token and user data on successful 2FA
         setAccessToken(result.access_token);
-        localStorage.setItem(TOKEN_KEY, result.access_token);
+        sessionStorage.setItem(TOKEN_KEY, result.access_token);
+        if (result.session_id) {
+          sessionStorage.setItem(SESSION_ID_KEY, result.session_id);
+        }
 
-        // Fetch full profile
         try {
           const profileResponse = await UserService.getProfile();
           const profileData = profileResponse.data;
 
-          const userData: UserDto = {
+          setUser({
             id: profileData.id,
             email: profileData.email,
             firstName: profileData.first_name || profileData.firstName || "",
@@ -247,13 +255,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             role: profileData.user_status === "ACTIVE" ? "user" : "pending",
             pin_set: profileData.pin_set,
             customerId: profileData.id,
-          };
-
-          setUser(userData);
-          localStorage.setItem(USER_KEY, JSON.stringify(userData));
-          if (result.session_id) {
-            localStorage.setItem(SESSION_ID_KEY, result.session_id);
-          }
+          });
         } catch (error) {
           console.error("Failed to fetch profile in 2FA:", error);
         }
@@ -265,7 +267,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       if (isRegistration) {
-        // Generate a random idempotency key for registration completion
         const idempotencyKey =
           crypto.randomUUID?.() || Math.random().toString(36).substring(2);
         await AuthService.completeRegistration(
@@ -273,7 +274,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           idempotencyKey,
         );
       } else {
-        // Fallback to legacy verifyOtp for forgot-password
         await AuthService.verifyOtp({ email, otp });
       }
 
@@ -290,7 +290,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     isRegistration?: boolean,
   ) => {
     try {
-      // First verify OTP
       const { error: verifyError } = await verifyOTP(
         email,
         otp,
@@ -300,13 +299,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return { error: verifyError };
       }
 
-      // Then authenticate
       const { error: signInError } = await signIn(email, password);
       if (signInError) {
         return { error: signInError };
       }
 
-      // Clear pending credentials
       setPendingCredentials(null, null);
 
       return { error: null };
@@ -325,9 +322,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const signOut = async () => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-    localStorage.removeItem(SESSION_ID_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(SESSION_ID_KEY);
     setAccessToken(null);
     setUser(null);
     setPendingCredentials(null, null);
@@ -338,7 +334,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const response = await UserService.getProfile();
       const profileData = response.data;
 
-      const userData: UserDto = {
+      setUser({
         id: profileData.id,
         email: profileData.email,
         firstName: profileData.first_name || profileData.firstName || "",
@@ -346,10 +342,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         role: profileData.status === "ACTIVE" ? "user" : "pending",
         pin_set: profileData.pin_set,
         customerId: profileData.id,
-      };
-
-      setUser(userData);
-      localStorage.setItem(USER_KEY, JSON.stringify(userData));
+      });
     } catch (error) {
       console.error("Failed to refresh profile:", error);
     }
