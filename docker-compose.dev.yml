@@ -10,7 +10,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-      - /app/control/.next
+      - /app/control/node_modules
     env_file:
       - .env
     environment:
@@ -30,7 +30,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-      - /app/dashboard/.next
+      - /app/dashboard/node_modules
     env_file:
       - .env
     environment:
@@ -70,7 +70,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-      - /app/corporate-web/.next
+      - /app/corporate-web/node_modules
     env_file:
       - .env
     environment:
