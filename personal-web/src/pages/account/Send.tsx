@@ -260,7 +260,7 @@ const Send = () => {
       {/* ── 2-col grid ── */}
       <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr] items-start">
         {/* ── Form column ── */}
-        <div className="space-y-5">
+        <div className="space-y-5 min-w-0">
           {/* Step: Type */}
           {step === "type" && (
             <div
@@ -353,6 +353,93 @@ const Send = () => {
                   </div>
                 </div>
 
+                <div className="space-y-1.5 relative group">
+                  <Label className="eyebrow">Account Number</Label>
+                  <div className="relative">
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={10}
+                      placeholder="0000000000"
+                      value={accountNumber}
+                      onFocus={() => setBeneficiarySearch("")} // Show all saved
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "");
+                        setAccountNumber(val);
+                        setAccountName("");
+                        // Do not trigger API search on every keystroke
+                        if (val.length === 10 && bankCode) {
+                          lookupAccountName(val, bankCode);
+                        }
+                      }}
+                      className="h-12 text-lg font-mono tracking-widest relative z-10"
+                    />
+                    {lookingUp && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
+                        <Loader2
+                          size={18}
+                          className="animate-spin text-brand-primary"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Auto-suggest dropdown (only shows when typing < 10 digits and we have matches, OR when focused initially) */}
+                  {accountNumber.length < 10 && (
+                    <div className="absolute top-full left-0 w-full mt-2 bg-background border border-border rounded-xl shadow-lg z-50 max-h-64 overflow-y-auto hidden group-focus-within:block hover:block">
+                      {(() => {
+                        const allBens = [
+                          ...(recentBeneficiaries?.data || []),
+                          ...(savedBeneficiaries?.data || []),
+                        ];
+                        // Deduplicate by account number
+                        const uniqueBens = Array.from(
+                          new Map(allBens.map((b) => [b.account_number, b])).values()
+                        );
+                        const filtered = uniqueBens.filter(
+                          (b) =>
+                            !accountNumber ||
+                            b.account_number.startsWith(accountNumber) ||
+                            b.account_name.toLowerCase().includes(accountNumber.toLowerCase())
+                        );
+
+                        if (filtered.length === 0) {
+                          return (
+                            <div className="p-4 text-center text-sm text-foreground-subtle">
+                              No matching beneficiaries
+                            </div>
+                          );
+                        }
+
+                        return filtered.map((b) => (
+                          <button
+                            key={b.id}
+                            onMouseDown={(e) => {
+                              // Use onMouseDown instead of onClick to prevent blur from hiding before click registers
+                              e.preventDefault();
+                              selectBeneficiary(b);
+                              setBeneficiarySearch(""); // Clear search to reset suggestions
+                            }}
+                            className="w-full flex items-center gap-3 p-3 hover:bg-surface transition-colors text-left border-b border-border last:border-0"
+                          >
+                            <div className="w-8 h-8 rounded-pill bg-foreground text-surface-highest flex items-center justify-center font-bold text-xs shrink-0">
+                              {b.account_name.charAt(0)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-sm truncate">
+                                {b.account_name}
+                              </p>
+                              <p className="text-[11px] text-foreground-subtle truncate">
+                                {b.bank_name} • {b.account_number}
+                              </p>
+                            </div>
+                          </button>
+                        ));
+                      })()}
+                    </div>
+                  )}
+                </div>
+
                 {transferType === "bank" && (
                   <div className="space-y-1.5">
                     <Label className="eyebrow">Select Bank</Label>
@@ -413,34 +500,6 @@ const Send = () => {
                   </div>
                 )}
 
-                <div className="space-y-1.5">
-                  <Label className="eyebrow">Account Number</Label>
-                  <div className="relative">
-                    <Input
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={10}
-                      placeholder="0000000000"
-                      value={accountNumber}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, "");
-                        setAccountNumber(val);
-                        setAccountName("");
-                        if (val.length === 10) lookupAccountName(val, bankCode);
-                      }}
-                      className="h-12 text-lg font-mono tracking-widest"
-                    />
-                    {lookingUp && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <Loader2
-                          size={18}
-                          className="animate-spin text-brand-primary"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
                 {accountName && (
                   <div
                     className="flex items-center gap-3 p-4 rounded-xl"
@@ -452,14 +511,14 @@ const Send = () => {
                     >
                       <Check size={16} className="text-white" />
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <p
                         className="eyebrow"
                         style={{ color: "rgb(var(--mint-deep))" }}
                       >
                         Verified
                       </p>
-                      <p className="font-bold text-foreground">{accountName}</p>
+                      <p className="font-bold text-foreground truncate">{accountName}</p>
                     </div>
                   </div>
                 )}
@@ -485,11 +544,11 @@ const Send = () => {
                   border: "1px solid rgb(var(--surface-high))",
                 }}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <h3 className="font-bold text-lg tracking-tight">
                     Suggested Beneficiaries
                   </h3>
-                  <div className="relative w-40 sm:w-64">
+                  <div className="relative w-full sm:w-64">
                     <Search
                       size={14}
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-subtle"
@@ -779,7 +838,7 @@ const Send = () => {
         </div>
 
         {/* ── Info column ── */}
-        <div className="space-y-5">
+        <div className="space-y-5 min-w-0">
           <div
             className="rounded-2xl p-6 shadow-card"
             style={{
