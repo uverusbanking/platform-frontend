@@ -7,6 +7,9 @@ const BANKING_ROOT = `${ACCOUNT_ROOT}/banking`;
 const LOANS_ROOT = `${ACCOUNT_ROOT}/loans`;
 const SETTINGS_ROOT = `${ACCOUNT_ROOT}/settings`;
 const CUSTOMERS_ROOT = `${ACCOUNT_ROOT}/customers`;
+const PAYMENT_LINKS_ROOT = `${ACCOUNT_ROOT}/payment-links`;
+const PAYOUTS_ROOT = `${ACCOUNT_ROOT}/payouts`;
+const DEVELOPERS_ROOT = `${ACCOUNT_ROOT}/developers`;
 
 export const APP_ROUTES = {
   HOME: "/",
@@ -18,7 +21,6 @@ export const APP_ROUTES = {
   },
   ACCOUNT: {
     DASHBOARD: `${ACCOUNT_ROOT}/dashboard`,
-    ANALYTICS: `${ACCOUNT_ROOT}/analytics`,
     BRANCHES: `${ACCOUNT_ROOT}/branches`,
     CUSTOMERS: {
       LIST: CUSTOMERS_ROOT,
@@ -44,6 +46,21 @@ export const APP_ROUTES = {
     EXPENSES: `${ACCOUNT_ROOT}/expenses`,
     NOTIFICATIONS: `${ACCOUNT_ROOT}/notifications`,
     REPORTS: `${ACCOUNT_ROOT}/reports`,
+    ANALYTICS: `${ACCOUNT_ROOT}/analytics`,
+    PAYMENT_LINKS: {
+      LIST: PAYMENT_LINKS_ROOT,
+      DETAILS: (id: string) => `${PAYMENT_LINKS_ROOT}/${id}`,
+    },
+    PAYOUTS: {
+      LIST: PAYOUTS_ROOT,
+    },
+    DEVELOPERS: {
+      ROOT: DEVELOPERS_ROOT,
+      API_KEYS: `${DEVELOPERS_ROOT}/api-keys`,
+      WEBHOOKS: `${DEVELOPERS_ROOT}/webhooks`,
+      SDK: `${DEVELOPERS_ROOT}/sdk`,
+      LOGS: `${DEVELOPERS_ROOT}/logs`,
+    },
     SETTINGS: {
       ROOT: SETTINGS_ROOT,
       PROFILE: `${SETTINGS_ROOT}/profile`,

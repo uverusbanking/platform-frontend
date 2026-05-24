@@ -1,24 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { APP_ROUTES } from "@/lib/routes";
 
 import {
   LayoutDashboard,
   Users,
-  Megaphone,
-  PiggyBank,
-  CreditCard,
-  Receipt,
-  UserCog,
   Settings,
   BarChart3,
-  Wallet,
   ChevronDown,
-  Phone,
-  MessageSquare,
-  Terminal,
+  Link2,
+  ArrowDownToLine,
+  Webhook,
+  BookOpen,
+  KeyRound,
+  FileText,
+  Wallet,
+  CreditCard,
+  UserCog,
+  Megaphone,
 } from "lucide-react";
 import {
   Sidebar,
@@ -41,7 +42,16 @@ import {
 import { useUserStore } from "@/state/userStore";
 import { BrandIcon } from "@/components/shared/BrandIcon";
 
-const navigationItems = [
+type SubNavItem = { title: string; url: string };
+type NavItem = {
+  title: string;
+  url: string;
+  icon: React.ElementType;
+  subItems?: SubNavItem[];
+};
+type NavSection = { title: string; items: NavItem[] };
+
+const navigationItems: NavSection[] = [
   {
     title: "Overview",
     items: [
@@ -50,80 +60,107 @@ const navigationItems = [
         url: APP_ROUTES.ACCOUNT.DASHBOARD,
         icon: LayoutDashboard,
       },
+      {
+        title: "Analytics",
+        url: APP_ROUTES.ACCOUNT.ANALYTICS,
+        icon: BarChart3,
+      },
     ],
   },
   {
-    title: "Management",
+    title: "Payments",
     items: [
-      // { title: "Branches", url: APP_ROUTES.ACCOUNT.BRANCHES, icon: Building2 },
+      {
+        title: "Transactions",
+        url: APP_ROUTES.ACCOUNT.BANKING.TRANSACTIONS,
+        icon: CreditCard,
+      },
+      {
+        title: "Payment Links",
+        url: APP_ROUTES.ACCOUNT.PAYMENT_LINKS.LIST,
+        icon: Link2,
+      },
+      {
+        title: "Payouts",
+        url: APP_ROUTES.ACCOUNT.PAYOUTS.LIST,
+        icon: ArrowDownToLine,
+      },
+    ],
+  },
+  {
+    title: "Customers",
+    items: [
       {
         title: "Customers",
         url: APP_ROUTES.ACCOUNT.CUSTOMERS.LIST,
         icon: Users,
       },
-      { title: "Staff", url: APP_ROUTES.ACCOUNT.STAFF, icon: UserCog },
+      {
+        title: "Wallets",
+        url: APP_ROUTES.ACCOUNT.BANKING.ACCOUNTS,
+        icon: Wallet,
+      },
     ],
   },
   {
-    title: "Financial Services",
+    title: "Developers",
     items: [
       {
-        title: "E-Banking",
-        url: APP_ROUTES.ACCOUNT.BANKING.ROOT,
-        icon: Wallet,
-        subItems: [
-          { title: "Accounts", url: APP_ROUTES.ACCOUNT.BANKING.ACCOUNTS },
-          {
-            title: "Transactions",
-            url: APP_ROUTES.ACCOUNT.BANKING.TRANSACTIONS,
-          },
-          { title: "Transfer Limits", url: APP_ROUTES.ACCOUNT.BANKING.LIMITS },
-        ],
+        title: "API Keys",
+        url: APP_ROUTES.ACCOUNT.DEVELOPERS.API_KEYS,
+        icon: KeyRound,
       },
       {
-        title: "Loans",
-        url: APP_ROUTES.ACCOUNT.LOANS.ROOT,
-        icon: PiggyBank,
-        subItems: [
-          {
-            title: "Loan Applications",
-            url: APP_ROUTES.ACCOUNT.LOANS.APPLICATIONS,
-          },
-          { title: "Active Loans", url: APP_ROUTES.ACCOUNT.LOANS.ACTIVE },
-          { title: "Loan Products", url: APP_ROUTES.ACCOUNT.LOANS.PRODUCTS },
-        ],
+        title: "Webhooks",
+        url: APP_ROUTES.ACCOUNT.DEVELOPERS.WEBHOOKS,
+        icon: Webhook,
       },
-      { title: "Cards", url: APP_ROUTES.ACCOUNT.CARDS, icon: CreditCard },
-      { title: "USSD Banking", url: APP_ROUTES.ACCOUNT.USSD, icon: Phone },
       {
-        title: "WhatsApp Banking",
-        url: APP_ROUTES.ACCOUNT.WHATSAPP,
-        icon: MessageSquare,
+        title: "SDK & Docs",
+        url: APP_ROUTES.ACCOUNT.DEVELOPERS.SDK,
+        icon: BookOpen,
       },
-      { title: "POS Management", url: APP_ROUTES.ACCOUNT.POS, icon: Terminal },
-      { title: "Expenses", url: APP_ROUTES.ACCOUNT.EXPENSES, icon: Receipt },
+      {
+        title: "Event Logs",
+        url: APP_ROUTES.ACCOUNT.DEVELOPERS.LOGS,
+        icon: FileText,
+      },
     ],
   },
   {
     title: "Operations",
     items: [
       {
+        title: "Staff",
+        url: APP_ROUTES.ACCOUNT.STAFF,
+        icon: UserCog,
+        subItems: [],
+      },
+      {
         title: "Notifications",
         url: APP_ROUTES.ACCOUNT.NOTIFICATIONS,
         icon: Megaphone,
+        subItems: [],
       },
-      { title: "Reports", url: APP_ROUTES.ACCOUNT.REPORTS, icon: BarChart3 },
       {
         title: "Settings",
         url: APP_ROUTES.ACCOUNT.SETTINGS.ROOT,
         icon: Settings,
+        subItems: [
+          { title: "Profile", url: APP_ROUTES.ACCOUNT.SETTINGS.PROFILE },
+          {
+            title: "Organisation",
+            url: APP_ROUTES.ACCOUNT.SETTINGS.ORGANISATION,
+          },
+          { title: "Security", url: APP_ROUTES.ACCOUNT.SETTINGS.SECURITY },
+          { title: "Documents", url: APP_ROUTES.ACCOUNT.SETTINGS.DOCUMENTS },
+        ],
       },
     ],
   },
 ];
 
 export function DashboardSidebar() {
-  // const pathname = usePathname();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const userData = useUserStore((state) => state.userData);
@@ -132,7 +169,6 @@ export function DashboardSidebar() {
   const formattedRole = role.replace(/_/g, " ");
 
   const { pathname: currentPath } = useLocation();
-  // const params = useSearchParams();
 
   const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>({});
 
@@ -155,25 +191,6 @@ export function DashboardSidebar() {
 
   return (
     <Sidebar className={collapsed ? "w-16" : "w-80"} collapsible="icon">
-      {/* <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <BrandIcon />
-            {!collapsed && (
-              <div className="flex flex-col">
-                <span className="text-xl font-black tracking-tight">
-                  {companyName}
-                </span>
-                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                  {formattedRole}
-                </span>
-              </div>
-            )}
-          </div>
-          <SidebarTrigger />
-        </div>
-      </SidebarHeader> */}
-
       <SidebarHeader
         className={
           collapsed

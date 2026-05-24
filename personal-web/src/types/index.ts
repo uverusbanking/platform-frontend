@@ -297,6 +297,7 @@ export interface TransactionDetailsResponseDto {
   description: string;
   date: string;
   recipient?: TransactionRecipientDto;
+  sender?: TransactionRecipientDto;
 }
 
 export interface TransactionsResponseDto {

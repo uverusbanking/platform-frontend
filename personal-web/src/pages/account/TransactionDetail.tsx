@@ -159,10 +159,23 @@ const TransactionDetail = () => {
   const narration = transactionData.description || "Transaction";
   const fee = 0;
   const channel = "Transfer";
-  const counterpartyName = transactionData.recipient?.accountName || "Unknown";
-  const counterpartyBank =
-    transactionData.recipient?.bankName || "Unknown Bank";
-  const counterpartyAccount = transactionData.recipient?.accountNumber;
+
+  const counterpartyName = isCredit
+    ? transactionData.sender?.accountName ||
+      transactionData.recipient?.accountName ||
+      "Unknown"
+    : transactionData.recipient?.accountName || "Unknown";
+
+  const counterpartyBank = isCredit
+    ? transactionData.sender?.bankName ||
+      transactionData.recipient?.bankName ||
+      "Unknown Bank"
+    : transactionData.recipient?.bankName || "Unknown Bank";
+
+  const counterpartyAccount = isCredit
+    ? transactionData.sender?.accountNumber ||
+      transactionData.recipient?.accountNumber
+    : transactionData.recipient?.accountNumber;
 
   const StatusIcon = {
     successful: CheckCircle,

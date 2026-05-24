@@ -1,6 +1,7 @@
 "use client";
 
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, Zap } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -24,10 +25,12 @@ export function DashboardHeader() {
     ? userData.first_name[0].toUpperCase()
     : "U";
 
+  const [isLive, setIsLive] = useState(false);
+
   return (
     <header className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-20">
       <div className="flex h-full items-center justify-between px-6">
-        {/* App Name & Search */}
+        {/* Search */}
         <div className="flex items-center gap-4 flex-1 max-w-md">
           <div className="relative flex-1 pr-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -41,6 +44,18 @@ export function DashboardHeader() {
         {/* Actions */}
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
+            {/* Test / Live toggle */}
+            <button
+              onClick={() => setIsLive((v) => !v)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                isLive
+                  ? "bg-emerald-500 text-white border-emerald-500"
+                  : "bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-700"
+              }`}
+            >
+              <Zap className="w-3 h-3" />
+              {isLive ? "Live" : "Test"}
+            </button>
             {/* Notifications */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
