@@ -8,6 +8,7 @@ import {
 import {
   createCustomer,
   freezeCustomer,
+  setCustomerTier,
   unfreezeCustomer,
 } from "../endpoints/useCustomer";
 import { TError } from "@/types/apiResponseType";
@@ -51,6 +52,23 @@ export const useUnfreezeCustomer = () => {
     { id: string; payload: { justification: string } }
   >({
     mutationFn: ({ id, payload }) => unfreezeCustomer(id, payload),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.CUSTOMER, variables.id],
+      });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CUSTOMERS] });
+    },
+  });
+};
+
+export const useSetCustomerTier = () => {
+  const queryClient = useQueryClient();
+  return useMutation<
+    IApiResponse<unknown>,
+    TError,
+    { id: string; payload: { kyc_level: number; justification: string } }
+  >({
+    mutationFn: ({ id, payload }) => setCustomerTier(id, payload),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.CUSTOMER, variables.id],

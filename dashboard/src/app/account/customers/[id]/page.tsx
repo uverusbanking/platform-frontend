@@ -42,6 +42,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { FreezeCustomerDialog } from "@/components/customers/FreezeCustomerDialog";
 import { UnFreezeCustomerDialog } from "@/components/customers/UnFreezeCustomerDialog";
+import { SetTierDialog } from "@/components/customers/SetTierDialog";
+import { HeldTransactionsList } from "@/components/customers/HeldTransactionsList";
 import { can } from "@/auth/can";
 import { PERMISSIONS } from "@/auth/permissions";
 // import { Tabs } from "@/components/ui/tabs";
@@ -73,6 +75,7 @@ export default function CustomerDetailPage() {
   const { id = "" } = useParams<{ id: string }>();
   const [showFreezeDialog, setShowFreezeDialog] = useState(false);
   const [showUnfreezeDialog, setShowUnfreezeDialog] = useState(false);
+  const [showSetTierDialog, setShowSetTierDialog] = useState(false);
   const { data: customerResponse, isLoading } = useGetCustomerById(id);
   const customer: ICustomer | undefined = customerResponse?.data;
   const userData = useUserStore((state) => state.userData);
@@ -263,6 +266,18 @@ export default function CustomerDetailPage() {
                     {isFrozen ? "Unfreeze Customer" : "Freeze Customer"}
                   </DropdownMenuItem>
                 )}
+                {can(userData, PERMISSIONS.SET_CUSTOMER_TIER) && (
+                  <DropdownMenuItem
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      setShowSetTierDialog(true);
+                    }}
+                    className="h-12 rounded-xl cursor-pointer gap-3 font-bold"
+                  >
+                    <Activity className="w-4 h-4" />
+                    Override Tier
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -376,6 +391,12 @@ export default function CustomerDetailPage() {
         </Card> */}
       </motion.div>
 
+      {wallet?.is_funding_frozen && wallet.id && (
+        <motion.section variants={itemVariants} className="space-y-4">
+          <HeldTransactionsList walletId={wallet.id} />
+        </motion.section>
+      )}
+
       <FreezeCustomerDialog
         id={customer.id}
         open={showFreezeDialog}
@@ -385,6 +406,12 @@ export default function CustomerDetailPage() {
         id={customer.id}
         open={showUnfreezeDialog}
         onOpenChange={setShowUnfreezeDialog}
+      />
+      <SetTierDialog
+        id={customer.id}
+        currentTier={customer.kyc_level ?? 1}
+        open={showSetTierDialog}
+        onOpenChange={setShowSetTierDialog}
       />
 
       {/* Main Grid Content */}
