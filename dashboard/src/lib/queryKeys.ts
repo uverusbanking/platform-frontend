@@ -22,4 +22,5 @@ export const QUERY_KEYS = {
   DOMAIN_VERIFICATION: "domain-verification",
   GO_LIVE_CHECKLIST: "go-live-checklist",
   PAYMENT_CONFIG: "payment-config",
+  HELD_TRANSACTIONS: "held-transactions",
 };
