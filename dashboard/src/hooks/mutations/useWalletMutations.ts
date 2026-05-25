@@ -2,9 +2,51 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { IApiResponse, TError } from "@/types/apiResponseType";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import {
+  freezeWallet,
+  unfreezeWallet,
   releaseSingleHeldTransaction,
   releaseAllHeldTransactions,
 } from "../endpoints/useWallet";
+
+export const useFreezeWallet = () => {
+  const queryClient = useQueryClient();
+  return useMutation<
+    IApiResponse<unknown>,
+    TError,
+    {
+      walletId: string;
+      payload: { transfer?: boolean; funding?: boolean; reason?: string };
+    }
+  >({
+    mutationFn: ({ walletId, payload }) => freezeWallet(walletId, payload),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.WALLETS, variables.walletId],
+      });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WALLETS] });
+    },
+  });
+};
+
+export const useUnfreezeWallet = () => {
+  const queryClient = useQueryClient();
+  return useMutation<
+    IApiResponse<unknown>,
+    TError,
+    { walletId: string; payload: { transfer?: boolean; funding?: boolean } }
+  >({
+    mutationFn: ({ walletId, payload }) => unfreezeWallet(walletId, payload),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.WALLETS, variables.walletId],
+      });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WALLETS] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.HELD_TRANSACTIONS, variables.walletId],
+      });
+    },
+  });
+};
 
 export const useReleaseSingleHeldTransaction = () => {
   const queryClient = useQueryClient();

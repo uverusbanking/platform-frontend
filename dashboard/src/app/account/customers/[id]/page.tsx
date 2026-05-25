@@ -43,6 +43,7 @@ import {
 import { FreezeCustomerDialog } from "@/components/customers/FreezeCustomerDialog";
 import { UnFreezeCustomerDialog } from "@/components/customers/UnFreezeCustomerDialog";
 import { SetTierDialog } from "@/components/customers/SetTierDialog";
+import { WalletFreezeDialog } from "@/components/customers/WalletFreezeDialog";
 import { HeldTransactionsList } from "@/components/customers/HeldTransactionsList";
 import { can } from "@/auth/can";
 import { PERMISSIONS } from "@/auth/permissions";
@@ -76,6 +77,7 @@ export default function CustomerDetailPage() {
   const [showFreezeDialog, setShowFreezeDialog] = useState(false);
   const [showUnfreezeDialog, setShowUnfreezeDialog] = useState(false);
   const [showSetTierDialog, setShowSetTierDialog] = useState(false);
+  const [showWalletFreezeDialog, setShowWalletFreezeDialog] = useState(false);
   const { data: customerResponse, isLoading } = useGetCustomerById(id);
   const customer: ICustomer | undefined = customerResponse?.data;
   const userData = useUserStore((state) => state.userData);
@@ -278,6 +280,24 @@ export default function CustomerDetailPage() {
                     Override Tier
                   </DropdownMenuItem>
                 )}
+                {wallet && (
+                  <DropdownMenuItem
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      setShowWalletFreezeDialog(true);
+                    }}
+                    className={`h-12 rounded-xl cursor-pointer gap-3 font-bold ${
+                      wallet.is_funding_frozen || wallet.is_transfer_frozen
+                        ? "text-primary hover:bg-primary/5 hover:text-primary"
+                        : "text-destructive hover:bg-destructive/5 hover:text-destructive"
+                    }`}
+                  >
+                    <Wallet className="w-4 h-4" />
+                    {wallet.is_funding_frozen || wallet.is_transfer_frozen
+                      ? "Unfreeze Wallet"
+                      : "Freeze Wallet"}
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -413,6 +433,13 @@ export default function CustomerDetailPage() {
         open={showSetTierDialog}
         onOpenChange={setShowSetTierDialog}
       />
+      {wallet && (
+        <WalletFreezeDialog
+          wallet={wallet}
+          open={showWalletFreezeDialog}
+          onOpenChange={setShowWalletFreezeDialog}
+        />
+      )}
 
       {/* Main Grid Content */}
       <div className="grid lg:grid-cols-12 gap-10 items-start">

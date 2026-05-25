@@ -13,6 +13,25 @@ export const getWallets = async (
   return response.data;
 };
 
+export const freezeWallet = async (
+  walletId: string,
+  payload: { transfer?: boolean; funding?: boolean; reason?: string },
+): Promise<IApiResponse<unknown>> => {
+  const response = await apiClient.post(`/wallets/${walletId}/freeze`, payload);
+  return response.data;
+};
+
+export const unfreezeWallet = async (
+  walletId: string,
+  payload: { transfer?: boolean; funding?: boolean },
+): Promise<IApiResponse<unknown>> => {
+  const response = await apiClient.post(
+    `/wallets/${walletId}/unfreeze`,
+    payload,
+  );
+  return response.data;
+};
+
 export const getHeldTransactions = async (
   walletId: string,
   page: number = 1,
