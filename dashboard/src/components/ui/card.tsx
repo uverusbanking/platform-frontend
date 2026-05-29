@@ -9,12 +9,12 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-xl border border-border bg-card text-card-foreground shadow-sm transition hover:border-primary/30 relative overflow-hidden group",
+      "rounded-xl border border-border bg-card text-card-foreground relative overflow-hidden group",
       className,
     )}
     {...props}
   >
-    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0  transition-opacity duration-500 pointer-events-none" />
     <div className="relative z-10">{children}</div>
   </div>
 ));

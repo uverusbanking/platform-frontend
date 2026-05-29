@@ -202,8 +202,8 @@ export default function Login() {
                     placeholder="••••••••"
                     {...register("password")}
                     disabled={isSubmitting}
-                    aria-invalid={!!errors.password}
-                    aria-describedby="password-error"
+                    // aria-invalid={!!errors.password}
+                    // aria-describedby="password-error"
                     className="h-12 bg-muted/30 border-border/40 focus:border-primary/50 focus:ring-primary/10 rounded-xl px-4 transition-all font-medium"
                   />
                 </div>
@@ -233,7 +233,7 @@ export default function Login() {
                     Securing Session...
                   </>
                 ) : (
-                  "Authenticate Account"
+                  "Authenticate"
                 )}
               </Button>
             </form>
