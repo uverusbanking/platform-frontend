@@ -49,6 +49,15 @@ import NotificationsPage from "@/app/account/notifications/page";
 import ReportsPage from "@/app/account/reports/page";
 import BranchesPage from "@/app/account/branches/page";
 
+// Payment gateway pages
+import PaymentLinksPage from "@/app/account/payment-links/page";
+import PayoutsPage from "@/app/account/payouts/page";
+import AnalyticsPage from "@/app/account/analytics/page";
+import DevApiKeysPage from "@/app/account/developers/api-keys/page";
+import DevWebhooksPage from "@/app/account/developers/webhooks/page";
+import DevSdkPage from "@/app/account/developers/sdk/page";
+import DevLogsPage from "@/app/account/developers/logs/page";
+
 // Settings pages
 import SettingsLayout from "@/app/account/settings/layout";
 import ProfilePage from "@/app/account/settings/profile/page";
@@ -176,6 +185,21 @@ const App = () => (
                 <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="reports" element={<ReportsPage />} />
                 <Route path="branches" element={<BranchesPage />} />
+
+                {/* Payment gateway */}
+                <Route path="analytics" element={<AnalyticsPage />} />
+                <Route path="payment-links" element={<PaymentLinksPage />} />
+                <Route path="payouts" element={<PayoutsPage />} />
+                <Route
+                  path="developers/api-keys"
+                  element={<DevApiKeysPage />}
+                />
+                <Route
+                  path="developers/webhooks"
+                  element={<DevWebhooksPage />}
+                />
+                <Route path="developers/sdk" element={<DevSdkPage />} />
+                <Route path="developers/logs" element={<DevLogsPage />} />
 
                 {/* Settings nested layout */}
                 <Route path="settings" element={<SettingsLayout />}>

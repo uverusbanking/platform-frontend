@@ -51,11 +51,6 @@ const PROVIDERS: {
     label: "Monnify",
     color: "bg-purple-500/10 text-purple-600 border-purple-500/20",
   },
-  {
-    value: "STRIPE",
-    label: "Stripe",
-    color: "bg-violet-500/10 text-violet-600 border-violet-500/20",
-  },
 ];
 
 function providerMeta(type: PaymentProviderType) {

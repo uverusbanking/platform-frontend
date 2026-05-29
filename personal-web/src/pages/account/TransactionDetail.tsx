@@ -159,10 +159,23 @@ const TransactionDetail = () => {
   const narration = transactionData.description || "Transaction";
   const fee = 0;
   const channel = "Transfer";
-  const counterpartyName = transactionData.recipient?.accountName || "Unknown";
-  const counterpartyBank =
-    transactionData.recipient?.bankName || "Unknown Bank";
-  const counterpartyAccount = transactionData.recipient?.accountNumber;
+
+  const counterpartyName = isCredit
+    ? transactionData.sender?.accountName ||
+      transactionData.recipient?.accountName ||
+      "Unknown"
+    : transactionData.recipient?.accountName || "Unknown";
+
+  const counterpartyBank = isCredit
+    ? transactionData.sender?.bankName ||
+      transactionData.recipient?.bankName ||
+      "Unknown Bank"
+    : transactionData.recipient?.bankName || "Unknown Bank";
+
+  const counterpartyAccount = isCredit
+    ? transactionData.sender?.accountNumber ||
+      transactionData.recipient?.accountNumber
+    : transactionData.recipient?.accountNumber;
 
   const StatusIcon = {
     successful: CheckCircle,
@@ -485,66 +498,102 @@ const TransactionDetail = () => {
           </div>
         </div>
 
-        {/* Detail rows */}
-        <div
-          className="rounded-2xl overflow-hidden shadow-card"
-          style={{
-            background: "rgb(var(--surface-highest))",
-            border: "1px solid rgb(var(--surface-high))",
-          }}
-        >
-          {[
-            { label: "Type", value: isCredit ? "Credit" : "Debit" },
-            { label: "Channel", value: channel },
-            ...(counterpartyName
-              ? [{ label: isCredit ? "From" : "To", value: counterpartyName }]
-              : []),
-            ...(counterpartyBank
-              ? [{ label: "Bank", value: counterpartyBank }]
-              : []),
-            ...(counterpartyAccount
-              ? [{ label: "Account", value: counterpartyAccount, mono: true }]
-              : []),
-            ...(narration ? [{ label: "Narration", value: narration }] : []),
-            ...(fee > 0 ? [{ label: "Fee", value: formatCurrency(fee) }] : []),
-            { label: "Date", value: formatDateTime(transactionData.date) },
-          ].map(({ label, value, mono }) => (
-            <div
-              key={label}
-              className="flex justify-between items-start gap-4 px-5 py-3.5"
-              style={{ borderBottom: "1px solid rgb(var(--surface-high))" }}
-            >
-              <span className="text-foreground-subtle text-sm shrink-0">
-                {label}
-              </span>
-              <span
-                className={cn(
-                  "text-sm font-medium text-right min-w-0 break-all",
-                  mono && "font-mono text-xs",
-                )}
+        {/* General Detail rows */}
+        <div className="space-y-4">
+          <div
+            className="rounded-2xl overflow-hidden shadow-card"
+            style={{
+              background: "rgb(var(--surface-highest))",
+              border: "1px solid rgb(var(--surface-high))",
+            }}
+          >
+            {[
+              { label: "Type", value: isCredit ? "Credit" : "Debit" },
+              { label: "Channel", value: channel },
+              ...(narration ? [{ label: "Narration", value: narration }] : []),
+              ...(fee > 0 ? [{ label: "Fee", value: formatCurrency(fee) }] : []),
+              { label: "Date", value: formatDateTime(transactionData.date) },
+            ].map(({ label, value }) => (
+              <div
+                key={label}
+                className="flex justify-between items-start gap-4 px-5 py-3.5"
+                style={{ borderBottom: "1px solid rgb(var(--surface-high))" }}
               >
-                {value}
-              </span>
-            </div>
-          ))}
+                <span className="text-foreground-subtle text-sm shrink-0">
+                  {label}
+                </span>
+                <span className="text-sm font-medium text-right min-w-0 break-all">
+                  {value}
+                </span>
+              </div>
+            ))}
 
-          {/* Reference row with copy */}
-          <div className="flex justify-between items-center gap-4 px-5 py-3.5">
-            <span className="text-foreground-subtle text-sm shrink-0">
-              Reference
-            </span>
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="font-mono text-xs text-right text-foreground-subtle break-all">
-                {transactionData.reference}
+            {/* Reference row with copy */}
+            <div className="flex justify-between items-center gap-4 px-5 py-3.5">
+              <span className="text-foreground-subtle text-sm shrink-0">
+                Reference
               </span>
-              <button
-                onClick={copyReference}
-                className="w-7 h-7 rounded-xl flex items-center justify-center transition-colors hover:bg-surface shrink-0"
-              >
-                <Copy size={12} className="text-foreground-subtle" />
-              </button>
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="font-mono text-xs text-right text-foreground-subtle break-all">
+                  {transactionData.reference}
+                </span>
+                <button
+                  onClick={copyReference}
+                  className="w-7 h-7 rounded-xl flex items-center justify-center transition-colors hover:bg-surface shrink-0"
+                >
+                  <Copy size={12} className="text-foreground-subtle" />
+                </button>
+              </div>
             </div>
           </div>
+
+          {/* Counterparty Detail rows */}
+          {(counterpartyName || counterpartyBank || counterpartyAccount) && (
+            <div>
+              <h3 className="text-sm font-semibold text-foreground-subtle mb-2 px-1">
+                {isCredit ? "Sender Details" : "Receiver Details"}
+              </h3>
+              <div
+                className="rounded-2xl overflow-hidden shadow-card"
+                style={{
+                  background: "rgb(var(--surface-highest))",
+                  border: "1px solid rgb(var(--surface-high))",
+                }}
+              >
+                {[
+                  ...(counterpartyName
+                    ? [{ label: isCredit ? "Name" : "Name", value: counterpartyName }]
+                    : []),
+                  ...(counterpartyBank
+                    ? [{ label: "Bank", value: counterpartyBank }]
+                    : []),
+                  ...(counterpartyAccount
+                    ? [{ label: "Account", value: counterpartyAccount, mono: true }]
+                    : []),
+                ].map(({ label, value, mono }, index, array) => (
+                  <div
+                    key={label}
+                    className="flex justify-between items-start gap-4 px-5 py-3.5"
+                    style={{
+                      borderBottom: index === array.length - 1 ? "none" : "1px solid rgb(var(--surface-high))",
+                    }}
+                  >
+                    <span className="text-foreground-subtle text-sm shrink-0">
+                      {label}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-sm font-medium text-right min-w-0 break-all",
+                        mono && "font-mono text-xs",
+                      )}
+                    >
+                      {value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Export actions */}
