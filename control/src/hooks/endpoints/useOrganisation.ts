@@ -426,8 +426,7 @@ export type PaymentProviderType =
   | "BUDPAY"
   | "FLUTTERWAVE"
   | "PROVIDUS"
-  | "MONNIFY"
-  | "STRIPE";
+  | "MONNIFY";
 
 export interface IPaymentConfig {
   id: string;

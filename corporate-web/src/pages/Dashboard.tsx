@@ -49,14 +49,6 @@ const recentTransactions: {
     status: "completed",
   },
   {
-    id: "tx-2",
-    recipient: "Stripe Global Payout",
-    category: "SaaS Revenue",
-    date: "2025-10-23T09:15:00Z",
-    amount: 84500.0,
-    status: "completed",
-  },
-  {
     id: "tx-3",
     recipient: "Jane Doe (Transfer)",
     category: "Q3 Bonus",
