@@ -45,6 +45,8 @@ import { UnFreezeCustomerDialog } from "@/components/customers/UnFreezeCustomerD
 import { SetTierDialog } from "@/components/customers/SetTierDialog";
 import { WalletFreezeDialog } from "@/components/customers/WalletFreezeDialog";
 import { HeldTransactionsList } from "@/components/customers/HeldTransactionsList";
+import { AdjustmentsList } from "@/components/customers/AdjustmentsList";
+import { LedgerAdjustmentDialog } from "@/components/customers/LedgerAdjustmentDialog";
 import { can } from "@/auth/can";
 import { PERMISSIONS } from "@/auth/permissions";
 // import { Tabs } from "@/components/ui/tabs";
@@ -78,6 +80,8 @@ export default function CustomerDetailPage() {
   const [showUnfreezeDialog, setShowUnfreezeDialog] = useState(false);
   const [showSetTierDialog, setShowSetTierDialog] = useState(false);
   const [showWalletFreezeDialog, setShowWalletFreezeDialog] = useState(false);
+  const [showLedgerAdjustmentDialog, setShowLedgerAdjustmentDialog] =
+    useState(false);
   const { data: customerResponse, isLoading } = useGetCustomerById(id);
   const customer: ICustomer | undefined = customerResponse?.data;
   const userData = useUserStore((state) => state.userData);
@@ -298,6 +302,18 @@ export default function CustomerDetailPage() {
                       : "Freeze Wallet"}
                   </DropdownMenuItem>
                 )}
+                {wallet && can(userData, PERMISSIONS.LEDGER_ADJUSTMENT) && (
+                  <DropdownMenuItem
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      setShowLedgerAdjustmentDialog(true);
+                    }}
+                    className="h-12 rounded-xl cursor-pointer gap-3 font-bold text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+                  >
+                    <Banknote className="w-4 h-4" />
+                    Ledger Adjustment
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -417,6 +433,12 @@ export default function CustomerDetailPage() {
         </motion.section>
       )}
 
+      {wallet?.id && (
+        <motion.section variants={itemVariants} className="space-y-4">
+          <AdjustmentsList walletId={wallet.id} />
+        </motion.section>
+      )}
+
       <FreezeCustomerDialog
         id={customer.id}
         open={showFreezeDialog}
@@ -438,6 +460,13 @@ export default function CustomerDetailPage() {
           wallet={wallet}
           open={showWalletFreezeDialog}
           onOpenChange={setShowWalletFreezeDialog}
+        />
+      )}
+      {wallet && (
+        <LedgerAdjustmentDialog
+          walletId={wallet.id}
+          open={showLedgerAdjustmentDialog}
+          onOpenChange={setShowLedgerAdjustmentDialog}
         />
       )}
 

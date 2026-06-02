@@ -2,4 +2,6 @@ export const PERMISSIONS = {
   FREEZE_CUSTOMER: "freeze_customer",
   UNFREEZE_CUSTOMER: "unfreeze_customer",
   SET_CUSTOMER_TIER: "update_customer_platform",
+  LEDGER_ADJUSTMENT: "LEDGER_ADJUSTMENT_PLATFORM",
+  MANAGE_WALLETS_PLATFORM: "MANAGE_WALLETS_PLATFORM",
 } as const;

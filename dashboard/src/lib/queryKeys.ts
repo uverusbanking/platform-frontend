@@ -23,4 +23,5 @@ export const QUERY_KEYS = {
   GO_LIVE_CHECKLIST: "go-live-checklist",
   PAYMENT_CONFIG: "payment-config",
   HELD_TRANSACTIONS: "held-transactions",
+  ADJUSTMENTS: "adjustments",
 };
