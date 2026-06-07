@@ -1,5 +1,7 @@
 "use client";
 
+import { BrandConfigService } from "@shared/core";
+
 type BrandIconProps = {
   containerClassName?: string;
   imageClassName?: string;
@@ -11,11 +13,14 @@ export function BrandIcon({
   imageClassName = "h-5 w-5 object-contain",
   size = 20,
 }: BrandIconProps) {
+  const brand = BrandConfigService.getConfigSync("dashboard");
+  const logoSrc = brand.brandLogoUrl || brand.brandIconUrl || "/icon.png";
+
   return (
     <div className={containerClassName}>
       <img
-        src="/icon.png"
-        alt="Uverus icon"
+        src={logoSrc}
+        alt={brand.brandName}
         width={size}
         height={size}
         className={imageClassName}

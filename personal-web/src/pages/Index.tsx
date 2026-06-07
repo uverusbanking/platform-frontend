@@ -169,37 +169,8 @@ const Index = () => {
           </motion.div>
         </div>
 
-        {/* Header - Simple Logo Only */}
-        <header className="fixed top-0 left-0 right-0 z-50 bg-transparent">
-          <div className="container mx-auto px-6 h-20 flex items-center justify-between max-w-7xl">
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-3 cursor-pointer text-white"
-              onClick={() => navigate("/")}
-            >
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shadow-lg backdrop-blur-sm border border-white/20">
-                {brand.brandLogoUrl ? (
-                  <img
-                    src={brand.brandLogoUrl}
-                    alt={brand.brandName}
-                    className="w-6 h-6 object-contain"
-                  />
-                ) : (
-                  <span className="text-white font-bold text-xl">
-                    {brand.brandName.charAt(0)}
-                  </span>
-                )}
-              </div>
-              <span className="font-bold text-xl tracking-tight text-white">
-                {brand.brandName}
-              </span>
-            </motion.div>
-          </div>
-        </header>
-
         {/* Login Container - Two Column Layout */}
-        <div className="container mx-auto px-6 relative z-10 max-w-7xl flex flex-col lg:flex-row items-center justify-center min-h-[calc(100vh-80px)] mt-20 gap-12 lg:gap-20">
+        <div className="container mx-auto px-6 relative z-10 max-w-7xl flex flex-col lg:flex-row items-center justify-center min-h-screen gap-12 lg:gap-20">
           {/* Left Column: Login Form */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
