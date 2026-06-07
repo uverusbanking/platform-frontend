@@ -14,10 +14,13 @@ export function BrandIcon({
   size = 20,
 }: BrandIconProps) {
   const brandConfig = BrandConfigService.getConfigSync("dashboard");
+  const logoSrc =
+    brandConfig.brandLogoUrl || brandConfig.brandIconUrl || "/icon.png";
+
   return (
     <div className={containerClassName}>
       <img
-        src="/icon.png"
+        src={logoSrc}
         alt={`${brandConfig.brandName} icon`}
         width={size}
         height={size}
