@@ -24,9 +24,11 @@ import {
   Lock as LockIcon,
   Copy,
   Snowflake,
+  Building2,
+  CheckCheck,
 } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { useGetPlatformCustomerWallets } from "@/hooks/endpoints/useWallet";
+// useGetPlatformCustomerWallets kept for fallback; wallets now embedded in customer response
 import { useUserStore } from "@/state/userStore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,13 +50,6 @@ import { UnFreezeCustomerDialog } from "@/components/features/customers/UnFreeze
 import { FreezeWalletDialog } from "@/components/features/customers/FreezeWalletDialog";
 import { UnfreezeWalletDialog } from "@/components/features/customers/UnfreezeWalletDialog";
 import { TransactionDetailModal } from "@/components/features/transactions/TransactionDetailModal";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { CustomerActivityTab } from "./CustomerActivityTab";
 import { can } from "@/auth/can";
 import { PERMISSIONS } from "@/auth/permissions";
@@ -96,7 +91,8 @@ export default function CustomerDetailPage() {
       : "bg-muted/40 text-muted-foreground border-border/40";
 
   const userData = useUserStore((state) => state.userData);
-  const { data: wallets = [] } = useGetPlatformCustomerWallets(id);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const wallets = customer?.wallets ?? [];
 
   if (isLoading) return <CustomerDetailSkeleton />;
   if (!customer)
@@ -341,185 +337,229 @@ export default function CustomerDetailPage() {
             </Card>
           </div> */}
 
-          {/* Wallet Carousel */}
-          {wallets.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between px-1">
-                <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                  <Wallet className="w-3.5 h-3.5 text-primary" />
-                  {wallets.length} Wallet{wallets.length > 1 ? "s" : ""} Linked
+          {/* Freeze Info Banner */}
+          {isFrozen && customer.frozen_at && (
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 rounded-2xl border border-destructive/30 bg-destructive/5">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="p-2.5 rounded-xl bg-destructive/10 shrink-0">
+                  <Snowflake className="w-4 h-4 text-destructive" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-black uppercase tracking-widest text-destructive mb-0.5">
+                    Account Frozen
+                  </div>
+                  <div className="text-sm font-bold text-foreground truncate">
+                    {customer.freeze_reason?.replace(/_/g, " ")}
+                    {customer.freeze_category && (
+                      <span className="ml-2 text-xs font-semibold text-muted-foreground">
+                        · {customer.freeze_category}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
+              <div className="flex flex-wrap gap-6 text-right shrink-0">
+                {customer.reference_id && (
+                  <div>
+                    <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">
+                      Ref
+                    </div>
+                    <div className="text-xs font-mono font-bold text-foreground">
+                      {customer.reference_id}
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">
+                    Frozen On
+                  </div>
+                  <div className="text-xs font-bold text-foreground">
+                    {new Date(customer.frozen_at).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">
+                    Policy
+                  </div>
+                  <div className="text-xs font-bold text-foreground">
+                    {customer.unfreeze_policy?.replace(/_/g, " ")}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
-              <Carousel
-                opts={{
-                  align: "start",
-                  loop: false,
-                }}
-                className="w-full"
-              >
-                <CarouselContent className="-ml-4">
-                  {wallets.map((wallet, idx) => {
-                    const gradients = [
-                      "from-violet-600 via-purple-600 to-indigo-700",
-                      "from-emerald-500 via-teal-600 to-cyan-700",
-                      "from-rose-500 via-pink-600 to-fuchsia-700",
-                      "from-amber-500 via-orange-500 to-red-600",
-                      "from-sky-500 via-blue-600 to-indigo-700",
-                    ];
-                    const gradient = gradients[idx % gradients.length];
-                    const balanceNum = parseFloat(wallet.balance || "0");
-                    const isFrozenWallet =
-                      wallet.is_transfer_frozen || wallet.is_funding_frozen;
+          {/* Wallets Grid */}
+          {wallets.length > 0 && (
+            <div className="space-y-3">
+              <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 px-1">
+                <Wallet className="w-3.5 h-3.5 text-primary" />
+                {wallets.length} Wallet{wallets.length > 1 ? "s" : ""} Linked
+              </div>
 
-                    return (
-                      <CarouselItem
-                        key={wallet.id}
-                        className="pl-4 basis-[85%] md:basis-[48%]"
-                      >
-                        <div className="relative group/card h-full">
-                          {/* Glow */}
-                          <div
-                            className={`absolute -inset-1 bg-gradient-to-br ${gradient} rounded-3xl blur-md opacity-20 group-hover/card:opacity-30 transition-opacity duration-500`}
-                          />
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                {wallets.map((wallet, idx) => {
+                  const gradients = [
+                    "from-violet-600 via-purple-600 to-indigo-700",
+                    "from-emerald-500 via-teal-600 to-cyan-700",
+                    "from-rose-500 via-pink-600 to-fuchsia-700",
+                    "from-amber-500 via-orange-500 to-red-600",
+                    "from-sky-500 via-blue-600 to-indigo-700",
+                  ];
+                  const isFrozenWallet =
+                    wallet.is_transfer_frozen || wallet.is_funding_frozen;
+                  const gradient = isFrozenWallet
+                    ? "from-[#8b0000] via-[#cd5c5c] to-[#ff0000]"
+                    : gradients[idx % gradients.length];
+                  const balanceNum = parseFloat(String(wallet.balance) || "0");
 
-                          <div
-                            className={`relative h-full bg-gradient-to-br ${gradient} rounded-2xl p-6 shadow-xl overflow-hidden text-white flex flex-col justify-between`}
-                          >
-                            {/* Background circles */}
-                            <div className="absolute inset-0 pointer-events-none">
-                              <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full border-2 border-white/10" />
-                              <div className="absolute -bottom-16 -left-8 w-52 h-52 rounded-full border-2 border-white/10" />
-                            </div>
+                  return (
+                    <div
+                      key={wallet.id}
+                      className={`relative bg-gradient-to-br ${gradient} rounded-2xl p-6 shadow-xl overflow-hidden text-white flex flex-col justify-between min-h-[180px]`}
+                    >
+                      <div className="absolute inset-0 pointer-events-none">
+                        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full border-2 border-white/10" />
+                        <div className="absolute -bottom-16 -left-8 w-52 h-52 rounded-full border-2 border-white/10" />
+                      </div>
 
-                            {/* Top row */}
-                            <div className="relative flex items-start justify-between mb-6">
-                              <div>
-                                <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">
-                                  {wallet.account_type} · {wallet.environment}
-                                </div>
-                                <div className="text-base font-black tracking-wide truncate max-w-[150px]">
-                                  {wallet.name}
-                                </div>
-                              </div>
-                              <div className="flex flex-col items-end gap-1.5">
-                                <div className="flex items-center gap-1.5">
-                                  <div
-                                    className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${wallet.status === "ACTIVE" ? "bg-white/20" : "bg-white/10 text-white/50"}`}
-                                  >
-                                    {wallet.status}
-                                  </div>
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <button
-                                        className="p-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
-                                        <svg
-                                          className="w-3 h-3 text-white"
-                                          fill="currentColor"
-                                          viewBox="0 0 20 20"
-                                        >
-                                          <circle cx="4" cy="10" r="1.5" />
-                                          <circle cx="10" cy="10" r="1.5" />
-                                          <circle cx="16" cy="10" r="1.5" />
-                                        </svg>
-                                      </button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent
-                                      align="end"
-                                      className="w-48 p-1.5 rounded-xl"
-                                    >
-                                      {isFrozenWallet ? (
-                                        <DropdownMenuItem
-                                          className="rounded-lg gap-2 text-xs font-bold cursor-pointer text-primary"
-                                          onClick={() =>
-                                            setWalletUnfreezeTarget({
-                                              id: wallet.id,
-                                              accountNumber:
-                                                wallet.account_number,
-                                            })
-                                          }
-                                        >
-                                          <Snowflake className="w-3.5 h-3.5" />
-                                          Unfreeze Wallet
-                                        </DropdownMenuItem>
-                                      ) : (
-                                        <DropdownMenuItem
-                                          className="rounded-lg gap-2 text-xs font-bold cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/5"
-                                          onClick={() =>
-                                            setWalletFreezeTarget({
-                                              id: wallet.id,
-                                              accountNumber:
-                                                wallet.account_number,
-                                            })
-                                          }
-                                        >
-                                          <Snowflake className="w-3.5 h-3.5" />
-                                          Freeze Wallet
-                                        </DropdownMenuItem>
-                                      )}
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
-                                {isFrozenWallet && (
-                                  <div className="flex items-center gap-1 bg-white/10 text-white/70 text-[8px] font-bold px-1.5 py-0.5 rounded-full">
-                                    <Snowflake className="w-2.5 h-2.5" />
-                                    FROZEN
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Chip + account number */}
-                            <div className="relative mb-6">
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="w-8 h-6 rounded-md bg-gradient-to-br from-yellow-300/60 to-amber-400/60 shadow-inner" />
-                              </div>
-                              <div className="font-mono text-lg font-bold tracking-[0.2em] text-white/90">
-                                {wallet.account_number.replace(
-                                  /(\d{4})(?=\d)/g,
-                                  "$1 ",
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Balance + bank */}
-                            <div className="relative flex items-end justify-between mt-auto">
-                              <div>
-                                <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-0.5">
-                                  Available Balance
-                                </div>
-                                <div className="text-2xl font-black tracking-tight">
-                                  {wallet.currency}{" "}
-                                  {balanceNum.toLocaleString(undefined, {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  })}
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-0.5">
-                                  Bank
-                                </div>
-                                <div className="text-xs font-black text-white/80">
-                                  {wallet.bank_name}
-                                </div>
-                              </div>
-                            </div>
+                      {/* Top row */}
+                      <div className="relative flex items-start justify-between mb-4">
+                        <div>
+                          <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/50 mb-0.5">
+                            {wallet.account_type} · {wallet.environment}
+                          </div>
+                          <div className="text-sm font-black tracking-wide truncate max-w-[160px]">
+                            {wallet.name}
                           </div>
                         </div>
-                      </CarouselItem>
-                    );
-                  })}
-                </CarouselContent>
-                {wallets.length > 1 && (
-                  <>
-                    <CarouselPrevious className="hidden md:flex -left-6 bg-background/80 backdrop-blur-sm border-border/50" />
-                    <CarouselNext className="hidden md:flex -right-6 bg-background/80 backdrop-blur-sm border-border/50" />
-                  </>
-                )}
-              </Carousel>
+                        <div className="flex flex-col items-end gap-1">
+                          <div className="flex items-center gap-1.5">
+                            <div
+                              className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${wallet.status === "ACTIVE" ? "bg-white/20" : "bg-white/10 text-white/50"}`}
+                            >
+                              {wallet.status}
+                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button
+                                  className="p-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <svg
+                                    className="w-3 h-3 text-white"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <circle cx="4" cy="10" r="1.5" />
+                                    <circle cx="10" cy="10" r="1.5" />
+                                    <circle cx="16" cy="10" r="1.5" />
+                                  </svg>
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="end"
+                                className="w-48 p-1.5 rounded-xl"
+                              >
+                                {isFrozenWallet ? (
+                                  <DropdownMenuItem
+                                    className="rounded-lg gap-2 text-xs font-bold cursor-pointer text-primary"
+                                    onClick={() =>
+                                      setWalletUnfreezeTarget({
+                                        id: wallet.id,
+                                        accountNumber: wallet.account_number,
+                                      })
+                                    }
+                                  >
+                                    <Snowflake className="w-3.5 h-3.5" />
+                                    Unfreeze Wallet
+                                  </DropdownMenuItem>
+                                ) : (
+                                  <DropdownMenuItem
+                                    className="rounded-lg gap-2 text-xs font-bold cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/5"
+                                    onClick={() =>
+                                      setWalletFreezeTarget({
+                                        id: wallet.id,
+                                        accountNumber: wallet.account_number,
+                                      })
+                                    }
+                                  >
+                                    <Snowflake className="w-3.5 h-3.5" />
+                                    Freeze Wallet
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                          {isFrozenWallet && (
+                            <div className="flex items-center gap-1 bg-white/10 text-white/70 text-[8px] font-bold px-1.5 py-0.5 rounded-full">
+                              <Snowflake className="w-2.5 h-2.5" />
+                              FROZEN
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Account number */}
+                      <div className="relative mb-4">
+                        <button
+                          className="flex items-center gap-2 group/copy"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              wallet.account_number,
+                            );
+                            setCopiedId(wallet.id);
+                            setTimeout(() => setCopiedId(null), 2000);
+                          }}
+                        >
+                          <span className="font-mono text-base font-bold tracking-[0.18em] text-white/90">
+                            {wallet.account_number.replace(
+                              /(\d{4})(?=\d)/g,
+                              "$1 ",
+                            )}
+                          </span>
+                          {copiedId === wallet.id ? (
+                            <CheckCheck className="w-3.5 h-3.5 text-white/60" />
+                          ) : (
+                            <Copy className="w-3 h-3 text-white/30 group-hover/copy:text-white/60 transition-colors" />
+                          )}
+                        </button>
+                        <div className="text-[10px] text-white/40 font-semibold mt-0.5">
+                          {wallet.account_name}
+                        </div>
+                      </div>
+
+                      {/* Balance + bank */}
+                      <div className="relative flex items-end justify-between">
+                        <div>
+                          <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-0.5">
+                            Available Balance
+                          </div>
+                          <div className="text-2xl font-black tracking-tight">
+                            NGN{" "}
+                            {balanceNum.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-0.5">
+                            Bank
+                          </div>
+                          <div className="text-xs font-black text-white/80">
+                            {wallet.bank_name}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 
