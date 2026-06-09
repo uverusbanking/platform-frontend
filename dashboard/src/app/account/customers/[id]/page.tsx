@@ -20,6 +20,9 @@ import {
   Activity,
   Banknote,
   Snowflake,
+  Building2,
+  Copy,
+  CheckCheck,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -47,13 +50,6 @@ import { WalletFreezeDialog } from "@/components/customers/WalletFreezeDialog";
 import { HeldTransactionsList } from "@/components/customers/HeldTransactionsList";
 import { AdjustmentsList } from "@/components/customers/AdjustmentsList";
 import { LedgerAdjustmentDialog } from "@/components/customers/LedgerAdjustmentDialog";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { can } from "@/auth/can";
 import { PERMISSIONS } from "@/auth/permissions";
 
@@ -91,8 +87,11 @@ export default function CustomerDetailPage() {
   const customer: ICustomer | undefined = customerResponse?.data;
   const userData = useUserStore((state) => state.userData);
   const view_mode = userData?.view_mode;
-  const [showBalance, setShowBalance] = useState(false);
+  const [showBalance, setShowBalance] = useState(true);
   const [activeWalletIdx, setActiveWalletIdx] = useState(0);
+  const [copiedAccountNumber, setCopiedAccountNumber] = useState<string | null>(
+    null,
+  );
   const { data: walletsResponse } = useGetWallets({
     customer_id: id,
     environment: view_mode,
@@ -101,9 +100,34 @@ export default function CustomerDetailPage() {
 
   if (isLoading) return <CustomerDetailSkeleton />;
 
-  const wallets: IWallet[] = walletsResponse?.data ?? [];
+  // Normalise customer.wallets (missing environment/hold_balance) into full IWallet objects,
+  // falling back to the dedicated wallet query when the customer response predates this field.
+  const rawWallets = customer?.wallets;
+  const wallets: IWallet[] = rawWallets?.length
+    ? rawWallets.map((w) => ({
+        id: w.id,
+        name: w.name,
+        customer_id: customer!.id,
+        environment: (view_mode ?? "LIVE") as "LIVE" | "TEST",
+        account_type: w.account_type as "CHECKING" | "SAVINGS",
+        currency: w.currency,
+        account_number: w.account_number,
+        bank_name: w.bank_name ?? "",
+        bank_code: w.bank_code ?? "",
+        account_name: w.account_name ?? "",
+        bank_logo: null,
+        metadata: null as any,
+        balance: String(w.balance ?? 0),
+        hold_balance: "0",
+        status: w.status as IWallet["status"],
+        is_funding_frozen: w.is_funding_frozen,
+        is_transfer_frozen: w.is_transfer_frozen,
+        created_at: w.created_at,
+        updated_at: w.created_at,
+        closed_at: null,
+      }))
+    : (walletsResponse?.data ?? []);
   const wallet: IWallet | undefined = wallets[activeWalletIdx];
-  const totalBalance = Number(wallet?.balance ?? 0);
 
   if (!customer) {
     return (
@@ -337,21 +361,12 @@ export default function CustomerDetailPage() {
             No wallets found for this customer.
           </span>
         </motion.div>
-      ) : wallets.length === 1 ? (
-        <motion.div variants={itemVariants}>
-          <WalletCard
-            wallet={wallets[0]}
-            selected
-            showBalance={showBalance}
-            onToggleBalance={() => setShowBalance(!showBalance)}
-          />
-        </motion.div>
       ) : (
         <motion.div variants={itemVariants} className="space-y-3">
           <div className="flex items-center gap-2 px-1">
             <Wallet className="w-3.5 h-3.5 text-primary" />
             <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">
-              {wallets.length} Wallets
+              {wallets.length} {wallets.length === 1 ? "Wallet" : "Wallets"}
             </span>
             <Button
               variant="ghost"
@@ -366,36 +381,120 @@ export default function CustomerDetailPage() {
               )}
             </Button>
           </div>
-          <Carousel opts={{ align: "start", loop: false }} className="w-full">
-            <CarouselContent className="-ml-4">
-              {wallets.map((w, idx) => (
-                <CarouselItem
-                  key={w.id}
-                  className="pl-4 basis-[92%] md:basis-[55%] lg:basis-[45%]"
-                >
-                  <div
-                    onClick={() => setActiveWalletIdx(idx)}
-                    className="cursor-pointer"
-                  >
-                    <WalletCard
-                      wallet={w}
-                      selected={activeWalletIdx === idx}
-                      showBalance={showBalance}
-                    />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="hidden md:flex -left-5 bg-background/80 border-border/50" />
-            <CarouselNext className="hidden md:flex -right-5 bg-background/80 border-border/50" />
-          </Carousel>
-          {wallet && (
-            <p className="text-[10px] text-muted-foreground font-semibold px-1">
-              Selected: <span className="text-foreground">{wallet.name}</span> ·{" "}
-              {wallet.account_number}
-            </p>
-          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {wallets.map((w, idx) => (
+              <div
+                key={w.id}
+                onClick={() => setActiveWalletIdx(idx)}
+                className="cursor-pointer"
+              >
+                <WalletCard
+                  wallet={w}
+                  index={idx}
+                  selected={activeWalletIdx === idx}
+                  showBalance={showBalance}
+                  onToggleBalance={() => setShowBalance(!showBalance)}
+                />
+              </div>
+            ))}
+          </div>
         </motion.div>
+      )}
+
+      {/* Bank Accounts Section */}
+      {wallets.length > 0 && (
+        <motion.section variants={itemVariants} className="space-y-4">
+          <div className="flex items-center gap-2 px-1">
+            <Building2 className="w-3.5 h-3.5 text-primary" />
+            <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">
+              Bank Accounts
+            </span>
+          </div>
+          <Card className="border-border/50 shadow-premium bg-card overflow-hidden">
+            <div className="divide-y divide-border/40">
+              {wallets.map((w) => (
+                <div
+                  key={w.id}
+                  className={`p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-muted/20 ${
+                    wallet?.id === w.id ? "bg-primary/5" : ""
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-2.5 rounded-xl bg-muted/40 border border-border/30">
+                      <Building2 className="w-4 h-4 text-muted-foreground/60" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <div className="text-xs font-black text-foreground">
+                        {w.name}
+                      </div>
+                      <div className="text-[11px] font-semibold text-muted-foreground/70">
+                        {w.bank_name || "---"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-6 sm:gap-8">
+                    <div className="space-y-0.5">
+                      <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                        Account Number
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-mono font-bold text-foreground">
+                          {w.account_number}
+                        </span>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(w.account_number);
+                            setCopiedAccountNumber(w.id);
+                            setTimeout(
+                              () => setCopiedAccountNumber(null),
+                              2000,
+                            );
+                          }}
+                          className="text-muted-foreground/40 hover:text-primary transition-colors"
+                        >
+                          {copiedAccountNumber === w.id ? (
+                            <CheckCheck className="w-3 h-3 text-success" />
+                          ) : (
+                            <Copy className="w-3 h-3" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-0.5">
+                      <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                        Account Name
+                      </div>
+                      <div className="text-xs font-bold text-foreground">
+                        {w.account_name?.split("/").pop()?.trim() || "---"}
+                      </div>
+                    </div>
+                    <div className="space-y-0.5">
+                      <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                        Currency
+                      </div>
+                      <div className="text-xs font-bold text-foreground">
+                        {w.currency}
+                      </div>
+                    </div>
+                    <div
+                      className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${
+                        w.status === "ACTIVE"
+                          ? "bg-success/10 text-success"
+                          : w.is_funding_frozen || w.is_transfer_frozen
+                            ? "bg-destructive/10 text-destructive"
+                            : "bg-muted/40 text-muted-foreground"
+                      }`}
+                    >
+                      {w.is_funding_frozen || w.is_transfer_frozen
+                        ? "Frozen"
+                        : w.status}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </motion.section>
       )}
 
       {wallet?.is_funding_frozen && wallet.id && (
@@ -639,27 +738,30 @@ export default function CustomerDetailPage() {
   );
 }
 
+const WALLET_GRADIENTS = [
+  "from-[#0047AB] via-[#0056D2] to-[#002B6B]",
+  "from-violet-600 via-purple-600 to-indigo-700",
+  "from-emerald-500 via-teal-600 to-cyan-700",
+  "from-rose-500 via-pink-600 to-fuchsia-700",
+  "from-amber-500 via-orange-500 to-red-600",
+];
+
 function WalletCard({
   wallet,
+  index,
   selected,
   showBalance,
   onToggleBalance,
 }: {
   wallet: IWallet;
+  index: number;
   selected: boolean;
   showBalance: boolean;
   onToggleBalance?: () => void;
 }) {
   const balance = Number(wallet.balance ?? 0);
   const isFrozenWallet = wallet.is_transfer_frozen || wallet.is_funding_frozen;
-  const gradients = [
-    "from-[#0047AB] via-[#0056D2] to-[#002B6B]",
-    "from-violet-600 via-purple-600 to-indigo-700",
-    "from-emerald-500 via-teal-600 to-cyan-700",
-    "from-rose-500 via-pink-600 to-fuchsia-700",
-    "from-amber-500 via-orange-500 to-red-600",
-  ];
-  const gradient = gradients[0];
+  const gradient = WALLET_GRADIENTS[index % WALLET_GRADIENTS.length];
 
   return (
     <div
