@@ -18,7 +18,7 @@ import {
 
 export const getWallets = async (
   params: IGetWalletsParams,
-): Promise<IApiResponse<IWallet>> => {
+): Promise<IApiResponse<IWallet[]>> => {
   const response = await apiClient.get("/wallets/organisation", { params });
   return response.data;
 };
