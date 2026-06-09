@@ -110,10 +110,10 @@ export default function Verify() {
         toast.success("A new verification code has been sent.");
         // Update URL if session ID changed (though typically it stays same)
         if (
-          (data.data as any).sessionId &&
-          (data.data as any).sessionId !== session_id
+          (data.data as any).session_id &&
+          (data.data as any).session_id !== session_id
         ) {
-          navigate(APP_ROUTES.AUTH.VERIFY((data.data as any).sessionId), {
+          navigate(APP_ROUTES.AUTH.VERIFY((data.data as any).session_id), {
             replace: true,
           });
         }

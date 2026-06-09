@@ -78,7 +78,7 @@ const mockStaffData = [
     company_id: "42edeb96-a666-48ad-a679-aa0fdffd7264",
     email: "sundaywht@gmail.com",
     phone_number: "+2348108786933",
-    role: "BRAND_ADMIN",
+    role: "ORGANISATION_ADMIN",
     status: "ACTIVE",
     gender: "MALE",
     first_name: "NugaPay",
@@ -196,7 +196,7 @@ describe("Staff Page", () => {
 
     // Select Role
     const roleSelect = getAllByTestId("mock-select")[0];
-    fireEvent.change(roleSelect, { target: { value: "BRAND_SUPPORT" } });
+    fireEvent.change(roleSelect, { target: { value: "ORGANISATION_FINANCE" } });
 
     // Select Gender
     const genderSelect = getAllByTestId("mock-select")[1];
@@ -213,7 +213,7 @@ describe("Staff Page", () => {
       expect.objectContaining({
         first_name: "Jane",
         last_name: "Smith",
-        role: "BRAND_SUPPORT",
+        role: "ORGANISATION_FINANCE",
       }),
       expect.any(Object),
     );
