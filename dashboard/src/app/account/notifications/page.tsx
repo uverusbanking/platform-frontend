@@ -39,75 +39,22 @@ import {
 } from "@/components/ui/table";
 import SendNotificationDialog from "@/components/notifications/SendNotificationDialog";
 
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: "info" | "success" | "warning" | "error";
-  timestamp: string;
-  read: boolean;
-  category: string;
-}
-
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    title: "New Customer Registration",
-    message: "John Doe has completed registration and KYC verification",
-    type: "success",
-    timestamp: "2024-01-20 10:30 AM",
-    read: false,
-    category: "customers",
-  },
-  {
-    id: "2",
-    title: "Loan Application Pending",
-    message: "Loan application #LA-1234 requires your approval",
-    type: "warning",
-    timestamp: "2024-01-20 09:15 AM",
-    read: false,
-    category: "loans",
-  },
-  {
-    id: "3",
-    title: "System Update",
-    message: "System maintenance scheduled for tonight at 11 PM",
-    type: "info",
-    timestamp: "2024-01-19 04:00 PM",
-    read: true,
-    category: "system",
-  },
-  {
-    id: "4",
-    title: "Transaction Alert",
-    message: "Large transaction detected - Amount: $50,000",
-    type: "warning",
-    timestamp: "2024-01-19 02:30 PM",
-    read: false,
-    category: "transactions",
-  },
-  {
-    id: "5",
-    title: "Failed Login Attempt",
-    message: "Multiple failed login attempts detected for admin account",
-    type: "error",
-    timestamp: "2024-01-19 01:15 PM",
-    read: true,
-    category: "security",
-  },
-  {
-    id: "6",
-    title: "New Branch Created",
-    message: "Downtown Branch has been successfully created",
-    type: "success",
-    timestamp: "2024-01-18 11:00 AM",
-    read: true,
-    category: "branches",
-  },
-];
+import { useGetNotifications } from "@/hooks/queries/useNotificationsQueries";
+import {
+  useMarkNotificationAsRead,
+  useMarkAllNotificationsAsRead,
+  useDeleteNotification,
+} from "@/hooks/mutations/useNotificationsMutations";
+import { INotification } from "@/types/notification.types";
 
 export default function Notifications() {
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const { data: notificationsData, isLoading } = useGetNotifications();
+  const notifications = notificationsData?.data || [];
+
+  const markNotificationAsReadMutation = useMarkNotificationAsRead();
+  const markAllNotificationsAsReadMutation = useMarkAllNotificationsAsRead();
+  const deleteNotificationMutation = useDeleteNotification();
+
   const [sentNotifications, setSentNotifications] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
@@ -119,21 +66,19 @@ export default function Notifications() {
   };
 
   const markAsRead = (id: string) => {
-    setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    );
+    markNotificationAsReadMutation.mutate(id);
   };
 
   const markAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
+    markAllNotificationsAsReadMutation.mutate();
   };
 
   const deleteNotification = (id: string) => {
-    setNotifications(notifications.filter((n) => n.id !== id));
+    deleteNotificationMutation.mutate(id);
   };
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
+  const getTypeColor = (severity: string) => {
+    switch (severity) {
       case "success":
         return "text-success";
       case "warning":
@@ -145,8 +90,8 @@ export default function Notifications() {
     }
   };
 
-  const getTypeBadge = (type: string) => {
-    switch (type) {
+  const getTypeBadge = (severity: string) => {
+    switch (severity) {
       case "success":
         return "default";
       case "warning":
@@ -270,7 +215,7 @@ export default function Notifications() {
                           <CardContent className="p-4">
                             <div className="flex items-start gap-4">
                               <div
-                                className={`mt-1 ${getTypeColor(notification.type)}`}
+                                className={`mt-1 ${getTypeColor(notification.severity)}`}
                               >
                                 <Bell className="h-5 w-5" />
                               </div>
@@ -289,10 +234,12 @@ export default function Notifications() {
                                       </Badge>
                                     )}
                                     <Badge
-                                      variant={getTypeBadge(notification.type)}
+                                      variant={getTypeBadge(
+                                        notification.severity,
+                                      )}
                                       className="h-5 px-2 text-xs capitalize"
                                     >
-                                      {notification.type}
+                                      {notification.severity}
                                     </Badge>
                                   </div>
                                   <div className="flex items-center gap-1">
@@ -322,7 +269,9 @@ export default function Notifications() {
                                   {notification.message}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                  {notification.timestamp}
+                                  {new Date(
+                                    notification.created_at,
+                                  ).toLocaleString()}
                                 </p>
                               </div>
                             </div>
