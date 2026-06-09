@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { IGetWalletsParams } from "@/types/wallet.types";
+import { IGetWalletsParams, IWallet } from "@/types/wallet.types";
+import { IApiResponse } from "@/types/apiResponseType";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { getWallets, getHeldTransactions } from "../endpoints/useWallet";
 
 export const useGetWallets = (params: IGetWalletsParams) => {
-  return useQuery({
+  return useQuery<IApiResponse<IWallet[]>>({
     queryKey: [QUERY_KEYS.WALLETS, params],
     queryFn: () => getWallets(params),
     enabled: !!params.customer_id,

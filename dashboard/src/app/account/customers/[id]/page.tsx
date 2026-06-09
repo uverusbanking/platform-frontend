@@ -6,7 +6,6 @@ import {
   Mail,
   Phone,
   ShieldCheck,
-  TrendingUp,
   User,
   Wallet,
   ChevronRight,
@@ -20,6 +19,7 @@ import {
   EyeOff,
   Activity,
   Banknote,
+  Snowflake,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -47,10 +47,15 @@ import { WalletFreezeDialog } from "@/components/customers/WalletFreezeDialog";
 import { HeldTransactionsList } from "@/components/customers/HeldTransactionsList";
 import { AdjustmentsList } from "@/components/customers/AdjustmentsList";
 import { LedgerAdjustmentDialog } from "@/components/customers/LedgerAdjustmentDialog";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { can } from "@/auth/can";
 import { PERMISSIONS } from "@/auth/permissions";
-// import { Tabs } from "@/components/ui/tabs";
-import { WalletMetadata } from "@/types/wallet.types";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -87,7 +92,8 @@ export default function CustomerDetailPage() {
   const userData = useUserStore((state) => state.userData);
   const view_mode = userData?.view_mode;
   const [showBalance, setShowBalance] = useState(false);
-  const { data: walletsResponse, isLoading: walletsLoading } = useGetWallets({
+  const [activeWalletIdx, setActiveWalletIdx] = useState(0);
+  const { data: walletsResponse } = useGetWallets({
     customer_id: id,
     environment: view_mode,
   });
@@ -95,8 +101,8 @@ export default function CustomerDetailPage() {
 
   if (isLoading) return <CustomerDetailSkeleton />;
 
-  const wallet: IWallet | undefined = walletsResponse?.data;
-  const walletMetadata: WalletMetadata | undefined = wallet?.metadata;
+  const wallets: IWallet[] = walletsResponse?.data ?? [];
+  const wallet: IWallet | undefined = wallets[activeWalletIdx];
   const totalBalance = Number(wallet?.balance ?? 0);
 
   if (!customer) {
@@ -320,112 +326,77 @@ export default function CustomerDetailPage() {
         </div>
       </motion.header>
 
-      <motion.div className="grid grid-cols-1 gap-6">
-        <Card className="relative overflow-hidden border-none shadow-2xl bg-linear-to-br from-[#0047AB] via-[#0056D2] to-[#002B6B] group hover:scale-[1.02] transition-all duration-500">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 blur-2xl" />
-
-          <CardContent className="p-8 space-y-8 relative z-10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-inner">
-                  <Wallet className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-[11px] font-black text-white/70 uppercase tracking-[0.2em]">
-                  Account Balance
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9 rounded-full hover:bg-white/10 text-white/80 transition-all"
-                  onClick={() => setShowBalance(!showBalance)}
+      {/* Wallet Section */}
+      {wallets.length === 0 ? (
+        <motion.div
+          variants={itemVariants}
+          className="flex items-center gap-3 p-6 rounded-2xl border border-border/40 bg-muted/10 text-muted-foreground"
+        >
+          <Wallet className="w-5 h-5 opacity-40" />
+          <span className="text-sm font-semibold">
+            No wallets found for this customer.
+          </span>
+        </motion.div>
+      ) : wallets.length === 1 ? (
+        <motion.div variants={itemVariants}>
+          <WalletCard
+            wallet={wallets[0]}
+            selected
+            showBalance={showBalance}
+            onToggleBalance={() => setShowBalance(!showBalance)}
+          />
+        </motion.div>
+      ) : (
+        <motion.div variants={itemVariants} className="space-y-3">
+          <div className="flex items-center gap-2 px-1">
+            <Wallet className="w-3.5 h-3.5 text-primary" />
+            <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">
+              {wallets.length} Wallets
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 rounded-full ml-auto"
+              onClick={() => setShowBalance(!showBalance)}
+            >
+              {showBalance ? (
+                <EyeOff className="w-3.5 h-3.5" />
+              ) : (
+                <Eye className="w-3.5 h-3.5" />
+              )}
+            </Button>
+          </div>
+          <Carousel opts={{ align: "start", loop: false }} className="w-full">
+            <CarouselContent className="-ml-4">
+              {wallets.map((w, idx) => (
+                <CarouselItem
+                  key={w.id}
+                  className="pl-4 basis-[92%] md:basis-[55%] lg:basis-[45%]"
                 >
-                  {showBalance ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
-                </Button>
-                <div className="px-2 py-1 rounded-lg bg-white/10 border border-white/10 backdrop-blur-sm">
-                  <TrendingUp className="w-4 h-4 text-emerald-400" />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="text-4xl font-black tracking-tight text-white drop-shadow-md">
-                {showBalance
-                  ? `₦${totalBalance.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}`
-                  : "₦ •••• ••••"}
-              </div>
-              <div className="flex items-center gap-2 text-[11px] font-bold text-white/50 tracking-wider bg-black/10 w-fit px-3 py-1 rounded-full border border-white/5">
-                {/* <span className="text-emerald-400">+₦2,300.00</span> */}
-                <span className="text-emerald-400">NIL</span>
-                <span>from last month</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Note: this card feature is disabled for now */}
-        {/* <Card className="relative overflow-hidden border-none shadow-2xl bg-linear-to-br from-[#6366f1] via-[#8b5cf6] to-[#a855f7] group hover:scale-[1.02] transition-all duration-500">
-          <div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full -ml-16 -mt-16 blur-3xl" />
-          <div className="absolute bottom-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mb-12 blur-2xl" />
-
-           <CardContent className="p-8 space-y-8 relative z-10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-inner">
-                  <Activity className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-[11px] font-black text-white/70 uppercase tracking-[0.2em]">
-                  Total Transactions
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-white/80">
-                <div className="px-2 py-1 rounded-lg bg-white/10 border border-white/10 backdrop-blur-sm">
-                  <TrendingUp className="w-4 h-4 text-white" />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="text-4xl font-black tracking-tight text-white drop-shadow-md">
-                ₦1,250,400.00
-              </div>
-              <div className="flex items-center gap-2 text-[11px] font-bold text-white/50 tracking-wider bg-black/10 w-fit px-3 py-1 rounded-full border border-white/5">
-                <span className="text-white/90">142 active transactions</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card> */}
-
-        {/* <Card className="border-border/50 shadow-premium bg-card group hover:scale-[1.02] transition-all duration-300">
-          <CardContent className="p-8 space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="p-3 rounded-2xl bg-success/10 text-success border border-success/20">
-                <ShieldCheck className="w-6 h-6" />
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <div className="text-3xl font-black tracking-tight text-foreground">
-                {wallet?.account_name || "-----------"}
-              </div>
-              <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-                {wallet?.account_number || "-----------"}
-              </div>
-              <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-                {wallet?.bank_name || "-----------"}
-              </div>
-            </div>
-          </CardContent>
-        </Card> */}
-      </motion.div>
+                  <div
+                    onClick={() => setActiveWalletIdx(idx)}
+                    className="cursor-pointer"
+                  >
+                    <WalletCard
+                      wallet={w}
+                      selected={activeWalletIdx === idx}
+                      showBalance={showBalance}
+                    />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden md:flex -left-5 bg-background/80 border-border/50" />
+            <CarouselNext className="hidden md:flex -right-5 bg-background/80 border-border/50" />
+          </Carousel>
+          {wallet && (
+            <p className="text-[10px] text-muted-foreground font-semibold px-1">
+              Selected: <span className="text-foreground">{wallet.name}</span> ·{" "}
+              {wallet.account_number}
+            </p>
+          )}
+        </motion.div>
+      )}
 
       {wallet?.is_funding_frozen && wallet.id && (
         <motion.section variants={itemVariants} className="space-y-4">
@@ -665,6 +636,117 @@ export default function CustomerDetailPage() {
         </div>
       </div>
     </motion.div>
+  );
+}
+
+function WalletCard({
+  wallet,
+  selected,
+  showBalance,
+  onToggleBalance,
+}: {
+  wallet: IWallet;
+  selected: boolean;
+  showBalance: boolean;
+  onToggleBalance?: () => void;
+}) {
+  const balance = Number(wallet.balance ?? 0);
+  const isFrozenWallet = wallet.is_transfer_frozen || wallet.is_funding_frozen;
+  const gradients = [
+    "from-[#0047AB] via-[#0056D2] to-[#002B6B]",
+    "from-violet-600 via-purple-600 to-indigo-700",
+    "from-emerald-500 via-teal-600 to-cyan-700",
+    "from-rose-500 via-pink-600 to-fuchsia-700",
+    "from-amber-500 via-orange-500 to-red-600",
+  ];
+  const gradient = gradients[0];
+
+  return (
+    <div
+      className={`relative overflow-hidden rounded-2xl shadow-2xl transition-all duration-300 ${
+        selected
+          ? "ring-2 ring-white/40 scale-[1.01]"
+          : "opacity-80 hover:opacity-100"
+      } bg-linear-to-br ${isFrozenWallet ? "from-[#8b0000] via-[#cd5c5c] to-[#ff0000]" : gradient}`}
+    >
+      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 blur-2xl pointer-events-none" />
+
+      <div className="relative p-7 space-y-6">
+        <div className="flex items-start justify-between">
+          <div className="space-y-0.5">
+            <div className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50">
+              {wallet.account_type} · {wallet.environment}
+            </div>
+            <div className="text-sm font-black text-white truncate max-w-[160px]">
+              {wallet.name}
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div
+              className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${
+                wallet.status === "ACTIVE"
+                  ? "bg-white/20"
+                  : "bg-white/10 text-white/50"
+              }`}
+            >
+              {wallet.status}
+            </div>
+            {isFrozenWallet && (
+              <div className="flex items-center gap-1 bg-white/10 px-1.5 py-0.5 rounded-full">
+                <Snowflake className="w-2.5 h-2.5 text-white/70" />
+                <span className="text-[8px] font-black text-white/70 uppercase">
+                  Frozen
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="font-mono text-sm font-bold tracking-[0.15em] text-white/80">
+          {wallet.account_number.replace(/(\d{4})(?=\d)/g, "$1 ")}
+        </div>
+
+        <div className="flex items-end justify-between">
+          <div>
+            <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-0.5">
+              Available Balance
+            </div>
+            <div className="text-2xl font-black tracking-tight text-white">
+              {showBalance
+                ? `${wallet.currency} ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : "•••• ••••"}
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-0.5">
+              Bank
+            </div>
+            <div className="text-xs font-black text-white/80">
+              {wallet.bank_name}
+            </div>
+          </div>
+        </div>
+
+        {onToggleBalance && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-5 right-5 h-8 w-8 rounded-full hover:bg-white/10 text-white/70"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleBalance();
+            }}
+          >
+            {showBalance ? (
+              <EyeOff className="w-3.5 h-3.5" />
+            ) : (
+              <Eye className="w-3.5 h-3.5" />
+            )}
+          </Button>
+        )}
+      </div>
+    </div>
   );
 }
 
