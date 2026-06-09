@@ -58,6 +58,22 @@ export interface ICustomerKyc {
   updated_at: string;
 }
 
+export interface ICustomerWallet {
+  id: string;
+  name: string;
+  account_number: string;
+  account_name: string | null;
+  balance?: number;
+  currency: string;
+  bank_code: string | null;
+  bank_name: string | null;
+  account_type: string;
+  status: string;
+  is_funding_frozen: boolean;
+  is_transfer_frozen: boolean;
+  created_at: string;
+}
+
 export interface ICustomer {
   id: string;
   company_id: string;
@@ -82,6 +98,7 @@ export interface ICustomer {
   bvn?: string;
   balance?: number;
   account_number?: string;
+  wallets?: ICustomerWallet[];
 }
 
 export interface ICreateCustomerPayload {
