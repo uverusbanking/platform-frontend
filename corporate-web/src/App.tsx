@@ -23,7 +23,6 @@ import NewPayment from "@/pages/NewPayment";
 import PaymentDetail from "@/pages/PaymentDetail";
 import UserManagement from "@/pages/UserManagement";
 import NotFound from "@/pages/NotFound";
-import UnderConstruction from "@/pages/UnderConstruction";
 
 const queryClient = new QueryClient();
 
@@ -35,11 +34,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            {/* Global Under Construction Override */}
-            <Route path="*" element={<UnderConstruction />} />
-
-            {/*
-            --- ORIGINAL ROUTES DISABLED ---
+            <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/change-password" element={<ChangePasswordPage />} />
@@ -51,17 +46,64 @@ const App = () => (
               <Route path="/accounts" element={<AccountsPage />} />
               <Route path="/applications" element={<ApplicationsList />} />
               <Route path="/applications/:id" element={<ApplicationDetail />} />
-              <Route path="/payments" element={<RequirePermission category="transactions"><PaymentsPage /></RequirePermission>} />
-              <Route path="/payments/new" element={<RequirePermission action="tx_initiate"><NewPayment /></RequirePermission>} />
-              <Route path="/payments/:id" element={<RequirePermission category="transactions"><PaymentDetail /></RequirePermission>} />
-              <Route path="/transactions" element={<RequirePermission category="transactions"><TransactionsPage /></RequirePermission>} />
-              <Route path="/users" element={<RequirePermission action="usr_invite"><UserManagement /></RequirePermission>} />
-              <Route path="/roles" element={<RequirePermission action="usr_roles"><RolesPermissionsPage /></RequirePermission>} />
-              <Route path="/settings/approval-rules" element={<RequirePermission action="apr_config"><ApprovalRulesPage /></RequirePermission>} />
+              <Route
+                path="/payments"
+                element={
+                  <RequirePermission category="transactions">
+                    <PaymentsPage />
+                  </RequirePermission>
+                }
+              />
+              <Route
+                path="/payments/new"
+                element={
+                  <RequirePermission action="tx_initiate">
+                    <NewPayment />
+                  </RequirePermission>
+                }
+              />
+              <Route
+                path="/payments/:id"
+                element={
+                  <RequirePermission category="transactions">
+                    <PaymentDetail />
+                  </RequirePermission>
+                }
+              />
+              <Route
+                path="/transactions"
+                element={
+                  <RequirePermission category="transactions">
+                    <TransactionsPage />
+                  </RequirePermission>
+                }
+              />
+              <Route
+                path="/users"
+                element={
+                  <RequirePermission action="usr_invite">
+                    <UserManagement />
+                  </RequirePermission>
+                }
+              />
+              <Route
+                path="/roles"
+                element={
+                  <RequirePermission action="usr_roles">
+                    <RolesPermissionsPage />
+                  </RequirePermission>
+                }
+              />
+              <Route
+                path="/settings/approval-rules"
+                element={
+                  <RequirePermission action="apr_config">
+                    <ApprovalRulesPage />
+                  </RequirePermission>
+                }
+              />
             </Route>
-            <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<NotFound />} />
-            */}
           </Routes>
         </AuthProvider>
       </BrowserRouter>

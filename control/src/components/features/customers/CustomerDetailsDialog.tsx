@@ -58,27 +58,48 @@ export function CustomerDetailsDialog({
   if (!customer) return null;
 
   const getStatusBadge = (status: string) => {
-    switch (status?.toUpperCase()) {
+    const s = status?.toUpperCase();
+    switch (s) {
       case "ACTIVE":
         return (
-          <Badge className="bg-success-light text-success-foreground border-success">
+          <Badge className="bg-success-light text-success-foreground border-success font-bold capitalize">
             Active
           </Badge>
         );
       case "PENDING":
         return (
-          <Badge className="bg-warning-light text-warning-foreground border-warning">
+          <Badge className="bg-warning-light text-warning-foreground border-warning font-bold capitalize">
             Pending
           </Badge>
         );
-      case "BLOCKED":
+      case "RESTRICTED":
         return (
-          <Badge className="bg-error-light text-error-foreground border-error">
-            Blocked
+          <Badge className="bg-warning-light text-warning-foreground border-warning font-bold capitalize">
+            Restricted
+          </Badge>
+        );
+      case "BLOCKED":
+      case "SUSPENDED":
+      case "FROZEN":
+        return (
+          <Badge className="bg-error-light text-error-foreground border-error font-bold capitalize">
+            {status.toLowerCase()}
+          </Badge>
+        );
+      case "INACTIVE":
+      case "CLOSED":
+      case "ARCHIVED":
+        return (
+          <Badge variant="secondary" className="font-bold capitalize">
+            {status.toLowerCase()}
           </Badge>
         );
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return (
+          <Badge variant="secondary" className="font-bold capitalize">
+            {status || "Unknown"}
+          </Badge>
+        );
     }
   };
 
@@ -250,7 +271,7 @@ export function CustomerDetailsDialog({
                   </div>
                   <div>
                     <div className="text-sm text-muted-foreground">Status</div>
-                    {getStatusBadge(customer.status)}
+                    {getStatusBadge(customer.user_status)}
                   </div>
                 </CardContent>
               </Card>

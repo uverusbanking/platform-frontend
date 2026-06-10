@@ -6,7 +6,7 @@ export default defineConfig({
   envDir: "../",
   server: {
     host: "::",
-    port: 3001,
+    port: 3000,
     allowedHosts: true,
     hmr: {
       overlay: false,
@@ -20,7 +20,7 @@ export default defineConfig({
     },
   },
   preview: {
-    port: 3001,
+    port: 3000,
     allowedHosts: true,
   },
   plugins: [react()],

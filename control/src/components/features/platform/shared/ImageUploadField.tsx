@@ -92,7 +92,6 @@ export function ImageUploadField({
     try {
       const res = await uploadMutation.mutateAsync({
         file,
-        userType: "PLATFORM",
       });
       onChange(res.data.file_url);
       toast.success("Image uploaded", { id: loading });

@@ -11,9 +11,8 @@ export function OrgPendingScreen({ brandConfig }: OrgPendingScreenProps) {
     : (brandConfig.websiteUrl ?? "https://uverus.com/contact");
 
   const handleSignOut = () => {
-    localStorage.removeItem("sb-access-token");
-    localStorage.removeItem("sb-user-data");
-    localStorage.removeItem("sb-session-id");
+    sessionStorage.removeItem("sb-access-token");
+    sessionStorage.removeItem("sb-session-id");
     window.location.reload();
   };
 

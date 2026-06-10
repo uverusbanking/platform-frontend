@@ -2,7 +2,12 @@ import { IApiResponse, TError } from "@/types/apiResponse.type";
 import apiClient from "@/lib/axios";
 import { useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/queryKeys";
-import { IGetWalletsParams, IWallet } from "@/types/wallet.types";
+import {
+  IGetWalletsParams,
+  IWallet,
+  IFreezeWalletPayload,
+  IUnfreezeWalletPayload,
+} from "@/types/wallet.types";
 
 const getWallets = async (
   params: IGetWalletsParams,
@@ -31,6 +36,22 @@ export const getPlatformCustomerWallets = async (
   }
   // Otherwise assume it's directly returning an array
   return response.data.data || [];
+};
+
+export const freezeWallet = async (
+  id: string,
+  payload: IFreezeWalletPayload,
+): Promise<IApiResponse<unknown>> => {
+  const response = await apiClient.post(`/wallets/${id}/freeze`, payload);
+  return response.data;
+};
+
+export const unfreezeWallet = async (
+  id: string,
+  payload: IUnfreezeWalletPayload,
+): Promise<IApiResponse<unknown>> => {
+  const response = await apiClient.post(`/wallets/${id}/unfreeze`, payload);
+  return response.data;
 };
 
 export const useGetPlatformCustomerWallets = (customerId: string) => {

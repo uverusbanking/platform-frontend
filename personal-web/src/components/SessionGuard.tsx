@@ -1,9 +1,9 @@
-import React, { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { useSessionGuard } from '@/hooks/useSessionGuard';
-import { SessionWarningModal } from './SessionWarningModal';
-import { STORAGE_KEYS } from '@/config/sessionConfig';
+import React, { useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSessionGuard } from "@/hooks/useSessionGuard";
+import { SessionWarningModal } from "./SessionWarningModal";
+import { STORAGE_KEYS } from "@/config/sessionConfig";
 
 interface SessionGuardProps {
   children: React.ReactNode;
@@ -11,7 +11,7 @@ interface SessionGuardProps {
 
 /**
  * SessionGuard Component
- * 
+ *
  * Wraps the application to provide automatic session timeout functionality.
  * Monitors user activity and enforces security policies for idle sessions.
  */
@@ -25,9 +25,9 @@ export const SessionGuard: React.FC<SessionGuardProps> = ({ children }) => {
   const handleLogout = useCallback(async () => {
     try {
       await signOut();
-      navigate('/auth/login', { replace: true });
+      navigate("/auth/login", { replace: true });
     } catch (error) {
-      console.error('SessionGuard: Logout error', error);
+      console.error("SessionGuard: Logout error", error);
 
       // Force logout even if signOut fails
       localStorage.removeItem(STORAGE_KEYS.LAST_ACTIVITY);
@@ -35,16 +35,21 @@ export const SessionGuard: React.FC<SessionGuardProps> = ({ children }) => {
       localStorage.removeItem(STORAGE_KEYS.SESSION_START);
 
       // Also clear auth tokens to prevent any potential issues
-      localStorage.removeItem("sb-access-token");
-      localStorage.removeItem("sb-user-data");
-      navigate('/auth/login', { replace: true });
+      sessionStorage.removeItem("sb-access-token");
+      sessionStorage.removeItem("sb-session-id");
+      navigate("/auth/login", { replace: true });
     }
   }, [signOut, navigate]);
 
   /**
    * Use session guard hook
    */
-  const { showWarningModal, countdown, handleStayLoggedIn, handleLogout: handleImmediateLogout } = useSessionGuard({
+  const {
+    showWarningModal,
+    countdown,
+    handleStayLoggedIn,
+    handleLogout: handleImmediateLogout,
+  } = useSessionGuard({
     isAuthenticated: !!user,
     onLogout: handleLogout,
   });

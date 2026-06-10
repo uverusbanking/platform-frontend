@@ -6,6 +6,7 @@ import {
   updateOrganisationDocuments,
   updateBrandSettings,
   updateConfiguredDomains,
+  approveOrgKYB,
 } from "@/hooks/endpoints/useOrganisation";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 
@@ -60,6 +61,19 @@ export const useUpdateBrandSettings = () => {
 
 export const useUpdateConfiguredDomains = () => {
   return useMutation({ mutationFn: updateConfiguredDomains });
+};
+
+export const useApproveOrgKYB = (organisationId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => approveOrgKYB(organisationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.GO_LIVE_CHECKLIST, organisationId],
+      });
+    },
+  });
 };
 
 export const useUpdateOrganisationDocuments = () => {

@@ -35,8 +35,7 @@ export const useLogin = () => {
       return response.data;
     },
     onSuccess: (data) => {
-      // Store token in localStorage
-      localStorage.setItem("sb-access-token", data.access_token);
+      sessionStorage.setItem("sb-access-token", data.access_token);
       // Invalidate user queries to refetch with new token
       queryClient.invalidateQueries({ queryKey: ["user"] });
     },

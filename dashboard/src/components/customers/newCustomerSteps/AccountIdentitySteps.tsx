@@ -166,7 +166,6 @@ export function AccountIdentitySteps({ data, nextStep, prevStep }: Props) {
       const response = await uploadFile({
         file,
         documentType: key,
-        userType: "ORGANISATION",
         userId: userData.id,
         fileType: fileType,
       });

@@ -174,7 +174,6 @@ function ImageUploadField({
       const res = await uploadFile({
         file: staged,
         documentType: field === "icon" ? "BRAND_ICON" : "BRAND_LOGO",
-        userType: "ORGANISATION",
       });
       onChange(res.data.file_url);
       toast.success("Image uploaded", { id: loading });

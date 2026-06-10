@@ -24,17 +24,14 @@ import {
   Lock as LockIcon,
   Copy,
   Snowflake,
+  Building2,
+  CheckCheck,
 } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { useGetPlatformCustomerWallets } from "@/hooks/endpoints/useWallet";
+// useGetPlatformCustomerWallets kept for fallback; wallets now embedded in customer response
 import { useUserStore } from "@/state/userStore";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -50,35 +47,43 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { FreezeCustomerDialog } from "@/components/features/customers/FreezeCustomerDialog";
 import { UnFreezeCustomerDialog } from "@/components/features/customers/UnFreezeCustomerDialog";
+import { FreezeWalletDialog } from "@/components/features/customers/FreezeWalletDialog";
+import { UnfreezeWalletDialog } from "@/components/features/customers/UnfreezeWalletDialog";
 import { TransactionDetailModal } from "@/components/features/transactions/TransactionDetailModal";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { CustomerActivityTab } from "./CustomerActivityTab";
 import { can } from "@/auth/can";
 import { PERMISSIONS } from "@/auth/permissions";
 import { useGetCustomerById } from "@/hooks/queries/useCustomerQueries";
 import { useGetPlatformCustomerTransactions } from "@/hooks/queries/useTransactionQueries";
 
-
 export default function CustomerDetailPage() {
   const { id = "" } = useParams<{ id: string }>();
   const [showFreezeDialog, setShowFreezeDialog] = useState(false);
   const [showUnfreezeDialog, setShowUnfreezeDialog] = useState(false);
   const [activeWalletIdx, setActiveWalletIdx] = useState(0);
+  const [walletFreezeTarget, setWalletFreezeTarget] = useState<{
+    id: string;
+    accountNumber: string;
+  } | null>(null);
+  const [walletUnfreezeTarget, setWalletUnfreezeTarget] = useState<{
+    id: string;
+    accountNumber: string;
+  } | null>(null);
   const { data: customerResponse, isLoading } = useGetCustomerById(id);
   const customer = customerResponse?.data;
 
-  const statusValue = String(customer?.status ?? "").toLowerCase();
+  const statusValue = String(customer?.user_status ?? "").toLowerCase();
   const isFrozen = statusValue === "frozen";
   const statusClassMap = {
     active: "bg-success/10 text-success border-success/20",
     frozen: "bg-destructive/10 text-destructive border-destructive/20",
     blocked: "bg-destructive/10 text-destructive border-destructive/20",
+    suspended: "bg-destructive/10 text-destructive border-destructive/20",
+    inactive: "bg-muted/40 text-muted-foreground border-border/40",
+    closed: "bg-muted/40 text-muted-foreground border-border/40",
+    archived: "bg-muted/40 text-muted-foreground border-border/40",
+    pending: "bg-warning/10 text-warning border-warning/20",
+    restricted: "bg-warning/10 text-warning border-warning/20",
   } as const;
   const statusBadgeClass =
     statusValue in statusClassMap
@@ -86,7 +91,8 @@ export default function CustomerDetailPage() {
       : "bg-muted/40 text-muted-foreground border-border/40";
 
   const userData = useUserStore((state) => state.userData);
-  const { data: wallets = [] } = useGetPlatformCustomerWallets(id);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const wallets = customer?.wallets ?? [];
 
   if (isLoading) return <CustomerDetailSkeleton />;
   if (!customer)
@@ -146,7 +152,7 @@ export default function CustomerDetailPage() {
                 <Badge
                   className={`${statusBadgeClass}  font-black uppercase text-[10px] px-3 py-1 rounded-full backdrop-blur-sm`}
                 >
-                  {customer.status}
+                  {customer.user_status}
                 </Badge>
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-muted-foreground font-medium">
@@ -246,6 +252,28 @@ export default function CustomerDetailPage() {
         open={showUnfreezeDialog}
         onOpenChange={setShowUnfreezeDialog}
       />
+      {walletFreezeTarget && (
+        <FreezeWalletDialog
+          walletId={walletFreezeTarget.id}
+          customerId={customer.id}
+          accountNumber={walletFreezeTarget.accountNumber}
+          open={!!walletFreezeTarget}
+          onOpenChange={(open) => {
+            if (!open) setWalletFreezeTarget(null);
+          }}
+        />
+      )}
+      {walletUnfreezeTarget && (
+        <UnfreezeWalletDialog
+          walletId={walletUnfreezeTarget.id}
+          customerId={customer.id}
+          accountNumber={walletUnfreezeTarget.accountNumber}
+          open={!!walletUnfreezeTarget}
+          onOpenChange={(open) => {
+            if (!open) setWalletUnfreezeTarget(null);
+          }}
+        />
+      )}
 
       <div className="grid lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Stats and Info */}
@@ -309,110 +337,218 @@ export default function CustomerDetailPage() {
             </Card>
           </div> */}
 
-          {/* Wallet Carousel */}
-          {wallets.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between px-1">
-                <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                  <Wallet className="w-3.5 h-3.5 text-primary" />
-                  {wallets.length} Wallet{wallets.length > 1 ? "s" : ""} Linked
+          {/* Freeze Info Banner */}
+          {isFrozen && customer.frozen_at && (
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 rounded-2xl border border-destructive/30 bg-destructive/5">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="p-2.5 rounded-xl bg-destructive/10 shrink-0">
+                  <Snowflake className="w-4 h-4 text-destructive" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-black uppercase tracking-widest text-destructive mb-0.5">
+                    Account Frozen
+                  </div>
+                  <div className="text-sm font-bold text-foreground truncate">
+                    {customer.freeze_reason?.replace(/_/g, " ")}
+                    {customer.freeze_category && (
+                      <span className="ml-2 text-xs font-semibold text-muted-foreground">
+                        · {customer.freeze_category}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
+              <div className="flex flex-wrap gap-6 text-right shrink-0">
+                {customer.reference_id && (
+                  <div>
+                    <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">
+                      Ref
+                    </div>
+                    <div className="text-xs font-mono font-bold text-foreground">
+                      {customer.reference_id}
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">
+                    Frozen On
+                  </div>
+                  <div className="text-xs font-bold text-foreground">
+                    {new Date(customer.frozen_at).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">
+                    Policy
+                  </div>
+                  <div className="text-xs font-bold text-foreground">
+                    {customer.unfreeze_policy?.replace(/_/g, " ")}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
-              <Carousel
-                opts={{
-                  align: "start",
-                  loop: false,
-                }}
-                className="w-full"
-              >
-                <CarouselContent className="-ml-4">
-                  {wallets.map((wallet, idx) => {
-                    const gradients = [
-                      "from-violet-600 via-purple-600 to-indigo-700",
-                      "from-emerald-500 via-teal-600 to-cyan-700",
-                      "from-rose-500 via-pink-600 to-fuchsia-700",
-                      "from-amber-500 via-orange-500 to-red-600",
-                      "from-sky-500 via-blue-600 to-indigo-700",
-                    ];
-                    const gradient = gradients[idx % gradients.length];
-                    const balanceNum = parseFloat(wallet.balance || "0");
-                    const isFrozenWallet = wallet.is_transfer_frozen || wallet.is_funding_frozen;
+          {/* Wallets Grid */}
+          {wallets.length > 0 && (
+            <div className="space-y-3">
+              <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 px-1">
+                <Wallet className="w-3.5 h-3.5 text-primary" />
+                {wallets.length} Wallet{wallets.length > 1 ? "s" : ""} Linked
+              </div>
+
+              <Card className="border-none shadow-premium bg-surface/50 backdrop-blur-md overflow-hidden">
+                <div className="divide-y divide-border/30">
+                  {wallets.map((wallet) => {
+                    const isFrozenWallet =
+                      wallet.is_transfer_frozen || wallet.is_funding_frozen;
 
                     return (
-                      <CarouselItem key={wallet.id} className="pl-4 basis-[85%] md:basis-[48%]">
-                        <div className="relative group/card h-full">
-                          {/* Glow */}
-                          <div className={`absolute -inset-1 bg-gradient-to-br ${gradient} rounded-3xl blur-md opacity-20 group-hover/card:opacity-30 transition-opacity duration-500`} />
-
-                          <div className={`relative h-full bg-gradient-to-br ${gradient} rounded-2xl p-6 shadow-xl overflow-hidden text-white flex flex-col justify-between`}>
-                            {/* Background circles */}
-                            <div className="absolute inset-0 pointer-events-none">
-                              <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full border-2 border-white/10" />
-                              <div className="absolute -bottom-16 -left-8 w-52 h-52 rounded-full border-2 border-white/10" />
+                      <div
+                        key={wallet.id}
+                        className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-muted/30"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="p-2.5 rounded-xl bg-muted/40 border border-border/30">
+                            <Building2 className="w-4 h-4 text-primary/70" />
+                          </div>
+                          <div className="space-y-0.5">
+                            <div className="text-sm font-black text-foreground">
+                              {wallet.name}
                             </div>
-
-                            {/* Top row */}
-                            <div className="relative flex items-start justify-between mb-6">
-                              <div>
-                                <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">
-                                  {wallet.account_type} · {wallet.environment}
-                                </div>
-                                <div className="text-base font-black tracking-wide truncate max-w-[150px]">
-                                  {wallet.name}
-                                </div>
-                              </div>
-                              <div className="flex flex-col items-end gap-1.5">
-                                <div className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${wallet.status === "ACTIVE" ? "bg-white/20" : "bg-white/10 text-white/50"}`}>
-                                  {wallet.status}
-                                </div>
-                                {isFrozenWallet && (
-                                  <div className="flex items-center gap-1 bg-white/10 text-white/70 text-[8px] font-bold px-1.5 py-0.5 rounded-full">
-                                    <Snowflake className="w-2.5 h-2.5" />
-                                    FROZEN
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Chip + account number */}
-                            <div className="relative mb-6">
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="w-8 h-6 rounded-md bg-gradient-to-br from-yellow-300/60 to-amber-400/60 shadow-inner" />
-                              </div>
-                              <div className="font-mono text-lg font-bold tracking-[0.2em] text-white/90">
-                                {wallet.account_number.replace(/(\d{4})(?=\d)/g, "$1 ")}
-                              </div>
-                            </div>
-
-                            {/* Balance + bank */}
-                            <div className="relative flex items-end justify-between mt-auto">
-                              <div>
-                                <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-0.5">
-                                  Available Balance
-                                </div>
-                                <div className="text-2xl font-black tracking-tight">
-                                  {wallet.currency} {balanceNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-0.5">Bank</div>
-                                <div className="text-xs font-black text-white/80">{wallet.bank_name}</div>
-                              </div>
+                            <div className="text-[11px] font-semibold text-muted-foreground/70 flex items-center gap-1.5">
+                              {wallet.bank_name || "---"}
+                              <span className="text-muted-foreground/30">
+                                •
+                              </span>
+                              <span className="uppercase tracking-widest">
+                                {wallet.account_type}
+                              </span>
                             </div>
                           </div>
                         </div>
-                      </CarouselItem>
+
+                        <div className="flex flex-wrap items-center gap-6 sm:gap-8">
+                          <div className="space-y-1 min-w-[120px]">
+                            <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                              Account Number
+                            </div>
+                            <div className="flex items-center gap-2 group/copy">
+                              <span className="text-sm font-mono font-bold text-foreground">
+                                {wallet.account_number}
+                              </span>
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(
+                                    wallet.account_number,
+                                  );
+                                  setCopiedId(wallet.id);
+                                  setTimeout(() => setCopiedId(null), 2000);
+                                }}
+                                className="text-muted-foreground/40 hover:text-primary transition-colors"
+                              >
+                                {copiedId === wallet.id ? (
+                                  <CheckCheck className="w-3.5 h-3.5 text-success" />
+                                ) : (
+                                  <Copy className="w-3 h-3 group-hover/copy:text-primary transition-colors" />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1 min-w-[140px] hidden md:block">
+                            <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                              Account Name
+                            </div>
+                            <div className="text-xs font-bold text-foreground truncate max-w-[180px]">
+                              {wallet.account_name?.split("/").pop()?.trim() ||
+                                "---"}
+                            </div>
+                          </div>
+
+                          <div className="space-y-1 min-w-[60px] hidden sm:block">
+                            <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                              Currency
+                            </div>
+                            <div className="text-xs font-bold text-foreground">
+                              {wallet.currency}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 shrink-0">
+                            <div
+                              className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1.5 ${
+                                wallet.status === "ACTIVE" && !isFrozenWallet
+                                  ? "bg-success/10 text-success"
+                                  : isFrozenWallet
+                                    ? "bg-destructive/10 text-destructive"
+                                    : "bg-muted/40 text-muted-foreground"
+                              }`}
+                            >
+                              {isFrozenWallet && (
+                                <Snowflake className="w-2.5 h-2.5" />
+                              )}
+                              {isFrozenWallet ? "Frozen" : wallet.status}
+                            </div>
+
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground">
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <circle cx="10" cy="4" r="1.5" />
+                                    <circle cx="10" cy="10" r="1.5" />
+                                    <circle cx="10" cy="16" r="1.5" />
+                                  </svg>
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="end"
+                                className="w-48 p-1.5 rounded-xl"
+                              >
+                                {isFrozenWallet ? (
+                                  <DropdownMenuItem
+                                    className="rounded-lg gap-2 text-xs font-bold cursor-pointer text-primary"
+                                    onClick={() =>
+                                      setWalletUnfreezeTarget({
+                                        id: wallet.id,
+                                        accountNumber: wallet.account_number,
+                                      })
+                                    }
+                                  >
+                                    <Snowflake className="w-3.5 h-3.5" />
+                                    Unfreeze Wallet
+                                  </DropdownMenuItem>
+                                ) : (
+                                  <DropdownMenuItem
+                                    className="rounded-lg gap-2 text-xs font-bold cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/5"
+                                    onClick={() =>
+                                      setWalletFreezeTarget({
+                                        id: wallet.id,
+                                        accountNumber: wallet.account_number,
+                                      })
+                                    }
+                                  >
+                                    <Snowflake className="w-3.5 h-3.5" />
+                                    Freeze Wallet
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      </div>
                     );
                   })}
-                </CarouselContent>
-                {wallets.length > 1 && (
-                  <>
-                    <CarouselPrevious className="hidden md:flex -left-6 bg-background/80 backdrop-blur-sm border-border/50" />
-                    <CarouselNext className="hidden md:flex -right-6 bg-background/80 backdrop-blur-sm border-border/50" />
-                  </>
-                )}
-              </Carousel>
+                </div>
+              </Card>
             </div>
           )}
 
@@ -449,7 +585,6 @@ export default function CustomerDetailPage() {
             <TabsContent value="activity">
               <CustomerActivityTab customerId={id} />
             </TabsContent>
-
 
             <TabsContent
               value="documents"
@@ -823,7 +958,9 @@ export default function CustomerDetailPage() {
 }
 
 function HistoryTab({ customerId }: { customerId: string }) {
-  const [typeFilter, setTypeFilter] = useState<"ALL" | "CREDIT" | "DEBIT">("ALL");
+  const [typeFilter, setTypeFilter] = useState<"ALL" | "CREDIT" | "DEBIT">(
+    "ALL",
+  );
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
 
@@ -833,7 +970,10 @@ function HistoryTab({ customerId }: { customerId: string }) {
     ...(typeFilter !== "ALL" ? { type: typeFilter as "CREDIT" | "DEBIT" } : {}),
   };
 
-  const { data, isLoading } = useGetPlatformCustomerTransactions(customerId, filters);
+  const { data, isLoading } = useGetPlatformCustomerTransactions(
+    customerId,
+    filters,
+  );
 
   const transactions = data?.data ?? [];
   const meta = data?.meta;
@@ -867,19 +1007,28 @@ function HistoryTab({ customerId }: { customerId: string }) {
             )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 text-xs font-bold gap-1.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs font-bold gap-1.5"
+                >
                   {filterLabels[typeFilter]}
                   <ChevronRight className="w-3 h-3 rotate-90" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-36">
-                <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground">Filter by type</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Filter by type
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {(["ALL", "CREDIT", "DEBIT"] as const).map((t) => (
                   <DropdownMenuItem
                     key={t}
                     className={`text-xs font-bold ${typeFilter === t ? "text-primary" : ""}`}
-                    onClick={() => { setTypeFilter(t); setPage(1); }}
+                    onClick={() => {
+                      setTypeFilter(t);
+                      setPage(1);
+                    }}
                   >
                     {filterLabels[t]}
                   </DropdownMenuItem>
@@ -940,9 +1089,33 @@ function HistoryTab({ customerId }: { customerId: string }) {
                         }`}
                       >
                         {isCredit ? (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M12 4v16m8-8H4"
+                            />
+                          </svg>
                         ) : (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" /></svg>
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M20 12H4"
+                            />
+                          </svg>
                         )}
                       </div>
                       <div className="flex flex-col gap-0.5 min-w-0">
@@ -953,11 +1126,14 @@ function HistoryTab({ customerId }: { customerId: string }) {
                           <span className="font-mono">{tx.reference}</span>
                           <span>·</span>
                           <span>
-                            {new Date(tx.createdAt).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
+                            {new Date(tx.createdAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              },
+                            )}
                           </span>
                         </div>
                       </div>
@@ -1017,15 +1193,17 @@ function HistoryTab({ customerId }: { customerId: string }) {
                 </Button>
               </div>
             )}
-            
           </div>
         )}
-        <Link to={`/account/customers/${customerId}/transactions`} className="block w-full">
-              <Button className="w-full gap-2 font-bold" size="sm">
-                View More
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </Link>
+        <Link
+          to={`/account/customers/${customerId}/transactions`}
+          className="block w-full"
+        >
+          <Button className="w-full gap-2 font-bold" size="sm">
+            View More
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </Link>
       </Card>
     </TabsContent>
   );

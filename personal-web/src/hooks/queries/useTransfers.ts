@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { TransferService } from "@/services";
+import { PaginationParams } from "@/types";
 
 export const useBanks = () => {
   return useQuery({
@@ -23,5 +24,19 @@ export const useTransferTransactionDetails = (transactionId: string) => {
     queryKey: ["transfers", "transactions", transactionId],
     queryFn: () => TransferService.getTransactionDetails(transactionId),
     enabled: !!transactionId,
+  });
+};
+
+export const useRecentBeneficiaries = (params?: PaginationParams) => {
+  return useQuery({
+    queryKey: ["transfers", "beneficiaries", "recent", params],
+    queryFn: () => TransferService.getRecentBeneficiaries(params),
+  });
+};
+
+export const useSavedBeneficiaries = (params?: PaginationParams) => {
+  return useQuery({
+    queryKey: ["transfers", "beneficiaries", "saved", params],
+    queryFn: () => TransferService.getSavedBeneficiaries(params),
   });
 };

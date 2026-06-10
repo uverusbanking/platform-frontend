@@ -1,4 +1,10 @@
-import { CheckCircle2, Circle, Rocket, AlertCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  Circle,
+  Rocket,
+  AlertCircle,
+  ShieldCheck,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,6 +14,7 @@ import {
   useGetOrgGoLiveChecklist,
   useUpdateOrganisationStatus,
 } from "@/hooks/queries/useOrganisationQueries";
+import { useApproveOrgKYB } from "@/hooks/mutations/usePlatformMutations";
 import type { IGoLiveChecklistItem } from "@/hooks/endpoints/useOrganisation";
 
 interface GoLiveChecklistProps {
@@ -47,6 +54,8 @@ export function GoLiveChecklist({
   const { data, isLoading } = useGetOrgGoLiveChecklist(organisationId);
   const { mutate: updateStatus, isPending } =
     useUpdateOrganisationStatus(organisationId);
+  const { mutate: approveKYB, isPending: isApprovingKYB } =
+    useApproveOrgKYB(organisationId);
 
   const checklist = data?.data;
   const isAlreadyActive = currentStatus === "ACTIVE";
@@ -133,7 +142,29 @@ export function GoLiveChecklist({
           <>
             <div className="mb-4">
               {checklist.items.map((item) => (
-                <ChecklistRow key={item.key} item={item} />
+                <div key={item.key}>
+                  <ChecklistRow item={item} />
+                  {item.key === "kyb_approved" && item.status === "pending" && (
+                    <div className="ml-7 mb-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs font-semibold border-primary/30 text-primary hover:bg-primary/10"
+                        disabled={isApprovingKYB}
+                        onClick={() =>
+                          approveKYB(undefined, {
+                            onSuccess: () =>
+                              toast.success("KYB approved successfully"),
+                            onError: () => toast.error("Failed to approve KYB"),
+                          })
+                        }
+                      >
+                        <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
+                        {isApprovingKYB ? "Approving…" : "Approve KYB"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
 

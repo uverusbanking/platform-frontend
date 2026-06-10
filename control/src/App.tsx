@@ -55,8 +55,12 @@ import WhatsappPage from "@/app/account/whatsapp/page";
 import SettingsProfilePage from "@/app/account/settings/profile/page";
 import SettingsSecurityPage from "@/app/account/settings/security/page";
 import SettingsDevelopersPage from "@/app/account/settings/developers_disabled/page";
+import NotificationSettingsPage from "@/app/account/settings/notifications/page";
 import CustomerActivityListPage from "@/app/account/customers/[id]/activity/page";
 import CustomerActivityDetailPage from "@/app/account/customers/[id]/activity/[activityId]/page";
+import FrozenFundsPage from "@/app/account/wallets/frozen-funds/page";
+import AuditLogsPage from "@/app/account/audit-logs/page";
+import AuditLogDetailPage from "@/app/account/audit-logs/[id]/page";
 
 // 404
 import NotFound from "@/app/not-found";
@@ -130,6 +134,7 @@ export default function App() {
       >
         <InactivityProvider>
           <TooltipProvider>
+            <Toaster position="top-center" richColors closeButton />
             <BrowserRouter>
               <Routes>
                 <Route element={<RootLayout />}>
@@ -212,6 +217,15 @@ export default function App() {
                     <Route path="expenses" element={<ExpensesPage />} />
                     <Route path="ussd" element={<UssdPage />} />
                     <Route path="whatsapp" element={<WhatsappPage />} />
+                    <Route
+                      path="wallets/frozen-funds"
+                      element={<FrozenFundsPage />}
+                    />
+                    <Route path="audit-logs" element={<AuditLogsPage />} />
+                    <Route
+                      path="audit-logs/:id"
+                      element={<AuditLogDetailPage />}
+                    />
 
                     <Route path="settings" element={<SettingsLayout />}>
                       <Route
@@ -228,6 +242,10 @@ export default function App() {
                       <Route
                         path="developers"
                         element={<SettingsDevelopersPage />}
+                      />
+                      <Route
+                        path="notifications"
+                        element={<NotificationSettingsPage />}
                       />
                     </Route>
                   </Route>

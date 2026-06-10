@@ -14,6 +14,8 @@ export interface IWallet {
   balance: string;
   hold_balance: string;
   status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
+  is_funding_frozen: boolean;
+  is_transfer_frozen: boolean;
   created_at: string; // ISO Date
   updated_at: string; // ISO Date
   closed_at: string | null;
@@ -77,4 +79,41 @@ export interface ProviderMetadata {
 export interface IGetWalletsParams {
   customer_id?: string;
   environment?: "LIVE" | "SANDBOX";
+}
+
+export interface IHeldTransactionMetadata {
+  wallet_id: string;
+  amount: string | number;
+  [key: string]: unknown;
+}
+
+export interface IHeldTransaction {
+  id: string;
+  reference: string;
+  description: string | null;
+  status: "HELD";
+  metadata: IHeldTransactionMetadata;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IHeldTransactionsWalletInfo {
+  id: string;
+  account_number: string;
+  customer: {
+    first_name: string;
+    last_name: string;
+    email: string;
+  } | null;
+}
+
+export interface IGetHeldTransactionsResponse {
+  data: IHeldTransaction[];
+  wallet: IHeldTransactionsWalletInfo | null;
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }

@@ -8,5 +8,4 @@ export interface IUploadResponse {
 
 export interface IUploadParams {
   file: File;
-  userType: "PLATFORM" | "ORGANISATION" | "CUSTOMER";
 }

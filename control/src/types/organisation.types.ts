@@ -32,6 +32,29 @@ export interface IOrganisation {
   brand_settings?: IBrandConfig;
   configured_domains?: IConfiguredDomains;
   members?: IOrganisationMember[];
+  directors?: IOrganisationDirector[];
+}
+
+export interface IOrganisationDirector {
+  id: string;
+  organisation_id: string;
+  first_name: string;
+  last_name: string;
+  middle_name?: string | null;
+  bvn?: string | null;
+  nin?: string | null;
+  id_type?: string | null;
+  id_number?: string | null;
+  ownership_percentage?: number | null;
+  residential_address_street?: string | null;
+  residential_address_city?: string | null;
+  residential_address_state?: string | null;
+  residential_address_country: string;
+  is_owner?: boolean | null;
+  is_verified: boolean;
+  verified_by?: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface IOrganisationMember {

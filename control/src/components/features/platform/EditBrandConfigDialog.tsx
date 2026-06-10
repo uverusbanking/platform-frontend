@@ -96,68 +96,78 @@ export function EditBrandConfigDialog({
   }, [open, organisation, form]);
 
   const onSubmit = async (values: FormValues) => {
-    const clean = (obj: any) =>
-      Object.fromEntries(
-        Object.entries(obj).filter(
-          ([_, v]) => v !== "" && v !== null && v !== undefined,
-        ),
+    const defaults = buildDefaults(organisation);
+
+    const getChangedFields = (current: any, original: any) => {
+      const changes: any = {};
+      Object.keys(current).forEach((key) => {
+        const val = current[key];
+        const origVal = original[key];
+
+        if (val && typeof val === "object" && !Array.isArray(val)) {
+          const nested = getChangedFields(val, origVal || {});
+          if (Object.keys(nested).length > 0) {
+            changes[key] = nested;
+          }
+        } else if (val !== origVal) {
+          // Only include if it's not just an empty string replacing a null/undefined (which buildDefaults does)
+          // or if the user explicitly cleared it.
+          changes[key] = val;
+        }
+      });
+      return changes;
+    };
+
+    const changes = getChangedFields(values, defaults);
+    const mutations: Promise<unknown>[] = [];
+
+    if (changes.brand && Object.keys(changes.brand).length > 0) {
+      mutations.push(
+        updateBrand({ id: organisation.id, brand: changes.brand }),
       );
+    }
 
-    const filteredValues = {
-      brand: clean(values.brand),
-      domains: clean(values.domains),
-      identifiers: clean(values.identifiers),
-    } as unknown as FormValues;
+    if (changes.domains && Object.keys(changes.domains).length > 0) {
+      mutations.push(
+        updateDomains({ id: organisation.id, ...changes.domains }),
+      );
+    }
 
-    try {
-      const mutations: Promise<unknown>[] = [
-        updateBrand({ id: organisation.id, brand: filteredValues.brand }),
-        updateDomains({ id: organisation.id, ...filteredValues.domains }),
-      ];
-
-      const { slug, prefix, short_name, short_code } =
-        filteredValues.identifiers;
-      if (slug || prefix || short_name || short_code) {
-        mutations.push(
-          updateOrg({
-            id: organisation.id,
-            slug: slug || undefined,
-            prefix: prefix || undefined,
-            short_name: short_name || undefined,
-            short_code: short_code || undefined,
-          }),
-        );
-      }
-
-      await Promise.all(mutations);
-
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: [QUERY_KEYS.ORGANISATION.GET_BY_ID, organisation.id],
+    if (changes.identifiers && Object.keys(changes.identifiers).length > 0) {
+      const { slug, prefix, short_name, short_code } = changes.identifiers;
+      mutations.push(
+        updateOrg({
+          id: organisation.id,
+          slug,
+          prefix,
+          short_name,
+          short_code,
         }),
-        queryClient.invalidateQueries({
-          queryKey: [QUERY_KEYS.ORGANISATION.BRAND_SETTINGS, organisation.id],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: [
-            QUERY_KEYS.ORGANISATION.CONFIGURED_DOMAINS,
-            organisation.id,
-          ],
-        }),
-      ]);
-      toast.success("Brand configuration saved");
+      );
+    }
+
+    if (mutations.length === 0) {
+      toast.info("No changes detected");
       onOpenChange(false);
-    } catch (err) {
-      const data = axios.isAxiosError(err)
-        ? (err.response?.data as
-            | { message?: string; errors?: string[] }
-            | undefined)
-        : undefined;
-      const errors = data?.errors ?? [];
-      const items =
-        errors.length > 0
-          ? errors
-          : [data?.message ?? "Failed to save brand configuration"];
+      return;
+    }
+
+    const results = await Promise.allSettled(mutations);
+    const failures = results.filter(
+      (r): r is PromiseRejectedResult => r.status === "rejected",
+    );
+
+    if (failures.length > 0) {
+      const items = failures.flatMap((r) => {
+        const err = r.reason;
+        if (!axios.isAxiosError(err)) return ["An unexpected error occurred"];
+        const body = err.response?.data as
+          | { message?: string | string[]; errors?: string[] }
+          | undefined;
+        if (body?.errors?.length) return body.errors;
+        if (Array.isArray(body?.message)) return body.message;
+        return [body?.message ?? "Failed to save configuration"];
+      });
       toast.error("Failed to save brand configuration", {
         description: (
           <ul className="mt-1 space-y-0.5">
@@ -170,7 +180,22 @@ export function EditBrandConfigDialog({
         ),
         duration: 6000,
       });
+      return;
     }
+
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.GET_BY_ID, organisation.id],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.BRAND_SETTINGS, organisation.id],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORGANISATION.CONFIGURED_DOMAINS, organisation.id],
+      }),
+    ]);
+    toast.success("Brand configuration saved");
+    onOpenChange(false);
   };
 
   return (

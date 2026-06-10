@@ -52,6 +52,17 @@ export const unfreezeCustomer = async (
   return response.data;
 };
 
+export const setCustomerTier = async (
+  id: string,
+  payload: { kyc_level: number; justification: string },
+): Promise<IApiResponse<unknown>> => {
+  const response = await apiClient.post(
+    `/customers/platform/${id}/set-tier`,
+    payload,
+  );
+  return response.data;
+};
+
 export const registerNewCustomer = async (
   payload: IRegisterNewCustomerPayload,
 ): Promise<IApiResponse<unknown>> => {

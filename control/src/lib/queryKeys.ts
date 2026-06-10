@@ -12,12 +12,16 @@ export const QUERY_KEYS = {
     DOMAIN_VERIFICATION: "org-domain-verification",
     GO_LIVE_CHECKLIST: "org-go-live-checklist",
     PAYMENT_CONFIG: "org-payment-config",
+    NOTIFICATION_CONFIG: "org-notification-config",
   },
   PLATFORM: {
     ORGANISATIONS: "platform-organisations",
     ROLES: "roles",
     USERS: "platform-users",
     CUSTOMER_WALLETS: "platform-customer-wallets",
+    NOTIFICATION_CONFIG: "platform-notification-config",
+    NOTIFICATION_BALANCE: "platform-notification-balance",
+    AUDIT_LOGS: "platform-audit-logs",
   },
   CUSTOMER: {
     GET_ALL: "customers",
@@ -35,6 +39,7 @@ export const QUERY_KEYS = {
   WALLET: {
     GET_ALL: "wallets",
     CUSTOMER_WALLETS: "customer-wallets",
+    FROZEN_FUNDS: "platform-frozen-funds",
   },
   AUTH: {
     ENCRYPTION_PUBLIC_KEY: "encryption-public-key",

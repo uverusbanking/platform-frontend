@@ -46,7 +46,7 @@ class ApiClient {
       Object.assign(headers, customHeaders);
     }
 
-    const token = localStorage.getItem("sb-access-token");
+    const token = sessionStorage.getItem("sb-access-token");
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
@@ -57,7 +57,7 @@ class ApiClient {
     });
 
     if (response.status === 401 && !url.includes("refresh-token")) {
-      const sessionId = localStorage.getItem("sb-session-id");
+      const sessionId = sessionStorage.getItem("sb-session-id");
       if (sessionId) {
         try {
           const refreshResponse = await fetch(
@@ -78,9 +78,9 @@ class ApiClient {
             const newToken =
               refreshData.data?.access_token || refreshData.access_token;
             if (newToken) {
-              localStorage.setItem("sb-access-token", newToken);
+              sessionStorage.setItem("sb-access-token", newToken);
               if (refreshData.data?.session_id || refreshData.session_id) {
-                localStorage.setItem(
+                sessionStorage.setItem(
                   "sb-session-id",
                   refreshData.data?.session_id || refreshData.session_id,
                 );
@@ -198,7 +198,7 @@ class ApiClient {
         typeof window !== "undefined" ? window.location.host : "",
     };
 
-    const token = localStorage.getItem("sb-access-token");
+    const token = sessionStorage.getItem("sb-access-token");
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }

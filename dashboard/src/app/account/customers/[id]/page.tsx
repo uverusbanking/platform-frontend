@@ -6,7 +6,6 @@ import {
   Mail,
   Phone,
   ShieldCheck,
-  TrendingUp,
   User,
   Wallet,
   ChevronRight,
@@ -20,6 +19,10 @@ import {
   EyeOff,
   Activity,
   Banknote,
+  Snowflake,
+  Building2,
+  Copy,
+  CheckCheck,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -42,10 +45,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { FreezeCustomerDialog } from "@/components/customers/FreezeCustomerDialog";
 import { UnFreezeCustomerDialog } from "@/components/customers/UnFreezeCustomerDialog";
+import { SetTierDialog } from "@/components/customers/SetTierDialog";
+import { WalletFreezeDialog } from "@/components/customers/WalletFreezeDialog";
+import { HeldTransactionsList } from "@/components/customers/HeldTransactionsList";
+import { AdjustmentsList } from "@/components/customers/AdjustmentsList";
+import { LedgerAdjustmentDialog } from "@/components/customers/LedgerAdjustmentDialog";
 import { can } from "@/auth/can";
 import { PERMISSIONS } from "@/auth/permissions";
-// import { Tabs } from "@/components/ui/tabs";
-import { WalletMetadata } from "@/types/wallet.types";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -73,12 +79,20 @@ export default function CustomerDetailPage() {
   const { id = "" } = useParams<{ id: string }>();
   const [showFreezeDialog, setShowFreezeDialog] = useState(false);
   const [showUnfreezeDialog, setShowUnfreezeDialog] = useState(false);
+  const [showSetTierDialog, setShowSetTierDialog] = useState(false);
+  const [showWalletFreezeDialog, setShowWalletFreezeDialog] = useState(false);
+  const [showLedgerAdjustmentDialog, setShowLedgerAdjustmentDialog] =
+    useState(false);
   const { data: customerResponse, isLoading } = useGetCustomerById(id);
   const customer: ICustomer | undefined = customerResponse?.data;
   const userData = useUserStore((state) => state.userData);
   const view_mode = userData?.view_mode;
-  const [showBalance, setShowBalance] = useState(false);
-  const { data: walletsResponse, isLoading: walletsLoading } = useGetWallets({
+  const [showBalance, setShowBalance] = useState(true);
+  const [activeWalletIdx, setActiveWalletIdx] = useState(0);
+  const [copiedAccountNumber, setCopiedAccountNumber] = useState<string | null>(
+    null,
+  );
+  const { data: walletsResponse } = useGetWallets({
     customer_id: id,
     environment: view_mode,
   });
@@ -86,9 +100,34 @@ export default function CustomerDetailPage() {
 
   if (isLoading) return <CustomerDetailSkeleton />;
 
-  const wallet: IWallet | undefined = walletsResponse?.data;
-  const walletMetadata: WalletMetadata | undefined = wallet?.metadata;
-  const totalBalance = Number(wallet?.balance ?? 0);
+  // Normalise customer.wallets (missing environment/hold_balance) into full IWallet objects,
+  // falling back to the dedicated wallet query when the customer response predates this field.
+  const rawWallets = customer?.wallets;
+  const wallets: IWallet[] = rawWallets?.length
+    ? rawWallets.map((w) => ({
+        id: w.id,
+        name: w.name,
+        customer_id: customer!.id,
+        environment: (view_mode ?? "LIVE") as "LIVE" | "TEST",
+        account_type: w.account_type as "CHECKING" | "SAVINGS",
+        currency: w.currency,
+        account_number: w.account_number,
+        bank_name: w.bank_name ?? "",
+        bank_code: w.bank_code ?? "",
+        account_name: w.account_name ?? "",
+        bank_logo: null,
+        metadata: null as any,
+        balance: String(w.balance ?? 0),
+        hold_balance: "0",
+        status: w.status as IWallet["status"],
+        is_funding_frozen: w.is_funding_frozen,
+        is_transfer_frozen: w.is_transfer_frozen,
+        created_at: w.created_at,
+        updated_at: w.created_at,
+        closed_at: null,
+      }))
+    : (walletsResponse?.data ?? []);
+  const wallet: IWallet | undefined = wallets[activeWalletIdx];
 
   if (!customer) {
     return (
@@ -263,118 +302,212 @@ export default function CustomerDetailPage() {
                     {isFrozen ? "Unfreeze Customer" : "Freeze Customer"}
                   </DropdownMenuItem>
                 )}
+                {can(userData, PERMISSIONS.SET_CUSTOMER_TIER) && (
+                  <DropdownMenuItem
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      setShowSetTierDialog(true);
+                    }}
+                    className="h-12 rounded-xl cursor-pointer gap-3 font-bold"
+                  >
+                    <Activity className="w-4 h-4" />
+                    Override Tier
+                  </DropdownMenuItem>
+                )}
+                {wallet && (
+                  <DropdownMenuItem
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      setShowWalletFreezeDialog(true);
+                    }}
+                    className={`h-12 rounded-xl cursor-pointer gap-3 font-bold ${
+                      wallet.is_funding_frozen || wallet.is_transfer_frozen
+                        ? "text-primary hover:bg-primary/5 hover:text-primary"
+                        : "text-destructive hover:bg-destructive/5 hover:text-destructive"
+                    }`}
+                  >
+                    <Wallet className="w-4 h-4" />
+                    {wallet.is_funding_frozen || wallet.is_transfer_frozen
+                      ? "Unfreeze Wallet"
+                      : "Freeze Wallet"}
+                  </DropdownMenuItem>
+                )}
+                {wallet && can(userData, PERMISSIONS.LEDGER_ADJUSTMENT) && (
+                  <DropdownMenuItem
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      setShowLedgerAdjustmentDialog(true);
+                    }}
+                    className="h-12 rounded-xl cursor-pointer gap-3 font-bold text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+                  >
+                    <Banknote className="w-4 h-4" />
+                    Ledger Adjustment
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
       </motion.header>
 
-      <motion.div className="grid grid-cols-1 gap-6">
-        <Card className="relative overflow-hidden border-none shadow-2xl bg-linear-to-br from-[#0047AB] via-[#0056D2] to-[#002B6B] group hover:scale-[1.02] transition-all duration-500">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 blur-2xl" />
-
-          <CardContent className="p-8 space-y-8 relative z-10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-inner">
-                  <Wallet className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-[11px] font-black text-white/70 uppercase tracking-[0.2em]">
-                  Account Balance
-                </span>
+      {/* Wallet Section */}
+      {wallets.length === 0 ? (
+        <motion.div
+          variants={itemVariants}
+          className="flex items-center gap-3 p-6 rounded-2xl border border-border/40 bg-muted/10 text-muted-foreground"
+        >
+          <Wallet className="w-5 h-5 opacity-40" />
+          <span className="text-sm font-semibold">
+            No wallets found for this customer.
+          </span>
+        </motion.div>
+      ) : (
+        <motion.div variants={itemVariants} className="space-y-3">
+          <div className="flex items-center gap-2 px-1">
+            <Wallet className="w-3.5 h-3.5 text-primary" />
+            <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">
+              {wallets.length} {wallets.length === 1 ? "Wallet" : "Wallets"}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 rounded-full ml-auto"
+              onClick={() => setShowBalance(!showBalance)}
+            >
+              {showBalance ? (
+                <EyeOff className="w-3.5 h-3.5" />
+              ) : (
+                <Eye className="w-3.5 h-3.5" />
+              )}
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {wallets.map((w, idx) => (
+              <div
+                key={w.id}
+                onClick={() => setActiveWalletIdx(idx)}
+                className="cursor-pointer"
+              >
+                <WalletCard
+                  wallet={w}
+                  index={idx}
+                  selected={activeWalletIdx === idx}
+                  showBalance={showBalance}
+                  onToggleBalance={() => setShowBalance(!showBalance)}
+                />
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9 rounded-full hover:bg-white/10 text-white/80 transition-all"
-                  onClick={() => setShowBalance(!showBalance)}
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Bank Accounts Section */}
+      {wallets.length > 0 && (
+        <motion.section variants={itemVariants} className="space-y-4">
+          <div className="flex items-center gap-2 px-1">
+            <Building2 className="w-3.5 h-3.5 text-primary" />
+            <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">
+              Bank Accounts
+            </span>
+          </div>
+          <Card className="border-border/50 shadow-premium bg-card overflow-hidden">
+            <div className="divide-y divide-border/40">
+              {wallets.map((w) => (
+                <div
+                  key={w.id}
+                  className={`p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-muted/20 ${
+                    wallet?.id === w.id ? "bg-primary/5" : ""
+                  }`}
                 >
-                  {showBalance ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
-                </Button>
-                <div className="px-2 py-1 rounded-lg bg-white/10 border border-white/10 backdrop-blur-sm">
-                  <TrendingUp className="w-4 h-4 text-emerald-400" />
+                  <div className="flex items-center gap-4">
+                    <div className="p-2.5 rounded-xl bg-muted/40 border border-border/30">
+                      <Building2 className="w-4 h-4 text-muted-foreground/60" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <div className="text-xs font-black text-foreground">
+                        {w.name}
+                      </div>
+                      <div className="text-[11px] font-semibold text-muted-foreground/70">
+                        {w.bank_name || "---"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-6 sm:gap-8">
+                    <div className="space-y-0.5">
+                      <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                        Account Number
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-mono font-bold text-foreground">
+                          {w.account_number}
+                        </span>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(w.account_number);
+                            setCopiedAccountNumber(w.id);
+                            setTimeout(
+                              () => setCopiedAccountNumber(null),
+                              2000,
+                            );
+                          }}
+                          className="text-muted-foreground/40 hover:text-primary transition-colors"
+                        >
+                          {copiedAccountNumber === w.id ? (
+                            <CheckCheck className="w-3 h-3 text-success" />
+                          ) : (
+                            <Copy className="w-3 h-3" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-0.5">
+                      <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                        Account Name
+                      </div>
+                      <div className="text-xs font-bold text-foreground">
+                        {w.account_name?.split("/").pop()?.trim() || "---"}
+                      </div>
+                    </div>
+                    <div className="space-y-0.5">
+                      <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                        Currency
+                      </div>
+                      <div className="text-xs font-bold text-foreground">
+                        {w.currency}
+                      </div>
+                    </div>
+                    <div
+                      className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${
+                        w.status === "ACTIVE"
+                          ? "bg-success/10 text-success"
+                          : w.is_funding_frozen || w.is_transfer_frozen
+                            ? "bg-destructive/10 text-destructive"
+                            : "bg-muted/40 text-muted-foreground"
+                      }`}
+                    >
+                      {w.is_funding_frozen || w.is_transfer_frozen
+                        ? "Frozen"
+                        : w.status}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
+          </Card>
+        </motion.section>
+      )}
 
-            <div className="space-y-2">
-              <div className="text-4xl font-black tracking-tight text-white drop-shadow-md">
-                {showBalance
-                  ? `₦${totalBalance.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}`
-                  : "₦ •••• ••••"}
-              </div>
-              <div className="flex items-center gap-2 text-[11px] font-bold text-white/50 tracking-wider bg-black/10 w-fit px-3 py-1 rounded-full border border-white/5">
-                {/* <span className="text-emerald-400">+₦2,300.00</span> */}
-                <span className="text-emerald-400">NIL</span>
-                <span>from last month</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {wallet?.is_funding_frozen && wallet.id && (
+        <motion.section variants={itemVariants} className="space-y-4">
+          <HeldTransactionsList walletId={wallet.id} />
+        </motion.section>
+      )}
 
-        {/* Note: this card feature is disabled for now */}
-        {/* <Card className="relative overflow-hidden border-none shadow-2xl bg-linear-to-br from-[#6366f1] via-[#8b5cf6] to-[#a855f7] group hover:scale-[1.02] transition-all duration-500">
-          <div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full -ml-16 -mt-16 blur-3xl" />
-          <div className="absolute bottom-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mb-12 blur-2xl" />
-
-           <CardContent className="p-8 space-y-8 relative z-10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-inner">
-                  <Activity className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-[11px] font-black text-white/70 uppercase tracking-[0.2em]">
-                  Total Transactions
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-white/80">
-                <div className="px-2 py-1 rounded-lg bg-white/10 border border-white/10 backdrop-blur-sm">
-                  <TrendingUp className="w-4 h-4 text-white" />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="text-4xl font-black tracking-tight text-white drop-shadow-md">
-                ₦1,250,400.00
-              </div>
-              <div className="flex items-center gap-2 text-[11px] font-bold text-white/50 tracking-wider bg-black/10 w-fit px-3 py-1 rounded-full border border-white/5">
-                <span className="text-white/90">142 active transactions</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card> */}
-
-        {/* <Card className="border-border/50 shadow-premium bg-card group hover:scale-[1.02] transition-all duration-300">
-          <CardContent className="p-8 space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="p-3 rounded-2xl bg-success/10 text-success border border-success/20">
-                <ShieldCheck className="w-6 h-6" />
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <div className="text-3xl font-black tracking-tight text-foreground">
-                {wallet?.account_name || "-----------"}
-              </div>
-              <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-                {wallet?.account_number || "-----------"}
-              </div>
-              <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-                {wallet?.bank_name || "-----------"}
-              </div>
-            </div>
-          </CardContent>
-        </Card> */}
-      </motion.div>
+      {wallet?.id && (
+        <motion.section variants={itemVariants} className="space-y-4">
+          <AdjustmentsList walletId={wallet.id} />
+        </motion.section>
+      )}
 
       <FreezeCustomerDialog
         id={customer.id}
@@ -386,6 +519,26 @@ export default function CustomerDetailPage() {
         open={showUnfreezeDialog}
         onOpenChange={setShowUnfreezeDialog}
       />
+      <SetTierDialog
+        id={customer.id}
+        currentTier={customer.kyc_level ?? 1}
+        open={showSetTierDialog}
+        onOpenChange={setShowSetTierDialog}
+      />
+      {wallet && (
+        <WalletFreezeDialog
+          wallet={wallet}
+          open={showWalletFreezeDialog}
+          onOpenChange={setShowWalletFreezeDialog}
+        />
+      )}
+      {wallet && (
+        <LedgerAdjustmentDialog
+          walletId={wallet.id}
+          open={showLedgerAdjustmentDialog}
+          onOpenChange={setShowLedgerAdjustmentDialog}
+        />
+      )}
 
       {/* Main Grid Content */}
       <div className="grid lg:grid-cols-12 gap-10 items-start">
@@ -582,6 +735,120 @@ export default function CustomerDetailPage() {
         </div>
       </div>
     </motion.div>
+  );
+}
+
+const WALLET_GRADIENTS = [
+  "from-[#0047AB] via-[#0056D2] to-[#002B6B]",
+  "from-violet-600 via-purple-600 to-indigo-700",
+  "from-emerald-500 via-teal-600 to-cyan-700",
+  "from-rose-500 via-pink-600 to-fuchsia-700",
+  "from-amber-500 via-orange-500 to-red-600",
+];
+
+function WalletCard({
+  wallet,
+  index,
+  selected,
+  showBalance,
+  onToggleBalance,
+}: {
+  wallet: IWallet;
+  index: number;
+  selected: boolean;
+  showBalance: boolean;
+  onToggleBalance?: () => void;
+}) {
+  const balance = Number(wallet.balance ?? 0);
+  const isFrozenWallet = wallet.is_transfer_frozen || wallet.is_funding_frozen;
+  const gradient = WALLET_GRADIENTS[index % WALLET_GRADIENTS.length];
+
+  return (
+    <div
+      className={`relative overflow-hidden rounded-2xl shadow-2xl transition-all duration-300 ${
+        selected
+          ? "ring-2 ring-white/40 scale-[1.01]"
+          : "opacity-80 hover:opacity-100"
+      } bg-linear-to-br ${isFrozenWallet ? "from-[#8b0000] via-[#cd5c5c] to-[#ff0000]" : gradient}`}
+    >
+      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 blur-2xl pointer-events-none" />
+
+      <div className="relative p-7 space-y-6">
+        <div className="flex items-start justify-between">
+          <div className="space-y-0.5">
+            <div className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50">
+              {wallet.account_type} · {wallet.environment}
+            </div>
+            <div className="text-sm font-black text-white truncate max-w-[160px]">
+              {wallet.name}
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div
+              className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${
+                wallet.status === "ACTIVE"
+                  ? "bg-white/20"
+                  : "bg-white/10 text-white/50"
+              }`}
+            >
+              {wallet.status}
+            </div>
+            {isFrozenWallet && (
+              <div className="flex items-center gap-1 bg-white/10 px-1.5 py-0.5 rounded-full">
+                <Snowflake className="w-2.5 h-2.5 text-white/70" />
+                <span className="text-[8px] font-black text-white/70 uppercase">
+                  Frozen
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="font-mono text-sm font-bold tracking-[0.15em] text-white/80">
+          {wallet.account_number.replace(/(\d{4})(?=\d)/g, "$1 ")}
+        </div>
+
+        <div className="flex items-end justify-between">
+          <div>
+            <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-0.5">
+              Available Balance
+            </div>
+            <div className="text-2xl font-black tracking-tight text-white">
+              {showBalance
+                ? `${wallet.currency} ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : "•••• ••••"}
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-0.5">
+              Bank
+            </div>
+            <div className="text-xs font-black text-white/80">
+              {wallet.bank_name}
+            </div>
+          </div>
+        </div>
+
+        {onToggleBalance && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-5 right-5 h-8 w-8 rounded-full hover:bg-white/10 text-white/70"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleBalance();
+            }}
+          >
+            {showBalance ? (
+              <EyeOff className="w-3.5 h-3.5" />
+            ) : (
+              <Eye className="w-3.5 h-3.5" />
+            )}
+          </Button>
+        )}
+      </div>
+    </div>
   );
 }
 

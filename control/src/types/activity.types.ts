@@ -1,5 +1,76 @@
-export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-export type ActionCategory = 'SECURITY' | 'FINANCIAL' | 'PROFILE' | 'SYSTEM' | 'AUTHENTICATION';
+export type RiskLevel = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+export type ActionCategory =
+  | "SECURITY"
+  | "FINANCIAL"
+  | "PROFILE"
+  | "SYSTEM"
+  | "AUTHENTICATION";
+
+// Platform-wide audit log types (matches backend AuditLog model)
+export type AuditActionCategory =
+  | "PLATFORM"
+  | "ORGANISATION"
+  | "CUSTOMER"
+  | "SECURITY"
+  | "FINANCIAL"
+  | "COMPLIANCE"
+  | "ADMINISTRATIVE";
+
+export type AuditStatus = "SUCCESS" | "FAILED" | "PENDING" | "BLOCKED";
+export type ActorLevel =
+  | "PLATFORM_USER"
+  | "ORGANISATION_USER"
+  | "CUSTOMER"
+  | "SYSTEM";
+
+export interface IAuditLog {
+  id: string;
+  actor_level: ActorLevel;
+  actor_id: string;
+  actor_role: string;
+  actor_organisation_id: string | null;
+  actor_ip: string | null;
+  actor_user_agent: string | null;
+  service_name: string;
+  action: string;
+  action_category: AuditActionCategory;
+  target_type: string | null;
+  target_id: string | null;
+  status: AuditStatus;
+  risk_level: RiskLevel;
+  before_state: unknown;
+  after_state: unknown;
+  metadata: unknown;
+  error_message: string | null;
+  request_id: string | null;
+  hash_signature: string | null;
+  created_at: string;
+}
+
+export interface IGetAuditLogsFilters {
+  page?: number;
+  limit?: number;
+  sortOrder?: "asc" | "desc";
+  actorId?: string;
+  actorLevel?: ActorLevel;
+  actorOrganisationId?: string;
+  serviceName?: string;
+  action?: string;
+  actionCategory?: AuditActionCategory;
+  targetType?: string;
+  targetId?: string;
+  status?: AuditStatus;
+  riskLevel?: RiskLevel;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface IAuditLogsResponse {
+  data: IAuditLog[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
 
 export interface ICustomerActivityLog {
   id: string;

@@ -3,6 +3,7 @@ import type {
   ApiResponse,
   WalletBalanceResponseDto,
   VirtualAccountResponseDto,
+  CreateWalletDto,
 } from "@/types";
 
 export interface WalletDto {
@@ -24,4 +25,7 @@ export const WalletService = {
     api.get<{ status: string; data: VirtualAccountResponseDto | null }>(
       "/api/v1/wallets/virtual-account",
     ),
+
+  createWallet: (data: CreateWalletDto) =>
+    api.post<ApiResponse<WalletDto>>("/api/v1/wallets/create", data),
 };

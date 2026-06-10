@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Instrument+Serif:ital@0;1&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -6,22 +6,22 @@
 
 @layer base {
   :root {
-    /* ── Surfaces ─────────────────────────────────────────────────────── */
-    --background: 240 242 243; /* #F0F2F3 — page background        */
-    --surface: 232 234 235; /* #E8EAEB — card/section containers */
-    --surface-high: 221 224 226; /* #DDE0E2 — elevated/pressed        */
-    --surface-highest: 255 255 255; /* #FFFFFF — modals, floating cards  */
+    /* ── Surfaces (warm beige palette) ───────────────────────────────── */
+    --background: 244 239 232; /* #F4EFE8 — warm beige page bg     */
+    --surface: 237 230 220; /* #EDE6DC — secondary bg            */
+    --surface-high: 226 217 204; /* #E2D9CC — borders, dividers       */
+    --surface-highest: 255 255 255; /* #FFFFFF — cards, modals           */
 
-    /* ── Brand (runtime-injectable) ──────────────────────────────────── */
-    --brand-primary: 0 82 255; /* #0052FF */
-    --brand-secondary: 88 86 214; /* #5856D6 */
+    /* ── Brand (runtime-injectable via BrandConfigService) ───────────── */
+    --brand-primary: 255 59 48; /* #FF3B30 — default red             */
+    --brand-secondary: 224 42 31; /* #E02A1F — default dark red        */
     --on-brand-primary: 255 255 255;
     --on-brand-secondary: 255 255 255;
 
     /* ── Text ────────────────────────────────────────────────────────── */
-    --foreground: 25 28 29; /* #191C1D — primary body text       */
-    --foreground-strong: 11 11 11; /* #0B0B0B — high-contrast headings  */
-    --foreground-subtle: 176 176 176; /* #B0B0B0 — captions, hints         */
+    --foreground: 22 19 16; /* #161310 — primary body text       */
+    --foreground-strong: 11 8 6; /* #0B0806 — high-contrast headings  */
+    --foreground-subtle: 111 102 92; /* #6F665C — captions, hints         */
 
     /* ── Feedback ────────────────────────────────────────────────────── */
     --error: 255 59 48; /* #FF3B30 */
@@ -31,21 +31,30 @@
     --warning: 255 149 0; /* #FF9500 */
     --on-warning: 255 255 255;
 
+    /* ── Accent palette ─────────────────────────────────────────────── */
+    --soft: 255 230 227; /* #FFE6E3 — red tint bg             */
+    --mint: 184 239 193; /* #B8EFC1 — success/positive        */
+    --mint-deep: 31 122 58; /* #1F7A3A — mint text               */
+    --lemon: 244 226 122; /* #F4E27A — warning/secondary       */
+    --sky: 191 220 247; /* #BFDCF7 — info/tertiary           */
+    --plum: 42 27 61; /* #2A1B3D — dark purple accent      */
+
     /* ── Structure ───────────────────────────────────────────────────── */
-    --border: 221 224 226; /* #DDE0E2 — matches surface-high    */
-    --input: 221 224 226;
-    --ring: 0 82 255; /* matches brand-primary             */
-    --radius: 0.75rem;
+    --border: 226 217 204; /* #E2D9CC — warm border             */
+    --input: 226 217 204;
+    --ring: 255 59 48; /* matches brand-primary default     */
+    --radius: 0.875rem; /* 14px base radius                  */
+    --radius-pill: 999px;
 
     /* ── Sidebar ─────────────────────────────────────────────────────── */
-    --sidebar-background: 240 242 243;
-    --sidebar-foreground: 25 28 29;
-    --sidebar-primary: 0 82 255;
+    --sidebar-background: 244 239 232;
+    --sidebar-foreground: 22 19 16;
+    --sidebar-primary: 255 59 48;
     --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 232 234 235;
-    --sidebar-accent-foreground: 25 28 29;
-    --sidebar-border: 221 224 226;
-    --sidebar-ring: 0 82 255;
+    --sidebar-accent: 237 230 220;
+    --sidebar-accent-foreground: 22 19 16;
+    --sidebar-border: 226 217 204;
+    --sidebar-ring: 255 59 48;
 
     /* ── Gradients ───────────────────────────────────────────────────── */
     --gradient-primary: linear-gradient(
@@ -66,13 +75,15 @@
     );
 
     /* ── Shadows ─────────────────────────────────────────────────────── */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
     --shadow-md:
-      0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.04);
     --shadow-lg:
-      0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+      0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.04);
     --shadow-xl:
-      0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+      0 20px 25px -5px rgb(0 0 0 / 0.09), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+    --shadow-card:
+      0 1px 0 rgba(20, 15, 10, 0.04), 0 18px 40px -18px rgba(20, 15, 10, 0.18);
     --shadow-glow: 0 0 40px -10px rgb(var(--brand-primary) / 0.4);
   }
 }
@@ -90,12 +101,14 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: "Inter", "DM Sans", system-ui, sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "ss01", "cv11";
+    line-height: 1.5;
   }
 
-  /* Responsive typography scale */
+  /* Responsive typography — headings now use tight tracking */
   h1 {
     @apply text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight;
   }
@@ -108,17 +121,58 @@
     @apply text-lg sm:text-xl md:text-2xl font-semibold;
   }
 
-  /* Touch-friendly interactive elements */
   button,
   a,
   [role="button"] {
     @apply touch-manipulation;
   }
 
-  /* Minimum touch target size (44x44px recommended by Apple) */
   .touch-target {
     @apply min-h-[44px] min-w-[44px];
   }
+
+  ::selection {
+    background: rgb(var(--brand-primary));
+    color: #fff;
+  }
+}
+
+/* ── Typography utilities ──────────────────────────────────────────────── */
+.display {
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+  font-feature-settings: "ss01";
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgb(var(--foreground-subtle));
+}
+
+.num {
+  font-feature-settings: "tnum", "cv11";
+  letter-spacing: -0.04em;
+}
+
+.serif-italic {
+  font-family: "Instrument Serif", "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+/* ── Dot-grid background pattern ───────────────────────────────────────── */
+.dot-grid {
+  background-image: radial-gradient(
+    circle,
+    rgba(22, 19, 16, 0.07) 1px,
+    transparent 1.2px
+  );
+  background-size: 22px 22px;
 }
 
 @layer utilities {
@@ -135,19 +189,25 @@
     background: var(--gradient-hero);
   }
 
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
 
   .glass {
-    @apply backdrop-blur-xl bg-white/80 border border-white/20;
+    @apply backdrop-blur-xl border border-white/20;
+    background: rgba(255, 255, 255, 0.75);
   }
 
   .glass-dark {
-    @apply backdrop-blur-xl bg-black/40 border border-white/10;
+    @apply backdrop-blur-xl border border-white/10;
+    background: rgba(22, 19, 16, 0.8);
   }
 
-  /* Hide scrollbar but keep functionality */
+  /* Hide scrollbar but keep scroll functionality */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -156,7 +216,7 @@
     display: none;
   }
 
-  /* Safe area for mobile */
+  /* Safe area insets for notched devices */
   .safe-top {
     padding-top: env(safe-area-inset-top);
   }
@@ -170,40 +230,38 @@
     padding-right: env(safe-area-inset-right);
   }
 
-  /* Responsive container with auto max-width */
   .container-responsive {
     @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
     max-width: min(100%, 1280px);
   }
 
-  /* Touch-friendly spacing */
   .touch-manipulation {
     touch-action: manipulation;
   }
 
-  /* Prevent text selection on interactive elements */
   .no-select {
     -webkit-user-select: none;
     user-select: none;
   }
 
-  /* Active state for touch feedback */
   .active-scale {
     @apply active:scale-[0.98] transition-transform duration-100;
   }
 
-  /* Responsive grid utilities */
   .grid-responsive {
     @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
   }
 
-  /* Card hover effect */
   .card-interactive {
-    @apply hover:shadow-lg active:scale-[0.99] transition-all duration-200;
+    @apply transition-all duration-200;
+  }
+  .card-interactive:hover {
+    transform: translateY(-2px);
+    border-color: rgb(var(--foreground));
   }
 }
 
-/* Custom animations */
+/* ── Custom animations ─────────────────────────────────────────────────── */
 @keyframes float {
   0%,
   100% {

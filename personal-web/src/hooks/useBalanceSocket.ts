@@ -119,7 +119,7 @@ export function useBalanceSocket(
   );
 
   useEffect(() => {
-    const token = accessToken || localStorage.getItem(TOKEN_KEY);
+    const token = accessToken || sessionStorage.getItem(TOKEN_KEY);
     if (!user || !token) return;
 
     connectBalanceSocket(token);

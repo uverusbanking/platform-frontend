@@ -1,49 +1,86 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate } from "react-router-dom";
-import { Bell, HelpCircle, User } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Bell, Search, User } from "lucide-react";
 
 export default function DashboardLayout() {
   const { isAuthenticated, user } = useAuth();
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (user?.force_password_change) return <Navigate to="/change-password" replace />;
-  if (user && !user.onboarding_completed) return <Navigate to="/onboarding/new" replace />;
+  if (user?.force_password_change)
+    return <Navigate to="/change-password" replace />;
+  if (user && !user.onboarding_completed)
+    return <Navigate to="/onboarding/new" replace />;
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center justify-between bg-card px-3 sm:px-4 shrink-0">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <SidebarTrigger />
-              <Input
-                placeholder="Search transactions..."
-                className="h-8 w-40 sm:w-64 text-xs bg-surface-low border-0 rounded-sm placeholder:text-muted-foreground hidden sm:block"
-              />
+          {/* Topbar */}
+          <header
+            className="h-16 flex items-center justify-between px-4 sm:px-6 shrink-0"
+            style={{
+              background: "rgb(var(--background))",
+              borderBottom: "1px solid rgb(var(--border))",
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <SidebarTrigger className="-ml-1" />
+              <div
+                className="hidden sm:flex items-center gap-2 h-9 px-3.5 rounded-pill"
+                style={{ background: "rgb(var(--surface))", minWidth: 220 }}
+              >
+                <Search
+                  className="h-3.5 w-3.5 shrink-0"
+                  style={{ color: "rgb(var(--foreground-subtle))" }}
+                />
+                <input
+                  placeholder="Search transactions..."
+                  className="bg-transparent text-xs outline-none flex-1 placeholder:text-foreground-subtle"
+                  style={{ color: "rgb(var(--foreground))" }}
+                />
+              </div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <button className="p-2 rounded-sm hover:bg-surface-low transition-colors">
-                <Bell className="h-4 w-4 text-muted-foreground" />
+
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <button
+                className="h-9 w-9 flex items-center justify-center rounded-pill transition-colors hover:bg-surface"
+                style={{ color: "rgb(var(--foreground-subtle))" }}
+              >
+                <Bell className="h-4 w-4" />
               </button>
-              <button className="p-2 rounded-sm hover:bg-surface-low transition-colors hidden sm:block">
-                <HelpCircle className="h-4 w-4 text-muted-foreground" />
-              </button>
-              <div className="flex items-center gap-2 ml-1 sm:ml-2">
-                <span className="text-sm font-medium text-foreground hidden sm:inline">
-                  {user?.full_name?.split(" ")[0] ?? "Profile"}
+              <div
+                className="flex items-center gap-2 ml-1 pl-2"
+                style={{ borderLeft: "1px solid rgb(var(--border))" }}
+              >
+                <span
+                  className="text-sm font-medium hidden sm:inline"
+                  style={{ color: "rgb(var(--foreground))" }}
+                >
+                  {user?.full_name?.split(" ")[0] ?? "Account"}
                 </span>
-                <div className="h-8 w-8 rounded-full bg-surface-low flex items-center justify-center">
-                  <User className="h-4 w-4 text-muted-foreground" />
+                <div
+                  className="h-8 w-8 rounded-pill flex items-center justify-center text-xs font-bold"
+                  style={{
+                    background: "rgb(var(--brand-primary) / 0.12)",
+                    color: "rgb(var(--brand-primary))",
+                  }}
+                >
+                  {user?.full_name?.[0]?.toUpperCase() ?? (
+                    <User className="h-4 w-4" />
+                  )}
                 </div>
               </div>
             </div>
           </header>
-          <main className="flex-1 overflow-auto p-3 sm:p-6">
+
+          {/* Main content */}
+          <main
+            className="flex-1 overflow-auto pb-20 sm:pb-0"
+            style={{ padding: "28px 36px" }}
+          >
             <Outlet />
           </main>
         </div>

@@ -1,19 +1,19 @@
 import { useNavigate } from "react-router-dom";
 import { getApplicationSummaries } from "@/services/mockData";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { ArrowRight, FilePlus2 } from "lucide-react";
 import { STATUS_LABELS, type ApplicationStatus } from "@/types/onboarding";
 import { formatDistanceToNow } from "date-fns";
 
-const statusColor: Record<ApplicationStatus, string> = {
-  draft: "bg-muted text-muted-foreground",
-  submitted: "bg-warning/10 text-warning border-warning/20",
-  under_review: "bg-primary/10 text-primary border-primary/20",
-  approved: "bg-success/10 text-success border-success/20",
-  rejected: "bg-destructive/10 text-destructive border-destructive/20",
-  returned_for_correction: "bg-warning/10 text-warning border-warning/20",
+const statusStyles: Record<ApplicationStatus, { bg: string; color: string }> = {
+  draft: { bg: "rgb(var(--surface))", color: "rgb(var(--foreground-subtle))" },
+  submitted: { bg: "rgb(var(--lemon) / 0.3)", color: "#7a6200" },
+  under_review: { bg: "rgb(var(--soft))", color: "rgb(var(--brand-primary))" },
+  approved: { bg: "rgb(var(--mint) / 0.3)", color: "rgb(var(--mint-deep))" },
+  rejected: {
+    bg: "rgb(var(--destructive) / 0.1)",
+    color: "rgb(var(--destructive))",
+  },
+  returned_for_correction: { bg: "rgb(var(--lemon) / 0.3)", color: "#7a6200" },
 };
 
 export default function ApplicationsList() {
@@ -24,51 +24,121 @@ export default function ApplicationsList() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">My Applications</h2>
-          <p className="text-sm text-muted-foreground">{applications.length} application{applications.length !== 1 ? "s" : ""}</p>
+          <p className="eyebrow mb-1">Corporate Onboarding</p>
+          <h1 className="display">My Applications</h1>
+          <p
+            className="text-sm mt-1"
+            style={{ color: "rgb(var(--foreground-subtle))" }}
+          >
+            {applications.length} application
+            {applications.length !== 1 ? "s" : ""}
+          </p>
         </div>
-        <Button onClick={() => navigate("/onboarding/new")} className="gap-2">
+        <button
+          onClick={() => navigate("/onboarding/new")}
+          className="btn-pill btn-primary gap-1.5 text-sm"
+        >
           <FilePlus2 className="h-4 w-4" /> New Application
-        </Button>
+        </button>
       </div>
 
       <div className="space-y-3">
-        {applications.map((app) => (
-          <Card
-            key={app.id}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => navigate(app.status === "draft" ? `/onboarding/${app.id}` : `/applications/${app.id}`)}
-          >
-            <CardContent className="p-4">
+        {applications.map((app) => {
+          const s = statusStyles[app.status];
+          return (
+            <div
+              key={app.id}
+              className="rounded-2xl p-4 shadow-card cursor-pointer transition-colors"
+              style={{ background: "rgb(var(--surface-highest))" }}
+              onClick={() =>
+                navigate(
+                  app.status === "draft"
+                    ? `/onboarding/${app.id}`
+                    : `/applications/${app.id}`,
+                )
+              }
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "rgb(var(--surface-high))")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background =
+                  "rgb(var(--surface-highest))")
+              }
+            >
               <div className="flex items-center justify-between">
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold">{app.company_name}</p>
-                    <Badge variant="outline" className={statusColor[app.status]}>{STATUS_LABELS[app.status]}</Badge>
+                    <p
+                      className="font-semibold text-sm"
+                      style={{ color: "rgb(var(--foreground))" }}
+                    >
+                      {app.company_name}
+                    </p>
+                    <span
+                      className="text-[11px] font-semibold px-2 py-0.5 rounded-pill"
+                      style={{ background: s.bg, color: s.color }}
+                    >
+                      {STATUS_LABELS[app.status]}
+                    </span>
                     {app.risk_classification && (
-                      <Badge variant="outline" className={
-                        app.risk_classification === "high" ? "border-destructive/30 text-destructive" :
-                        app.risk_classification === "medium" ? "border-warning/30 text-warning" :
-                        "border-success/30 text-success"
-                      }>
+                      <span
+                        className="text-[11px] font-semibold px-2 py-0.5 rounded-pill"
+                        style={{
+                          background:
+                            app.risk_classification === "high"
+                              ? "rgb(var(--destructive) / 0.1)"
+                              : app.risk_classification === "medium"
+                                ? "rgb(var(--lemon) / 0.3)"
+                                : "rgb(var(--mint) / 0.3)",
+                          color:
+                            app.risk_classification === "high"
+                              ? "rgb(var(--destructive))"
+                              : app.risk_classification === "medium"
+                                ? "#7a6200"
+                                : "rgb(var(--mint-deep))",
+                        }}
+                      >
                         {app.risk_classification} risk
-                      </Badge>
+                      </span>
                     )}
                     {app.feedback_count > 0 && (
-                      <Badge variant="destructive">{app.feedback_count} issue{app.feedback_count > 1 ? "s" : ""}</Badge>
+                      <span
+                        className="text-[11px] font-semibold px-2 py-0.5 rounded-pill"
+                        style={{
+                          background: "rgb(var(--destructive) / 0.1)",
+                          color: "rgb(var(--destructive))",
+                        }}
+                      >
+                        {app.feedback_count} issue
+                        {app.feedback_count > 1 ? "s" : ""}
+                      </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-4 mt-1.5 text-xs text-muted-foreground">
+                  <div
+                    className="flex items-center gap-4 mt-1.5 text-xs"
+                    style={{ color: "rgb(var(--foreground-subtle))" }}
+                  >
                     <span>Step {app.current_step}/5</span>
-                    <span>Directors: {app.director_verification_summary.verified}/{app.director_verification_summary.total} verified</span>
-                    <span>Updated {formatDistanceToNow(new Date(app.updated_at), { addSuffix: true })}</span>
+                    <span>
+                      Directors: {app.director_verification_summary.verified}/
+                      {app.director_verification_summary.total} verified
+                    </span>
+                    <span>
+                      Updated{" "}
+                      {formatDistanceToNow(new Date(app.updated_at), {
+                        addSuffix: true,
+                      })}
+                    </span>
                   </div>
                 </div>
-                <ArrowRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                <ArrowRight
+                  className="h-4 w-4 shrink-0 ml-3"
+                  style={{ color: "rgb(var(--foreground-subtle))" }}
+                />
               </div>
-            </CardContent>
-          </Card>
-        ))}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

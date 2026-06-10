@@ -88,6 +88,7 @@ export interface ICustomer {
   middle_name: string;
   kyc_level: number;
   kyc_id: string;
+  user_status: string;
   status: string;
   created_by_type: string;
   created_by_user_id: string;

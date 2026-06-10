@@ -8,7 +8,6 @@ export const uploadFile = async (
   const formData = new FormData();
   formData.append("file", payload.file);
   formData.append("documentType", payload.documentType);
-  formData.append("userType", payload.userType);
   if (payload.userId) formData.append("userId", payload.userId);
   if (payload.fileType) formData.append("fileType", payload.fileType);
 

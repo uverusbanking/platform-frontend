@@ -15,6 +15,12 @@ export const UserService = {
   getKycStatus: () =>
     api.get<ApiResponse<KycStatusResponseDto>>("/api/v1/users/kyc/status"),
 
+  changePassword: (data: { old_password: string; new_password: string }) =>
+    api.put<ApiResponse<{ message: string }>>(
+      "/api/v1/account/change-password",
+      data,
+    ),
+
   requestAccountDeletion: () =>
     api.delete<ApiResponse<{ message: string }>>("/api/v1/account/me"),
 };

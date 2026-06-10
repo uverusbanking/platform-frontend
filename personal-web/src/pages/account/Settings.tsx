@@ -13,11 +13,9 @@ import {
   SettingsToggle,
   SettingsButton,
 } from "@/components/settings/SettingsSection";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
-  ArrowLeft,
   Bell,
   Mail,
   MessageSquare,
@@ -31,7 +29,6 @@ import {
   HelpCircle,
   FileText,
   LogOut,
-  ChevronUp,
   AlertTriangle,
   ArrowUpCircle,
   Lock,
@@ -56,13 +53,11 @@ const Settings = () => {
     currentTier: apiTier,
     allTiers,
     loading: statusLoading,
-    customerId,
     fetchTierLevel,
   } = usePlatformKYC();
 
   const currentTierLevel = apiTier?.kyc_level || 1;
   const currentTier = `tier_${currentTierLevel}` as UserTier;
-  // allTiers comes from useUverusKYC now.
   const tierLimits =
     allTiers.find((t) => t.tier === currentTier) ||
     allTiers.find((t) => t.tier === "tier_1");
@@ -96,14 +91,10 @@ const Settings = () => {
   const [setupPinOpen, setSetupPinOpen] = useState(false);
   const [verifyPinOpen, setVerifyPinOpen] = useState(false);
 
-  // Determine if we should show the upgrade section
   const showUpgradeSection = () => {
     if (currentTier === "tier_3") return false;
     if (kycLoading) return false;
-
     const nextTier = currentTier === "tier_1" ? "tier_2" : "tier_3";
-
-    // Show if no pending request and KYC not complete for next tier
     return !hasPendingRequest() && !isKYCComplete(nextTier);
   };
 
@@ -115,39 +106,37 @@ const Settings = () => {
   const loading = tierLoading || settingsLoading;
 
   return (
-    <AppLayout showHeader={false}>
+    <AppLayout>
       {/* Header */}
-      <header className="bg-gradient-hero safe-top">
-        <div className="container mx-auto px-4 sm:px-6 py-4 max-w-4xl">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <button
-              onClick={() => navigate(-1)}
-              className="p-2.5 sm:p-2 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors text-white touch-manipulation"
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-7">
+        <div>
+          <p className="eyebrow mb-2">Account</p>
+          <h1 className="display text-[clamp(26px,3.5vw,44px)] m-0 leading-none">
+            Account{" "}
+            <span
+              className="serif-italic"
+              style={{ color: "rgb(var(--brand-primary))" }}
             >
-              <ArrowLeft size={20} />
-            </button>
-            <h1 className="text-lg sm:text-xl font-semibold text-white">
-              Account Settings
-            </h1>
-          </div>
+              settings.
+            </span>
+          </h1>
         </div>
-      </header>
+      </div>
 
-      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6 max-w-4xl">
+      <div className="space-y-5">
         {/* Tier Card */}
         {loading ? (
-          <Skeleton className="h-64 w-full rounded-lg" />
+          <Skeleton className="h-64 w-full rounded-2xl" />
         ) : tierLimits ? (
           <TierCard
             currentTier={currentTier}
-            // cast tierLimits to any if types mismatch slightly (though they shouldn't)
             tierLimits={tierLimits}
             tierProgress={getTierProgress()}
             nextTier={getNextTier()}
           />
         ) : null}
 
-        {/* Upgrade Section - only show if KYC not complete */}
+        {/* Upgrade Section */}
         {showUpgradeSection() && (
           <SettingsSection
             title="Upgrade Your Account"
@@ -167,7 +156,7 @@ const Settings = () => {
           </SettingsSection>
         )}
 
-        {/* Notification Settings */}
+        {/* Notifications */}
         <SettingsSection
           title="Notifications"
           description="Control how you receive alerts and updates"
@@ -224,7 +213,7 @@ const Settings = () => {
           )}
         </SettingsSection>
 
-        {/* Security Settings */}
+        {/* Security */}
         <SettingsSection
           title="Security"
           description="Protect your account and transactions"
@@ -362,23 +351,25 @@ const Settings = () => {
           />
         </SettingsSection>
 
-        {/* Sign Out */}
-        <Button
-          variant="destructive"
-          className="w-full h-11 sm:h-10"
+        {/* Sign out */}
+        <button
           onClick={handleSignOut}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-pill text-sm font-semibold transition-colors"
+          style={{
+            background: "rgb(var(--soft))",
+            color: "rgb(var(--brand-primary))",
+            border: "1px solid rgb(var(--brand-primary) / 0.2)",
+          }}
         >
-          <LogOut size={18} className="mr-2" />
+          <LogOut size={15} />
           Sign Out
-        </Button>
+        </button>
 
-        {/* Version info */}
-        <p className="text-center text-xs text-muted-foreground">
-          Version 1.0.0 • {brandConfig.brandName}
+        <p className="text-center text-xs text-foreground-subtle">
+          Version 1.0.0 · {brandConfig.brandName}
         </p>
       </div>
 
-      {/* Tier Upgrade Dialog */}
       {tierLimits && (
         <TierUpgradeDialog
           open={upgradeDialogOpen}
@@ -392,18 +383,15 @@ const Settings = () => {
         open={changePasswordOpen}
         onOpenChange={setChangePasswordOpen}
       />
-
       <DeleteAccountDialog
         open={deleteAccountOpen}
         onOpenChange={setDeleteAccountOpen}
       />
-
       <SetupPinDialog
         open={setupPinOpen}
         onOpenChange={setSetupPinOpen}
         onSuccess={refreshPin}
       />
-
       <VerifyPinDialog
         open={verifyPinOpen}
         onOpenChange={setVerifyPinOpen}

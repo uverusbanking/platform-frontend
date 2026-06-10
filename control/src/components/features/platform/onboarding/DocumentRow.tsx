@@ -46,7 +46,6 @@ export function DocumentRow({ doc, className }: DocumentRowProps) {
     try {
       const response = await uploadMutation.mutateAsync({
         file: selectedFile,
-        userType: "PLATFORM",
       });
 
       form.setValue(

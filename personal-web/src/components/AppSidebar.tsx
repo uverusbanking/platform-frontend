@@ -1,5 +1,4 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Home,
@@ -18,14 +17,14 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { BrandConfigService } from "@shared/core";
+import { cn } from "@/lib/utils";
 
 const mainNavItems = [
   { title: "Dashboard", url: "/account/dashboard", icon: Home },
@@ -42,8 +41,6 @@ const accountNavItems = [
 
 const adminNavItems = [{ title: "Admin Panel", url: "/admin", icon: Shield }];
 
-import { BrandConfigService } from "@shared/core";
-
 export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
@@ -54,135 +51,185 @@ export function AppSidebar() {
 
   const isActive = (path: string) => location.pathname === path;
 
-  // Check if user is admin (you can expand this logic)
   const isAdmin = user?.user_metadata?.role === "admin";
 
   const handleSignOut = async () => {
     try {
       await signOut();
       navigate("/auth/login");
-    } catch (error) {
-      console.error("Sign out failed:", error);
+    } catch {
+      // sign out failed silently
     }
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border">
-      <SidebarHeader className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center shrink-0">
-            {brand.brandLogoUrl ? (
-              <img
-                src={brand.brandLogoUrl}
-                alt={brand.brandName}
-                className="w-6 h-6 object-contain"
-              />
-            ) : (
-              <span className="text-white font-bold text-lg">
-                {brand.brandName.charAt(0)}
-              </span>
-            )}
-          </div>
-          {!collapsed && (
-            <div className="min-w-0">
-              <h1 className="font-bold text-lg text-foreground">
-                {brand.brandName}
-              </h1>
-              <p className="text-xs text-muted-foreground truncate">
-                {user?.email}
-              </p>
+    <Sidebar
+      collapsible="icon"
+      className="border-r border-border bg-background"
+    >
+      {/* Logo */}
+      <SidebarHeader className="px-[18px] py-[22px]">
+        <div className="flex items-center gap-[10px]">
+          <div className="relative shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-foreground flex items-center justify-center">
+              {brand.brandLogoUrl ? (
+                <img
+                  src={brand.brandLogoUrl}
+                  alt={brand.brandName}
+                  className="w-4 h-4 object-contain"
+                />
+              ) : (
+                <span className="text-surface-highest font-extrabold text-sm tracking-tighter">
+                  {brand.brandName.charAt(0)}
+                </span>
+              )}
             </div>
+            {/* Red notification dot */}
+            <span className="absolute -top-[3px] -right-[3px] w-2 h-2 rounded-pill bg-brand-primary" />
+          </div>
+
+          {!collapsed && (
+            <span className="font-extrabold text-[18px] tracking-[-0.04em] text-foreground leading-none">
+              {brand.shortBrandName || brand.brandName}
+            </span>
           )}
         </div>
       </SidebarHeader>
 
-      <SidebarSeparator />
-
-      <SidebarContent>
-        {/* Main Navigation */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Main</SidebarGroupLabel>
+      <SidebarContent className="px-[10px]">
+        {/* Main nav */}
+        <SidebarGroup className="p-0">
+          {!collapsed && (
+            <div className="eyebrow mx-3 mt-[18px] mb-[6px]">Main</div>
+          )}
           <SidebarGroupContent>
-            <SidebarMenu>
-              {mainNavItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title}
-                  >
-                    <NavLink to={item.url} className="flex items-center gap-3">
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Account Navigation */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Account</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {accountNavItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title}
-                  >
-                    <NavLink to={item.url} className="flex items-center gap-3">
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Admin Navigation (conditional) */}
-        {isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Admin</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {adminNavItems.map((item) => (
+            <SidebarMenu className="gap-[2px]">
+              {mainNavItems.map((item) => {
+                const active = isActive(item.url);
+                return (
                   <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton
                       asChild
-                      isActive={isActive(item.url)}
+                      isActive={active}
                       tooltip={item.title}
+                      className={cn(
+                        "h-[40px] rounded-xl px-3 text-sm font-medium transition-colors duration-150",
+                        "text-foreground/70 hover:bg-surface hover:text-foreground",
+                        active &&
+                          "bg-foreground text-surface-highest hover:bg-foreground hover:text-surface-highest",
+                      )}
                     >
-                      <NavLink
-                        to={item.url}
-                        className="flex items-center gap-3"
+                      <button
+                        onClick={() => navigate(item.url)}
+                        className="flex items-center gap-3 w-full"
                       >
-                        <item.icon className="h-4 w-4 shrink-0" />
+                        <item.icon
+                          className="h-4 w-4 shrink-0"
+                          strokeWidth={active ? 2.5 : 2}
+                        />
                         {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
+                      </button>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                ))}
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Account nav */}
+        <SidebarGroup className="p-0">
+          {!collapsed && (
+            <div className="eyebrow mx-3 mt-[18px] mb-[6px]">Account</div>
+          )}
+          <SidebarGroupContent>
+            <SidebarMenu className="gap-[2px]">
+              {accountNavItems.map((item) => {
+                const active = isActive(item.url);
+                return (
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={active}
+                      tooltip={item.title}
+                      className={cn(
+                        "h-[40px] rounded-xl px-3 text-sm font-medium transition-colors duration-150",
+                        "text-foreground/70 hover:bg-surface hover:text-foreground",
+                        active &&
+                          "bg-foreground text-surface-highest hover:bg-foreground hover:text-surface-highest",
+                      )}
+                    >
+                      <button
+                        onClick={() => navigate(item.url)}
+                        className="flex items-center gap-3 w-full"
+                      >
+                        <item.icon
+                          className="h-4 w-4 shrink-0"
+                          strokeWidth={active ? 2.5 : 2}
+                        />
+                        {!collapsed && <span>{item.title}</span>}
+                      </button>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Admin nav */}
+        {isAdmin && (
+          <SidebarGroup className="p-0">
+            {!collapsed && (
+              <div className="eyebrow mx-3 mt-[18px] mb-[6px]">Admin</div>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-[2px]">
+                {adminNavItems.map((item) => {
+                  const active = isActive(item.url);
+                  return (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={active}
+                        tooltip={item.title}
+                        className={cn(
+                          "h-[40px] rounded-xl px-3 text-sm font-medium transition-colors duration-150",
+                          "text-foreground/70 hover:bg-surface hover:text-foreground",
+                          active &&
+                            "bg-foreground text-surface-highest hover:bg-foreground hover:text-surface-highest",
+                        )}
+                      >
+                        <button
+                          onClick={() => navigate(item.url)}
+                          className="flex items-center gap-3 w-full"
+                        >
+                          <item.icon
+                            className="h-4 w-4 shrink-0"
+                            strokeWidth={active ? 2.5 : 2}
+                          />
+                          {!collapsed && <span>{item.title}</span>}
+                        </button>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         )}
       </SidebarContent>
 
-      <SidebarFooter className="p-2">
+      {/* Sign out footer */}
+      <SidebarFooter className="px-[10px] pb-4">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              onClick={handleSignOut}
               tooltip="Sign Out"
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={handleSignOut}
+              className="h-[40px] rounded-xl px-3 text-sm font-medium text-foreground/50 hover:bg-surface hover:text-error transition-colors duration-150"
             >
-              <LogOut className="h-4 w-4 shrink-0" />
+              <LogOut className="h-4 w-4 shrink-0" strokeWidth={2} />
               {!collapsed && <span>Sign Out</span>}
             </SidebarMenuButton>
           </SidebarMenuItem>

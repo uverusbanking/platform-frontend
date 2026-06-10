@@ -1,7 +1,7 @@
 "use client";
 
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { User, Lock, Code } from "lucide-react";
+import { User, Lock, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const settingsNav = [
@@ -17,12 +17,12 @@ const settingsNav = [
     href: "/account/settings/security",
     icon: Lock,
   },
-  // {
-  //   id: "developers",
-  //   label: "Developers",
-  //   href: "/account/settings/developers", // rename developers_disabled back to developers
-  //   icon: Code,
-  // },
+  {
+    id: "notifications",
+    label: "Notifications",
+    href: "/account/settings/notifications",
+    icon: Bell,
+  },
 ];
 
 export default function SettingsLayout() {

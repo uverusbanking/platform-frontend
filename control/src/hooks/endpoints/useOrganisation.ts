@@ -40,7 +40,11 @@ function toSnakeDoc(doc: {
   fileUrl?: string;
   documentType: string;
 }) {
-  return { id: doc.id, fileUrl: doc.fileUrl, documentType: doc.documentType };
+  return {
+    file_id: doc.id,
+    file_url: doc.fileUrl,
+    document_type: doc.documentType,
+  };
 }
 
 function toSnakeDirector(d: IRegisterOrganisationDirector) {
@@ -468,6 +472,28 @@ export const upsertOrgPaymentConfig = async ({
   return response.data;
 };
 
+export const approveOrgKYB = async (
+  id: string,
+): Promise<IApiResponse<{ kyc_id: string; status: string }>> => {
+  const response = await apiClient.post(
+    `/organisations/platform/${id}/approve-kyb`,
+  );
+  return response.data;
+};
+
+export const verifyDirector = async ({
+  orgId,
+  directorId,
+}: {
+  orgId: string;
+  directorId: string;
+}): Promise<IApiResponse<unknown>> => {
+  const response = await apiClient.patch(
+    `/organisations/platform/${orgId}/directors/${directorId}/verify`,
+  );
+  return response.data;
+};
+
 export const removeOrgPaymentConfig = async ({
   id,
   providerType,
@@ -477,6 +503,44 @@ export const removeOrgPaymentConfig = async ({
 }): Promise<IApiResponse<unknown>> => {
   const response = await apiClient.delete(
     `/organisations/platform/${id}/payment-config/${providerType}`,
+  );
+  return response.data;
+};
+
+export const getOrgNotificationConfigs = async (
+  id: string,
+): Promise<IApiResponse<import("./usePlatform").INotificationConfig[]>> => {
+  const response = await apiClient.get(
+    `/organisations/platform/${id}/notification-config`,
+  );
+  return response.data;
+};
+
+export const upsertOrgNotificationConfig = async ({
+  id,
+  channel,
+  payload,
+}: {
+  id: string;
+  channel: import("./usePlatform").NotificationChannel;
+  payload: import("./usePlatform").IUpsertNotificationConfigPayload;
+}): Promise<IApiResponse<import("./usePlatform").INotificationConfig>> => {
+  const response = await apiClient.put(
+    `/organisations/platform/${id}/notification-config/${channel}`,
+    payload,
+  );
+  return response.data;
+};
+
+export const removeOrgNotificationConfig = async ({
+  id,
+  channel,
+}: {
+  id: string;
+  channel: import("./usePlatform").NotificationChannel;
+}): Promise<IApiResponse<unknown>> => {
+  const response = await apiClient.delete(
+    `/organisations/platform/${id}/notification-config/${channel}`,
   );
   return response.data;
 };

@@ -1,91 +1,91 @@
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { UserTier, TierLimits } from '@/hooks/useUserTier';
-import { useKYC } from '@/hooks/useKYC';
-import { ArrowUpCircle, Shield, TrendingUp, Sparkles } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
+import { UserTier, TierLimits } from "@/hooks/useUserTier";
+import { useKYC } from "@/hooks/useKYC";
+import { ArrowUpCircle, TrendingUp, Zap } from "lucide-react";
 
 interface TierUpgradeBannerProps {
   currentTier: UserTier;
   tierLimits: TierLimits;
 }
 
-const getNextTierInfo = (currentTier: UserTier) => {
-  switch (currentTier) {
-    case 'tier_1':
-      return {
-        name: 'Tier 2',
-        icon: TrendingUp,
-        benefits: ['₦200,000 per transaction', '₦10M monthly limit', 'Faster transfers'],
-        gradient: 'from-primary/20 to-primary/5',
-        buttonColor: 'bg-primary hover:bg-primary/90',
-      };
-    case 'tier_2':
-      return {
-        name: 'Tier 3',
-        icon: ArrowUpCircle,
-        benefits: ['₦1,000,000 per transaction', '₦50M monthly limit', 'Priority support'],
-        gradient: 'from-success/20 to-success/5',
-        buttonColor: 'bg-success hover:bg-success/90',
-      };
-    default:
-      return null;
-  }
+const nextTierData = {
+  tier_1: {
+    name: "Tier 2",
+    icon: TrendingUp,
+    benefits: [
+      "₦200,000 per transaction",
+      "₦10M monthly limit",
+      "Faster transfers",
+    ],
+  },
+  tier_2: {
+    name: "Tier 3",
+    icon: ArrowUpCircle,
+    benefits: [
+      "₦1,000,000 per transaction",
+      "₦50M monthly limit",
+      "Priority support",
+    ],
+  },
 };
 
-export const TierUpgradeBanner = ({ currentTier, tierLimits }: TierUpgradeBannerProps) => {
+export const TierUpgradeBanner = ({ currentTier }: TierUpgradeBannerProps) => {
   const navigate = useNavigate();
   const { hasPendingRequest, loading: kycLoading } = useKYC();
 
-  // Don't show for tier 3 users
-  if (currentTier === 'tier_3') return null;
+  if (currentTier === "tier_3" || kycLoading || hasPendingRequest())
+    return null;
 
-  // Don't show while loading KYC status
-  if (kycLoading) return null;
+  const next = nextTierData[currentTier as keyof typeof nextTierData];
+  if (!next) return null;
 
-  // Don't show if there's a pending upgrade request
-  if (hasPendingRequest()) return null;
-
-  const nextTier = getNextTierInfo(currentTier);
-  if (!nextTier) return null;
-
-  const NextTierIcon = nextTier.icon;
+  const Icon = next.icon;
 
   return (
-    <Card className={`overflow-hidden border-0 bg-gradient-to-r ${nextTier.gradient}`}>
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-full bg-background/80 shrink-0">
-            <NextTierIcon size={20} className="text-primary" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 mb-1">
-              <Sparkles size={14} className="text-warning" />
-              <p className="text-sm font-semibold">Upgrade to {nextTier.name}</p>
-            </div>
-            <p className="text-xs text-muted-foreground mb-3">
-              Unlock higher transaction limits and premium features
-            </p>
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {nextTier.benefits.map((benefit, index) => (
-                <span
-                  key={index}
-                  className="text-[10px] px-2 py-0.5 rounded-full bg-background/60 text-foreground/80"
-                >
-                  {benefit}
-                </span>
-              ))}
-            </div>
-            <Button
-              size="sm"
-              onClick={() => navigate('/account/kyc-verification')}
-              className={`${nextTier.buttonColor} text-white h-8 text-xs`}
-            >
-              Upgrade Now
-            </Button>
-          </div>
+    <div
+      className="rounded-2xl p-5 shadow-card"
+      style={{
+        background: "rgb(var(--surface-highest))",
+        border: "1px solid rgb(var(--surface-high))",
+      }}
+    >
+      <div className="flex items-start gap-3">
+        <div
+          className="w-10 h-10 rounded-pill flex items-center justify-center shrink-0"
+          style={{ background: "rgb(var(--soft))" }}
+        >
+          <Icon size={18} style={{ color: "rgb(var(--brand-primary))" }} />
         </div>
-      </CardContent>
-    </Card>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 mb-1">
+            <Zap size={13} style={{ color: "rgb(var(--brand-primary))" }} />
+            <p className="text-sm font-bold">Upgrade to {next.name}</p>
+          </div>
+          <p className="text-xs text-foreground-subtle mb-3 leading-relaxed">
+            Unlock higher transaction limits and premium features
+          </p>
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {next.benefits.map((b, i) => (
+              <span
+                key={i}
+                className="text-[10px] px-2 py-0.5 rounded-pill font-medium"
+                style={{
+                  background: "rgb(var(--surface))",
+                  border: "1px solid rgb(var(--surface-high))",
+                }}
+              >
+                {b}
+              </span>
+            ))}
+          </div>
+          <button
+            onClick={() => navigate("/account/kyc-verification")}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-pill text-xs font-semibold bg-foreground text-surface-highest hover:opacity-90 transition-opacity"
+          >
+            Upgrade Now
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };

@@ -9,7 +9,6 @@ export interface IFileUploadResponse {
 export interface IUploadFilePayload {
   file: File;
   documentType: string;
-  userType: string;
   userId?: string;
   fileType?: string;
 }
