@@ -401,63 +401,111 @@ export default function CustomerDetailPage() {
                 {wallets.length} Wallet{wallets.length > 1 ? "s" : ""} Linked
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                {wallets.map((wallet, idx) => {
-                  const gradients = [
-                    "from-violet-600 via-purple-600 to-indigo-700",
-                    "from-emerald-500 via-teal-600 to-cyan-700",
-                    "from-rose-500 via-pink-600 to-fuchsia-700",
-                    "from-amber-500 via-orange-500 to-red-600",
-                    "from-sky-500 via-blue-600 to-indigo-700",
-                  ];
-                  const isFrozenWallet =
-                    wallet.is_transfer_frozen || wallet.is_funding_frozen;
-                  const gradient = isFrozenWallet
-                    ? "from-[#8b0000] via-[#cd5c5c] to-[#ff0000]"
-                    : gradients[idx % gradients.length];
-                  const balanceNum = parseFloat(String(wallet.balance) || "0");
+              <Card className="border-none shadow-premium bg-surface/50 backdrop-blur-md overflow-hidden">
+                <div className="divide-y divide-border/30">
+                  {wallets.map((wallet) => {
+                    const isFrozenWallet =
+                      wallet.is_transfer_frozen || wallet.is_funding_frozen;
 
-                  return (
-                    <div
-                      key={wallet.id}
-                      className={`relative bg-gradient-to-br ${gradient} rounded-2xl p-6 shadow-xl overflow-hidden text-white flex flex-col justify-between min-h-[180px]`}
-                    >
-                      <div className="absolute inset-0 pointer-events-none">
-                        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full border-2 border-white/10" />
-                        <div className="absolute -bottom-16 -left-8 w-52 h-52 rounded-full border-2 border-white/10" />
-                      </div>
-
-                      {/* Top row */}
-                      <div className="relative flex items-start justify-between mb-4">
-                        <div>
-                          <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/50 mb-0.5">
-                            {wallet.account_type} · {wallet.environment}
+                    return (
+                      <div
+                        key={wallet.id}
+                        className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-muted/30"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="p-2.5 rounded-xl bg-muted/40 border border-border/30">
+                            <Building2 className="w-4 h-4 text-primary/70" />
                           </div>
-                          <div className="text-sm font-black tracking-wide truncate max-w-[160px]">
-                            {wallet.name}
+                          <div className="space-y-0.5">
+                            <div className="text-sm font-black text-foreground">
+                              {wallet.name}
+                            </div>
+                            <div className="text-[11px] font-semibold text-muted-foreground/70 flex items-center gap-1.5">
+                              {wallet.bank_name || "---"}
+                              <span className="text-muted-foreground/30">
+                                •
+                              </span>
+                              <span className="uppercase tracking-widest">
+                                {wallet.account_type}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <div className="flex items-center gap-1.5">
-                            <div
-                              className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${wallet.status === "ACTIVE" ? "bg-white/20" : "bg-white/10 text-white/50"}`}
-                            >
-                              {wallet.status}
+
+                        <div className="flex flex-wrap items-center gap-6 sm:gap-8">
+                          <div className="space-y-1 min-w-[120px]">
+                            <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                              Account Number
                             </div>
+                            <div className="flex items-center gap-2 group/copy">
+                              <span className="text-sm font-mono font-bold text-foreground">
+                                {wallet.account_number}
+                              </span>
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(
+                                    wallet.account_number,
+                                  );
+                                  setCopiedId(wallet.id);
+                                  setTimeout(() => setCopiedId(null), 2000);
+                                }}
+                                className="text-muted-foreground/40 hover:text-primary transition-colors"
+                              >
+                                {copiedId === wallet.id ? (
+                                  <CheckCheck className="w-3.5 h-3.5 text-success" />
+                                ) : (
+                                  <Copy className="w-3 h-3 group-hover/copy:text-primary transition-colors" />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1 min-w-[140px] hidden md:block">
+                            <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                              Account Name
+                            </div>
+                            <div className="text-xs font-bold text-foreground truncate max-w-[180px]">
+                              {wallet.account_name?.split("/").pop()?.trim() ||
+                                "---"}
+                            </div>
+                          </div>
+
+                          <div className="space-y-1 min-w-[60px] hidden sm:block">
+                            <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                              Currency
+                            </div>
+                            <div className="text-xs font-bold text-foreground">
+                              {wallet.currency}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 shrink-0">
+                            <div
+                              className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1.5 ${
+                                wallet.status === "ACTIVE" && !isFrozenWallet
+                                  ? "bg-success/10 text-success"
+                                  : isFrozenWallet
+                                    ? "bg-destructive/10 text-destructive"
+                                    : "bg-muted/40 text-muted-foreground"
+                              }`}
+                            >
+                              {isFrozenWallet && (
+                                <Snowflake className="w-2.5 h-2.5" />
+                              )}
+                              {isFrozenWallet ? "Frozen" : wallet.status}
+                            </div>
+
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <button
-                                  className="p-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
+                                <button className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground">
                                   <svg
-                                    className="w-3 h-3 text-white"
+                                    className="w-4 h-4"
                                     fill="currentColor"
                                     viewBox="0 0 20 20"
                                   >
-                                    <circle cx="4" cy="10" r="1.5" />
+                                    <circle cx="10" cy="4" r="1.5" />
                                     <circle cx="10" cy="10" r="1.5" />
-                                    <circle cx="16" cy="10" r="1.5" />
+                                    <circle cx="10" cy="16" r="1.5" />
                                   </svg>
                                 </button>
                               </DropdownMenuTrigger>
@@ -495,71 +543,12 @@ export default function CustomerDetailPage() {
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
-                          {isFrozenWallet && (
-                            <div className="flex items-center gap-1 bg-white/10 text-white/70 text-[8px] font-bold px-1.5 py-0.5 rounded-full">
-                              <Snowflake className="w-2.5 h-2.5" />
-                              FROZEN
-                            </div>
-                          )}
                         </div>
                       </div>
-
-                      {/* Account number */}
-                      <div className="relative mb-4">
-                        <button
-                          className="flex items-center gap-2 group/copy"
-                          onClick={() => {
-                            navigator.clipboard.writeText(
-                              wallet.account_number,
-                            );
-                            setCopiedId(wallet.id);
-                            setTimeout(() => setCopiedId(null), 2000);
-                          }}
-                        >
-                          <span className="font-mono text-base font-bold tracking-[0.18em] text-white/90">
-                            {wallet.account_number.replace(
-                              /(\d{4})(?=\d)/g,
-                              "$1 ",
-                            )}
-                          </span>
-                          {copiedId === wallet.id ? (
-                            <CheckCheck className="w-3.5 h-3.5 text-white/60" />
-                          ) : (
-                            <Copy className="w-3 h-3 text-white/30 group-hover/copy:text-white/60 transition-colors" />
-                          )}
-                        </button>
-                        <div className="text-[10px] text-white/40 font-semibold mt-0.5">
-                          {wallet.account_name}
-                        </div>
-                      </div>
-
-                      {/* Balance + bank */}
-                      <div className="relative flex items-end justify-between">
-                        <div>
-                          <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-0.5">
-                            Available Balance
-                          </div>
-                          <div className="text-2xl font-black tracking-tight">
-                            NGN{" "}
-                            {balanceNum.toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-0.5">
-                            Bank
-                          </div>
-                          <div className="text-xs font-black text-white/80">
-                            {wallet.bank_name}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              </Card>
             </div>
           )}
 
